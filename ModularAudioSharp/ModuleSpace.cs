@@ -1,0 +1,52 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using NAudio.Wave;
+
+namespace ModularAudioSharp {
+	public class ModuleSpace {
+
+		// TODO 初期化手段
+		public static int SampleRate { get { return 44101; } }
+
+		// ステレオ未対応のため固定
+		public static int Channels { get { return 1; } }
+
+		private static IList<Node> cachingModules = new List<Node>();
+		public static void AddCachingModule(Node module) {
+			Debug.Assert(! cachingModules.Contains(module));
+			cachingModules.Add(module);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="master"></param>
+		/// <returns>再生用のオブジェクトの寿命を管理するためのオブジェクト。
+		/// 再生が終わったら Dispose すること</returns>
+		public static Player Play(Node master) {
+			var signal = new EnumerableWaveProvider32(MakeMasterSignal(master));
+			signal.SetWaveFormat(SampleRate, Channels);
+
+			var waveOut = new WaveOut {
+				DesiredLatency = 200,
+			};
+			waveOut.Init(signal);
+			waveOut.Play();
+
+			return new Player(waveOut);
+		}
+
+		private static IEnumerable<float> MakeMasterSignal(Node master) {
+			// TODO use してしまうと 2 回再生できない
+			var masterOut = master.UseAsStream();
+			foreach (var value in masterOut) {
+				yield return value;
+				foreach (var cache in cachingModules) cache.Update();
+			}
+		}
+	}
+}
