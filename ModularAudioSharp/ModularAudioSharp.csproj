@@ -45,9 +45,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EnumerableWaveProvider32.cs" />
+    <Compile Include="ModuleSpace.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="Nodes.cs" />
-    <Compile Include="ModuleSpace.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SequencerExper1.cs" />

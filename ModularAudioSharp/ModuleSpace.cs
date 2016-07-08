@@ -15,10 +15,10 @@ namespace ModularAudioSharp {
 		// ステレオ未対応のため固定
 		public static int Channels { get { return 1; } }
 
-		private static IList<Node> cachingModules = new List<Node>();
-		public static void AddCachingModule(Node module) {
-			Debug.Assert(! cachingModules.Contains(module));
-			cachingModules.Add(module);
+		private static IList<Node> cachingNodes = new List<Node>();
+		public static void AddCachingNode<T>(Node<T> node) where T : struct {
+			Debug.Assert(! cachingNodes.Contains(node));
+			cachingNodes.Add(node);
 		}
 
 		/// <summary>
@@ -27,7 +27,7 @@ namespace ModularAudioSharp {
 		/// <param name="master"></param>
 		/// <returns>再生用のオブジェクトの寿命を管理するためのオブジェクト。
 		/// 再生が終わったら Dispose すること</returns>
-		public static Player Play(Node master) {
+		public static Player Play(Node<float> master) {
 			var signal = new EnumerableWaveProvider32(MakeMasterSignal(master));
 			signal.SetWaveFormat(SampleRate, Channels);
 
@@ -40,12 +40,12 @@ namespace ModularAudioSharp {
 			return new Player(waveOut);
 		}
 
-		private static IEnumerable<float> MakeMasterSignal(Node master) {
+		private static IEnumerable<float> MakeMasterSignal(Node<float> master) {
 			// TODO use してしまうと 2 回再生できない
 			var masterOut = master.UseAsStream();
 			foreach (var value in masterOut) {
 				yield return value;
-				foreach (var cache in cachingModules) cache.Update();
+				foreach (var cache in cachingNodes) cache.Update();
 			}
 		}
 	}
