@@ -50,6 +50,7 @@
     <Compile Include="Nodes.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sequencer.cs" />
     <Compile Include="SequencerExper1.cs" />
   </ItemGroup>
   <ItemGroup>

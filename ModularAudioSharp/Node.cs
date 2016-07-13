@@ -37,6 +37,14 @@ namespace ModularAudioSharp {
 			throw new InvalidCastException($"cannot convert node of type {this.ValueType} into node of int");
 		}
 
+		public Node<bool> AsBool() {
+			if (this.ValueType == typeof(bool)) {
+				return (Node<bool>) this;
+			}
+
+			throw new InvalidCastException($"cannot convert node of type {this.ValueType} into node of bool");
+		}
+
 		public static Node operator +(Node lhs, Node rhs) {
 			return TryCalc<float, float, float>(lhs, rhs, (l, r) => l + r)
 					?? TryCalc<float, int, float>(lhs, rhs, (l, r) => l + r)

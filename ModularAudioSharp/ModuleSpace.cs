@@ -43,6 +43,7 @@ namespace ModularAudioSharp {
 		private static IEnumerable<float> MakeMasterSignal(Node<float> master) {
 			// TODO use してしまうと 2 回再生できない
 			var masterOut = master.UseAsStream();
+			foreach (var cache in cachingNodes) cache.Update();
 			foreach (var value in masterOut) {
 				yield return value;
 				foreach (var cache in cachingNodes) cache.Update();

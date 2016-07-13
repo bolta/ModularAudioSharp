@@ -7,26 +7,31 @@ using System.Threading.Tasks;
 namespace ModularAudioSharp {
 	public static class SequencerExper1 {
 
-		public static Node<Output> New(Node tempo, Node portamentoRate) {
-			return new Node<Output>(New(tempo.AsFloat().UseAsStream(),
+		public static Node<Output> New(Node tick, int ticksPerRate, Node portamentoRate) {
+			return new Node<Output>(New(tick.AsBool().UseAsStream(), ticksPerRate,
 					portamentoRate.AsFloat().UseAsStream()));
 		}
 
-		private static IEnumerable<Output> New(IEnumerable<float> tempo, IEnumerable<float> portamentoRate) {
+		private static IEnumerable<Output> New(IEnumerable<bool> tick, int ticksPerBeat, IEnumerable<float> portamentoRate) {
 			// サンプルごとに増加し、1 拍で 1 進む
-			var timer = 0f;
-			var innerFreqIndex = 0;
+			var tickCount = 0;
+			// 初回 Update で trigger した結果 0 になるよう、初期状態は -1
+			var innerFreqIndex = -1;
 
-			return tempo.Zip(portamentoRate, Tuple.Create).Select(tp => {
-				var t = tp.Item1;
+			return tick.Zip(portamentoRate, Tuple.Create).Select(tp => {
+				var tk = tp.Item1;
 				var p = tp.Item2;
-				var newTimer = timer + t / 60 / ModuleSpace.SampleRate;
-				var trigger = Math.Floor(newTimer) != Math.Floor(timer);
-				if (trigger) {
-					innerFreqIndex = (innerFreqIndex + 1) % FREQS.Length;
-					newTimer -= 1;
+				var trigger = false;
+				if (tk) {
+					// 拍の頭で trigger する
+					trigger = tickCount % ticksPerBeat == 0;
+					if (trigger) {
+						innerFreqIndex = (innerFreqIndex + 1) % FREQS.Length;
+						tickCount %= ticksPerBeat;
+					}
+
+					++ tickCount;
 				}
-				timer = newTimer;
 
 				var freq = FREQS[innerFreqIndex];
 
