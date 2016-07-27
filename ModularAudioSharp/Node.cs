@@ -17,6 +17,11 @@ namespace ModularAudioSharp {
 			return Nodes.Const(value);
 		}
 
+		/// <summary>
+		/// デバッグ用の名前
+		/// </summary>
+		public string Name { get; set; } = "";
+
 		public Node<float> AsFloat() {
 			if (this.ValueType == typeof(float)) {
 				return (Node<float>) this;

@@ -4,23 +4,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ModularAudioSharp {
-	/// <summary>
-	/// シーケンサを実装・利用するための static クラス
-	/// </summary>
-	public static class Sequencer {
-
+namespace ModularAudioSharp.Sequencer {
+	public class Tick {
 		/// <summary>
 		/// シーケンサの時間の最小単位となる tick を発生させるノード
 		/// </summary>
 		/// <param name="tempo">テンポ（BPM）</param>
 		/// <param name="ticksPerBeat">1 拍に何回 tick を発生させるか</param>
 		/// <returns>tick が発生するとき true、そうでないとき false の値をとるノード</returns>
-		public static Node<bool> Tick(Node tempo, int ticksPerBeat) {
-			return new Node<bool>(Tick(tempo.AsFloat().UseAsStream(), ticksPerBeat));
+		public static Node<bool> New(Node tempo, int ticksPerBeat) {
+			return new Node<bool>(New(tempo.AsFloat().UseAsStream(), ticksPerBeat));
 		}
 
-		private static IEnumerable<bool> Tick(IEnumerable<float> tempo, int ticksPerBeat) {
+		private static IEnumerable<bool> New(IEnumerable<float> tempo, int ticksPerBeat) {
 			// 初回（演奏開始の瞬間）は trigger する
 			yield return true;
 
@@ -34,7 +30,6 @@ namespace ModularAudioSharp {
 
 				yield return trigger;
 			}
-
 		}
 
 	}
