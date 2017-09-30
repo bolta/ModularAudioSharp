@@ -5,108 +5,51 @@ using System.Text;
 using System.Threading.Tasks;
 using ModularAudioSharp.Data;
 // TODO ループなどを表現できないのでこの定義は力不足
-using Instruction = System.Func<ModularAudioSharp.Sequencer.Sequencer.Output, ModularAudioSharp.Sequencer.Sequencer.Output>;
-using Sequence = System.Collections.Generic.SortedDictionary<int,
-		System.Collections.Generic.List<
-				System.Func<ModularAudioSharp.Sequencer.Sequencer.Output, ModularAudioSharp.Sequencer.Sequencer.Output>>>;
 
 namespace ModularAudioSharp.Sequencer {
 	/// <summary>
 	/// シーケンサとして動作するノード
 	/// </summary>
-	public class Sequencer : Node<Sequencer.Output> {
+	public class Sequencer<T> : Node<T> where T : struct {
 
-		private readonly Sequence sequence;
+		private readonly Sequence<T> topLevel;
+		private readonly List<Thread<T>> threads;
+
 		private readonly int ticksPerBeat;
 
-		private Sequencer(Node tick, int ticksPerBeat, Sequence sequence)
-				: base(RunSequence(tick.AsBool().UseAsStream(), sequence)) {
-			this.sequence = sequence;
+		private class Context {
+			// 何を持つ？　型引数で外から与える必要があるかも。
+			// もしくは Dictionary<string, object> を 1 つだけ持つか…
+		}
+
+		private Sequencer(Node tick, int ticksPerBeat, Sequence<T> sequence, List<Thread<T>> threads)
+				: base(RunThreads(tick.AsBool().UseAsStream(), threads)) {
+			this.topLevel = sequence;
+			this.threads = threads;
 			this.ticksPerBeat = ticksPerBeat;
 		}
 
-		public static Sequencer New(Node tick, int ticksPerBeat) {
-			return new Sequencer(tick, ticksPerBeat, new Sequence());
+		public static Sequencer<T> New(Node tick, int ticksPerBeat, Sequence<T> sequence) {
+			return new Sequencer<T>(tick, ticksPerBeat, sequence,
+					new List<Thread<T>>() { new Thread<T>(sequence) });
 		}
 
-		public void AddInstruction(int tick, Instruction instruction) {
-			if (! this.sequence.ContainsKey(tick)) {
-				this.sequence.Add(tick, new List<Instruction>());
-			}
+		private IEnumerable<T> RunThreads(IEnumerable<bool> tick) {
+			var output = default(T);
 
-			this.sequence[tick].Add(instruction);
-		}
-
-		private static IEnumerable<Output> RunSequence(IEnumerable<bool> tick, Sequence sequence) {
-			var output = Output.Initial();
-
-			//Output? final = null;
-
-			var seqPtr = sequence.GetEnumerator();
-			// シーケンスが空の場合、初期値のまま無限ループする
-			if (! seqPtr.MoveNext()) {
-				while (true) yield return output;
-			}
-
-			var tickCnt = -1;
-			foreach (var t in tick) {
-				if (! t) {
-					yield return output;
-					continue;
+			var finishedThreads = new List<Thread<T>>();
+			while (true) {
+				foreach (var thread in threads) {
+					var hasMore = thread.Tick(ref output);
+					if (! hasMore) finishedThreads.Add(thread);
 				}
-
-				++tickCnt;
-
-				if (seqPtr.Current.Key <= tickCnt) {
-					foreach (var mod in seqPtr.Current.Value) output = mod(output);
-
-					// シーケンスが終わったら状態はこれ以上変わらない。ここで無限ループする
-					if (!seqPtr.MoveNext()) {
-						while (true) yield return output;
-					}
-				}
-
+				// スレッドが全て削除されたら、演奏は終了しているので
+				// 最後の状態を永久に保って停止（将来的には終了シグナルを挙げることになるだろう）
 				yield return output;
+
+				foreach (var finished in finishedThreads) threads.Remove(finished);
+				finishedThreads.Clear();
 			}
 		}
-
-		/// <summary>
-		/// シーケンサの出力。
-		/// 各メンバの標準的な意味や値の範囲を定義しているが、これ以外の定義で用いてもよい
-		/// （解釈系とシーケンサとの取り決め次第）
-		/// </summary>
-		public struct Output {
-
-			public Tone Tone { get; set; }
-
-			/// <summary>
-			/// ノートオンの瞬間だけ true になる
-			/// </summary>
-			public bool NoteOn { get; set; }
-
-			/// <summary>
-			/// ノートオフの瞬間だけ true になる
-			/// </summary>
-			public bool NoteOff { get; set; }
-
-			/// <summary>
-			/// ベロシティ（）
-			/// </summary>
-			public float Velocity { get; set; }
-
-			internal static Output Initial() {
-				return new Output {
-					Tone = new Tone {
-						Octave = 4,
-						ToneName = ToneName.C,
-						Accidental = 0,
-					},
-					NoteOn = false,
-					NoteOff = false,
-					Velocity = 0,
-				};
-			}
-		}
-
 	}
 }

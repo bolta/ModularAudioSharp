@@ -12,7 +12,7 @@ namespace ModularAudioSharp {
 	public static class Nodes {
 
 		/// <summary>
-		/// 定数を表すモジュール。
+		/// 定数を表すノード。
 		/// TODO Update 不要なので、その旨 ModuleSpace へ通知するように
 		/// </summary>
 		/// <param name="value"></param>
@@ -22,6 +22,15 @@ namespace ModularAudioSharp {
 		private static IEnumerable<T> Const_<T>(T value) where T : struct {
 			while (true) yield return value;
 		}
+
+		/// <summary>
+		/// 可変値を保持するノード。
+		/// TODO Update 不要なので、その旨 ModuleSpace へ通知するように
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="initValue"></param>
+		/// <returns></returns>
+		public static VarNode<T> Var<T>(T initValue) where T : struct => new VarNode<T>(initValue);
 
 		/// <summary>
 		/// source の出力を amount_smp サンプルだけ遅らせて再現する
@@ -74,7 +83,7 @@ namespace ModularAudioSharp {
 		}
 
 		public static Node<float> SquareOsc(Node freq, bool crazy = false) {
-			return Osc((Node<float>) freq, phase => phase % (2 * Math.PI) < Math.PI ? 1 : -1, crazy);
+			return Osc((Node<float>) freq, phase => phase % (2 * Math.PI) < Math.PI ? 1f : -1f, crazy);
 		}
 
 		public static Node<float> Osc(Node freq, Func<float, float> func, bool crazy = false) {

@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 namespace ModularAudioSharp {
 
 	public abstract class Node {
+
+		// TODO ノードを一度使った状態から初期状態に戻すためのメソッドを提供する
+		// public virtual void Initialize() { }
+
 		public abstract void Update();
 
 		public static implicit operator Node(float value) {
@@ -119,6 +123,12 @@ namespace ModularAudioSharp {
 			this.signal = signal.GetEnumerator();
 		}
 
+		/// <summary>
+		/// このノードの出力を使うための Out オブジェクトを得る。
+		/// 1 度だけ、ノードを ModuleSpace に登録する。
+		/// 普通はこれをラップした UseAsStream() を使えばよい
+		/// </summary>
+		/// <returns></returns>
 		public Out Use() {
 			if (this.userCount == 0) {
 				ModuleSpace.AddCachingNode(this);
@@ -127,6 +137,11 @@ namespace ModularAudioSharp {
 			return new Out(this);
 		}
 
+		/// <summary>
+		/// ノードの出力を IEnumerable によるストリームとして得る。
+		/// Use() をラップしたもの
+		/// </summary>
+		/// <returns></returns>
 		public IEnumerable<T> UseAsStream() {
 			var o = this.Use();
 			// ここで別メソッドに分けないと Use() の呼び出しがループ中まで遅延されてしまい、
@@ -153,6 +168,10 @@ namespace ModularAudioSharp {
 		public class Out {
 			private Node<T> owner;
 			internal Out(Node<T> owner) { this.owner = owner; }
+
+			/// <summary>
+			/// 自分が属するノードの現在の値
+			/// </summary>
 			public T Value { get { return this.owner.current; } }
 		}
 

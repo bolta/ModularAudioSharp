@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 using NAudio.Wave;
 
 namespace ModularAudioSharp {
-	public class ModuleSpace {
+	public static class ModuleSpace {
 
 		// TODO 初期化手段
-		public static int SampleRate { get { return 44101; } }
+		public static int SampleRate { get; } = 44101;
 
 		// ステレオ未対応のため固定
-		public static int Channels { get { return 1; } }
+		public static int Channels { get; } = 1;
 
 		private static IList<Node> cachingNodes = new List<Node>();
 		public static void AddCachingNode<T>(Node<T> node) where T : struct {

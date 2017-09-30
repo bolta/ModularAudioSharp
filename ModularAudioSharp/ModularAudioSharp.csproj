@@ -51,16 +51,14 @@
     <Compile Include="Nodes.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Sequencer\Instruction.cs" />
-    <Compile Include="Sequencer\Sequencer.cs" />
-    <Compile Include="SequencerExper1.cs" />
-    <Compile Include="Sequencer\Tick.cs" />
     <Compile Include="Data\ToneName.cs" />
     <Compile Include="Temperament.cs" />
+    <Compile Include="VarNode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
