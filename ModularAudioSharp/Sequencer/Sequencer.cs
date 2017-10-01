@@ -12,44 +12,24 @@ namespace ModularAudioSharp.Sequencer {
 	/// </summary>
 	public class Sequencer<T> : Node<T> where T : struct {
 
-		private readonly Sequence<T> topLevel;
-		private readonly List<Thread<T>> threads;
-
+		// TODO ここで ticksPerBeat を持っている必要性はないのでは？
 		private readonly int ticksPerBeat;
 
-		private class Context {
-			// 何を持つ？　型引数で外から与える必要があるかも。
-			// もしくは Dictionary<string, object> を 1 つだけ持つか…
-		}
-
-		private Sequencer(Node tick, int ticksPerBeat, Sequence<T> sequence, List<Thread<T>> threads)
-				: base(RunThreads(tick.AsBool().UseAsStream(), threads)) {
-			this.topLevel = sequence;
-			this.threads = threads;
+		private Sequencer(Node tick, int ticksPerBeat, SequenceThread<T> thread)
+				: base(RunThread(tick.AsBool().UseAsStream(), thread)) {
 			this.ticksPerBeat = ticksPerBeat;
 		}
 
-		public static Sequencer<T> New(Node tick, int ticksPerBeat, Sequence<T> sequence) {
-			return new Sequencer<T>(tick, ticksPerBeat, sequence,
-					new List<Thread<T>>() { new Thread<T>(sequence) });
+		public static Sequencer<T> New(Node tick, int ticksPerBeat, SequenceThread<T> thread) {
+			return new Sequencer<T>(tick, ticksPerBeat, thread);
 		}
 
-		private IEnumerable<T> RunThreads(IEnumerable<bool> tick) {
-			var output = default(T);
+		private static IEnumerable<T> RunThread(IEnumerable<bool> tick, SequenceThread<T> thread) {
+			return tick.Select(t => {
+				if (t) thread.Tick();
 
-			var finishedThreads = new List<Thread<T>>();
-			while (true) {
-				foreach (var thread in threads) {
-					var hasMore = thread.Tick(ref output);
-					if (! hasMore) finishedThreads.Add(thread);
-				}
-				// スレッドが全て削除されたら、演奏は終了しているので
-				// 最後の状態を永久に保って停止（将来的には終了シグナルを挙げることになるだろう）
-				yield return output;
-
-				foreach (var finished in finishedThreads) threads.Remove(finished);
-				finishedThreads.Clear();
-			}
+				return thread.CurrentValue;
+			});
 		}
 	}
 }
