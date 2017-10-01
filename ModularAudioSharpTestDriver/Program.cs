@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ModularAudioSharp;
 using ModularAudioSharp.Data;
+using ModularAudioSharp.Mml;
 using ModularAudioSharp.Sequencer;
 using static ModularAudioSharp.Nodes;
 
@@ -14,7 +15,8 @@ namespace ModularAudioTestDriver {
 		static void Main(string[] args) {
 #if true
 //			VarSample();
-			SeqSample();
+//			SeqSample();
+			ParserSample();
 #elif true
 			{
 				var tempo = Nodes.Const(120f);
@@ -182,6 +184,13 @@ namespace ModularAudioTestDriver {
 
 		}
 
+		private static void ParserSample() {
+			var parser = new SimpleMmlParser();
+
+			var ast = parser.Parse("o4L8c4^2.^^de");
+			Console.WriteLine(ast);
+			Console.ReadKey();
+		}
 
 	}
 }
