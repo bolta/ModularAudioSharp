@@ -108,8 +108,9 @@ namespace ModularAudioTestDriver {
 		private static void SeqSample() {
 //			var tempo = Const(160f);
 			Func<int, float> semi = s => (float) (440 * Math.Pow(2, s / 12.0));
-			var tick = Tick.New(120, 4);
+			var tick = Tick.New(134, 4);
 			var seq = Sequencer<float>.New(tick, 0, new SequenceThread<float>(new List<Instruction<float>>(){
+#region sequence
 				new ValueInstruction<float>(semi(3)),
 				new WaitInstruction<float>(1),
 				new ValueInstruction<float>(semi(15)),
@@ -175,6 +176,7 @@ namespace ModularAudioTestDriver {
 				new ValueInstruction<float>(semi(15)),
 				new WaitInstruction<float>(1),
 				new JumpInstruction<float>(0),
+#endregion
 			}));
 
 
@@ -187,7 +189,7 @@ namespace ModularAudioTestDriver {
 		private static void ParserSample() {
 			var parser = new SimpleMmlParser();
 
-			var ast = parser.Parse("o4L8c4^2.^^de");
+			var ast = parser.Parse("o4L8c4^2.^ ^de>>f+<g---");
 			Console.WriteLine(ast);
 			Console.ReadKey();
 		}

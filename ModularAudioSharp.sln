@@ -5,7 +5,9 @@ VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModularAudioSharp", "ModularAudioSharp\ModularAudioSharp.csproj", "{D85A2CE6-98B5-49FB-A2ED-7D7140DF7024}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModularAudioSharpTestDriver", "ModularAudioSharpTestDriver\ModularAudioSharpTestDriver.csproj", "{05C9F138-F5C0-4267-B1B9-F7729A31E637}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModularAudioSharpSampleApp", "ModularAudioSharpTestDriver\ModularAudioSharpSampleApp.csproj", "{05C9F138-F5C0-4267-B1B9-F7729A31E637}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModularAudioSharpTest", "ModularAudioSharpTest\ModularAudioSharpTest.csproj", "{941CB150-7E3B-4CDE-82E4-8C7B22E13887}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{05C9F138-F5C0-4267-B1B9-F7729A31E637}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{05C9F138-F5C0-4267-B1B9-F7729A31E637}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{05C9F138-F5C0-4267-B1B9-F7729A31E637}.Release|Any CPU.Build.0 = Release|Any CPU
+		{941CB150-7E3B-4CDE-82E4-8C7B22E13887}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{941CB150-7E3B-4CDE-82E4-8C7B22E13887}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{941CB150-7E3B-4CDE-82E4-8C7B22E13887}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{941CB150-7E3B-4CDE-82E4-8C7B22E13887}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
