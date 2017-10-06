@@ -51,7 +51,11 @@
     <Compile Include="Data\Tone.cs" />
     <Compile Include="EnumerableWaveProvider32.cs" />
     <Compile Include="Mml\AstNodes.cs" />
+    <Compile Include="Mml\AstVisitor.cs" />
+    <Compile Include="Mml\IInstructionGenerator.cs" />
+    <Compile Include="Mml\SimpleMmlInstructionGenerator.cs" />
     <Compile Include="Mml\SimpleMmlParser.cs" />
+    <Compile Include="Mml\SimpleMmlValue.cs" />
     <Compile Include="ModuleSpace.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="Nodes.cs" />
@@ -63,6 +67,7 @@
     <Compile Include="Sequencer\SequenceThread.cs" />
     <Compile Include="Sequencer\Tick.cs" />
     <Compile Include="Temperament.cs" />
+    <Compile Include="Data\Util.cs" />
     <Compile Include="VarNode.cs" />
   </ItemGroup>
   <ItemGroup>
