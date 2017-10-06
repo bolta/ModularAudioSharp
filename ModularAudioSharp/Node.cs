@@ -14,12 +14,8 @@ namespace ModularAudioSharp {
 
 		public abstract void Update();
 
-		public static implicit operator Node(float value) {
-			return Nodes.Const(value);
-		}
-		public static implicit operator Node(int value) {
-			return Nodes.Const(value);
-		}
+		public static implicit operator Node(float value) => Nodes.Const(value);
+		public static implicit operator Node(int value) => Nodes.Const(value);
 
 		/// <summary>
 		/// デバッグ用の名前
@@ -109,6 +105,8 @@ namespace ModularAudioSharp {
 	}
 
 	public class Node<T> : Node where T : struct {
+
+		//public static implicit operator Node<T>(NodeController<T> ctrl) => ctrl.Node;
 
 		private IEnumerator<T> signal;
 		private T current;

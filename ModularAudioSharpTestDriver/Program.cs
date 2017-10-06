@@ -15,10 +15,10 @@ namespace ModularAudioTestDriver {
 	class Program {
 		static void Main(string[] args) {
 #if true
-			//			VarSample();
+			VarSample();
 			//SeqSample();
-//			ParserSample();
-			MmlSample();
+			//			ParserSample();
+			//			MmlSample();
 #elif true
 			{
 				var tempo = Nodes.Const(120f);

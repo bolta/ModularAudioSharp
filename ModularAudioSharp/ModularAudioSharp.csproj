@@ -58,6 +58,7 @@
     <Compile Include="Mml\SimpleMmlValue.cs" />
     <Compile Include="ModuleSpace.cs" />
     <Compile Include="Node.cs" />
+    <Compile Include="NodeController.cs" />
     <Compile Include="Nodes.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -68,7 +69,7 @@
     <Compile Include="Sequencer\Tick.cs" />
     <Compile Include="Temperament.cs" />
     <Compile Include="Data\Util.cs" />
-    <Compile Include="VarNode.cs" />
+    <Compile Include="VarController.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

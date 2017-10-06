@@ -30,7 +30,8 @@ namespace ModularAudioSharp {
 		/// <typeparam name="T"></typeparam>
 		/// <param name="initValue"></param>
 		/// <returns></returns>
-		public static VarNode<T> Var<T>(T initValue) where T : struct => new VarNode<T>(initValue);
+		//public static VarNode<T> Var<T>(T initValue) where T : struct => new VarNode<T>(initValue);
+		public static VarController<T> Var<T>(T initValue) where T : struct => new VarController<T>(initValue);
 
 		/// <summary>
 		/// source の出力を amount_smp サンプルだけ遅らせて再現する
@@ -108,5 +109,9 @@ namespace ModularAudioSharp {
 			var newStream = node.UseAsStream().Select(getMember);
 			return new Node<TMember>(newStream);
 		}
+
+		//public static Node<float> ExpEnv(float timesBySec) {
+
+		//}
 	}
 }
