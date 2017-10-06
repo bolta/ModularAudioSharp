@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="Data\Tone.cs" />
     <Compile Include="EnumerableWaveProvider32.cs" />
+    <Compile Include="ExpEnvController.cs" />
     <Compile Include="Mml\AstNodes.cs" />
     <Compile Include="Mml\AstVisitor.cs" />
     <Compile Include="Mml\IInstructionGenerator.cs" />

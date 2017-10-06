@@ -15,10 +15,12 @@ namespace ModularAudioTestDriver {
 	class Program {
 		static void Main(string[] args) {
 #if true
-			VarSample();
+//			VarSample();
 			//SeqSample();
 			//			ParserSample();
 			//			MmlSample();
+
+			NoteSample();
 #elif true
 			{
 				var tempo = Nodes.Const(120f);
@@ -210,6 +212,22 @@ namespace ModularAudioTestDriver {
 			var master = SinOsc(Temperament.Equal(seq.GetMember(v => v.Tone))) * 0.125f;
 
 			using (ModuleSpace.Play(master.AsFloat())) Console.ReadKey(); // Thread.Sleep(10000);
+		}
+
+		private static void NoteSample() {
+			var env = ExpEnv(0.06125f);
+
+			var master = SinOsc(440) * env * 0.25f;
+
+			using (ModuleSpace.Play(master.AsFloat())) {
+				var note = false;
+				while (true) {
+					Console.ReadKey();
+					note = ! note;
+					if (note) env.NoteOn(); else env.NoteOff();
+				}
+			}
+
 		}
 	}
 }
