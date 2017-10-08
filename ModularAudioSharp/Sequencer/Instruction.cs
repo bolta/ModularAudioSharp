@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace ModularAudioSharp.Sequencer {
 	public abstract class Instruction<T> where T : struct {
-//		public abstract void Execute(ref T output);
 		internal abstract void Execute(SequenceThread<T> thread);
 	}
 
@@ -22,6 +21,16 @@ namespace ModularAudioSharp.Sequencer {
 
 		internal override void Execute(SequenceThread<T> thread) {
 			thread.CurrentValue = this.value;
+		}
+	}
+
+	public class ValueOnceInstruction<T> : Instruction<T> where T : struct {
+		private readonly T value;
+
+		public ValueOnceInstruction(T value) { this.value = value; }
+
+		internal override void Execute(SequenceThread<T> thread) {
+			thread.ValueOnce = this.value;
 		}
 	}
 

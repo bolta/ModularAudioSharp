@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ModularAudioSharp.Data;
 
 namespace ModularAudioSharp {
 	/// <summary>
@@ -32,7 +33,8 @@ namespace ModularAudioSharp {
 		/// <returns></returns>
 		public static VarController<T> Var<T>(T initValue) where T : struct => new VarController<T>(initValue);
 
-		public static ExpEnvController ExpEnv(float ratioPerSec) => new ExpEnvController(ratioPerSec);
+		public static ExpEnvController ExpEnv(float ratioPerSec, Node<NoteOperation> oper = null)
+				=> new ExpEnvController(ratioPerSec, oper);
 
 		/// <summary>
 		/// source の出力を amount_smp サンプルだけ遅らせて再現する
@@ -104,7 +106,7 @@ namespace ModularAudioSharp {
 			}
 		}
 
-		public static Node<TMember> GetMember<TStruct, TMember>(this Node<TStruct> node, Func<TStruct, TMember> getMember)
+		public static Node<TMember> Select<TStruct, TMember>(this Node<TStruct> node, Func<TStruct, TMember> getMember)
 				where TStruct : struct
 				where TMember : struct {
 			var newStream = node.UseAsStream().Select(getMember);

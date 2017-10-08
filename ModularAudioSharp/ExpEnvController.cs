@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ModularAudioSharp.Data;
 
 namespace ModularAudioSharp {
 	public class ExpEnvController : NodeController<float> {
@@ -28,15 +29,24 @@ namespace ModularAudioSharp {
 		private float ratioPerSample;
 
 		/// <summary>
+		/// note on/off 入力
+		/// </summary>
+		private readonly IEnumerable<NoteOperation> notes;
+
+		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="ratioPerSec">1 秒ごとの減衰率</param>
-		public ExpEnvController(float ratioPerSec) {
+		public ExpEnvController(float ratioPerSec, Node<NoteOperation> notes = null) {
 			this.RatioPerSec = ratioPerSec;
+			this.notes = (notes ?? Nodes.Const(NoteOperation.None)).UseAsStream();
 		}
 
 		protected override IEnumerable<float> Signal() {
-			while (true) {
+			foreach (var op in this.notes) {
+				if (op == NoteOperation.NoteOn) this.NoteOn();
+				else if (op == NoteOperation.NoteOff) this.NoteOff();
+
 				yield return this.amplitude;
 
 				if (this.state == State.Idle) continue;

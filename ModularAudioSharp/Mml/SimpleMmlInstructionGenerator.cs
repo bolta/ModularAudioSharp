@@ -19,6 +19,7 @@ namespace ModularAudioSharp.Mml {
 			private readonly int tickPerBar;
 			private int octave = 4;
 			private int length = 8;
+			private float gateRatio = 1f;
 
 			internal Visitor(IList<Instruction<SimpleMmlValue>> result, int tickPerBeat) {
 				this.result = result;
@@ -34,7 +35,8 @@ namespace ModularAudioSharp.Mml {
 			public override void Visit(OctaveDecrStatement visitee) { this.octave -= 1; }
 			public override void Visit(LengthStatement visitee) { this.length = visitee.Value; }
 			public override void Visit(ToneStatement visitee) {
-				var lenTicks = CalcTicksFromLength(visitee.Length, this.tickPerBar, this.length);
+				var stepTicks = CalcTicksFromLength(visitee.Length, this.tickPerBar, this.length);
+				var gateTicks = (int) (stepTicks * this.gateRatio);
 
 				// TODO ちゃんと書き直す
 				Data.ToneName toneName; switch (visitee.ToneName.BaseName.ToUpper()) {
@@ -48,15 +50,29 @@ namespace ModularAudioSharp.Mml {
 				default: throw new Exception();
 				}
 
-				this.result.Add(new ValueInstruction<SimpleMmlValue>(new SimpleMmlValue {
+				var tone = new Tone { Octave = this.octave, ToneName = toneName, Accidental = visitee.ToneName.Accidental };
+
+				this.result.Add(new ValueOnceInstruction<SimpleMmlValue>(new SimpleMmlValue {
 					NoteOperation = NoteOperation.NoteOn,
-					Tone = new Tone { Octave = this.octave, ToneName = toneName, Accidental = visitee.ToneName.Accidental },
+					Tone = tone,
 				}));
-				this.result.Add(new WaitInstruction<SimpleMmlValue>(lenTicks));
 				this.result.Add(new ValueInstruction<SimpleMmlValue>(new SimpleMmlValue {
-					NoteOperation = NoteOperation.NoteOff,
-					Tone = new Tone { Octave = this.octave, ToneName = toneName, Accidental = visitee.ToneName.Accidental }
+					NoteOperation = NoteOperation.None,
+					Tone = tone,
 				}));
+				this.result.Add(new WaitInstruction<SimpleMmlValue>(gateTicks));
+
+				this.result.Add(new ValueOnceInstruction<SimpleMmlValue>(new SimpleMmlValue {
+					NoteOperation = NoteOperation.NoteOff,
+					Tone = tone,
+				}));
+				this.result.Add(new ValueInstruction<SimpleMmlValue>(new SimpleMmlValue {
+					NoteOperation = NoteOperation.None,
+					Tone = tone,
+				}));
+				if (stepTicks - gateTicks > 0) {
+					this.result.Add(new WaitInstruction<SimpleMmlValue>(stepTicks - gateTicks));
+				}
 			}
 
 			/// <summary>
@@ -94,9 +110,9 @@ namespace ModularAudioSharp.Mml {
 				return result;
 			}
 
-			private static int Pow(int bass, int times) {
+			private static int Pow(int @base, int times) {
 				int result = 1;
-				for (int i=0 ; i<times ; ++i) result *= bass;
+				for (int i=0 ; i<times ; ++i) result *= @base;
 				return result;
 			}
 		}

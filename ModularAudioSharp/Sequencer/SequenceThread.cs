@@ -26,6 +26,13 @@ namespace ModularAudioSharp.Sequencer {
 		internal T CurrentValue { get; set; } = default(T);
 
 		/// <summary>
+		/// 有効値を設定すると、その値を直後の 1 サンプルのみ、CurrentValue に優先して使う。
+		/// 次のサンプルからは CurrentValue を出力する。
+		/// Tick 単位ではなく 1 サンプルだけ出力したい値（NoteOn/Off など）があるときに使う
+		/// </summary>
+		internal T? ValueOnce { get; set; } = null;
+
+		/// <summary>
 		/// 待機中の場合、正の値（tick 単位）。
 		/// 0 のときは直ちに次のインストラクションを実行できる
 		/// </summary>

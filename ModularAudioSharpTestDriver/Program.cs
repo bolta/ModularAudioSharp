@@ -15,12 +15,12 @@ namespace ModularAudioTestDriver {
 	class Program {
 		static void Main(string[] args) {
 #if true
-//			VarSample();
-			//SeqSample();
+			//			VarSample();
+			//			SeqSample();
 			//			ParserSample();
-			//			MmlSample();
+			MmlSample();
 
-			NoteSample();
+			//NoteSample();
 #elif true
 			{
 				var tempo = Nodes.Const(120f);
@@ -200,16 +200,20 @@ namespace ModularAudioTestDriver {
 		}
 
 		private static void MmlSample() {
+			var ticksPerBeat = 96;
+
 			var parser = new SimpleMmlParser();
 //			var ast = parser.Parse("o4L4b>ef+<b>a2g+f+ed+8e8f+ee2d+2");
 			var ast = parser.Parse("o5L16c>c<b>cec<b>c<c>c<b->cec<b->c<c>c<a>cec<a>c<c>c<a->cec<a->c<");
-			var instrs = new SimpleMmlInstructionGenerator().GenerateInstructions(ast, 4).ToList();
+			var instrs = new SimpleMmlInstructionGenerator().GenerateInstructions(ast, ticksPerBeat).ToList();
 
-			var tick = Tick.New(134, 4);
+			var tick = Tick.New(60, ticksPerBeat);
 			var seq = Sequencer<SimpleMmlValue>.New(tick, 0, new SequenceThread<SimpleMmlValue>(instrs));
 
-			// とりあえず音高以外無視する。NoteOperation の区別も考慮しない
-			var master = SinOsc(Temperament.Equal(seq.GetMember(v => v.Tone))) * 0.125f;
+			var env = ExpEnv(1 / 32f, seq.Select(v => { /*Console.WriteLine(v.NoteOperation);*/ return v.NoteOperation; }));
+
+			var master = SinOsc(Temperament.Equal(seq.Select(v => v.Tone))) * env * 0.125f;
+
 
 			using (ModuleSpace.Play(master.AsFloat())) Console.ReadKey(); // Thread.Sleep(10000);
 		}

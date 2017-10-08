@@ -28,7 +28,14 @@ namespace ModularAudioSharp.Sequencer {
 			return tick.Select(t => {
 				if (t) thread.Tick();
 
-				return thread.CurrentValue;
+				if (thread.ValueOnce.HasValue) {
+					var value = thread.ValueOnce.Value;
+					thread.ValueOnce = null;
+					return value;
+
+				} else {
+					return thread.CurrentValue;
+				}
 			});
 		}
 	}

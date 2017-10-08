@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\NoteOperation.cs" />
     <Compile Include="Data\Tone.cs" />
     <Compile Include="EnumerableWaveProvider32.cs" />
     <Compile Include="ExpEnvController.cs" />
