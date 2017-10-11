@@ -72,6 +72,9 @@
     <Compile Include="Temperament.cs" />
     <Compile Include="Data\Util.cs" />
     <Compile Include="VarController.cs" />
+    <Compile Include="Waveform\Interpolator.cs" />
+    <Compile Include="Waveform\Waveform.cs" />
+    <Compile Include="Waveform\WaveformPlayer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -9,6 +9,7 @@ using ModularAudioSharp;
 using ModularAudioSharp.Data;
 using ModularAudioSharp.Mml;
 using ModularAudioSharp.Sequencer;
+using ModularAudioSharp.Waveform;
 using static ModularAudioSharp.Nodes;
 
 namespace ModularAudioTestDriver {
@@ -18,7 +19,8 @@ namespace ModularAudioTestDriver {
 			//			VarSample();
 			//			SeqSample();
 			//			ParserSample();
-			MmlSample();
+//			MmlSample();
+			WavetableSample();
 
 			//NoteSample();
 #elif true
@@ -231,6 +233,36 @@ namespace ModularAudioTestDriver {
 					if (note) env.NoteOn(); else env.NoteOff();
 				}
 			}
+		}
+
+		private static void WavetableSample() {
+			var ticksPerBeat = 96;
+
+			var parser = new SimpleMmlParser();
+			var ast = parser.Parse(
+				"o5L16c>c<b>cec<b>c<c>c<b->cec<b->c<c>c<a>cec<a>c<c>c<a->cec<a->c<"
+			//	"o5c1^1^1^1^1"
+				);
+			var instrs = new SimpleMmlInstructionGenerator().GenerateInstructions(ast, ticksPerBeat).ToList();
+
+			var tick = Tick.New(134, ticksPerBeat);
+			var seq = Sequencer<SimpleMmlValue>.New(tick, 0, new SequenceThread<SimpleMmlValue>(instrs));
+
+//			var env = ExpEnv(1 / 32f, seq.Select(v => { /*Console.WriteLine(v.NoteOperation);*/ return v.NoteOperation; }));
+
+			var freq = Temperament.Equal(seq.Select(v => v.Tone));
+
+			var waveform = new Waveform(
+					// 100 smp/s = 441 Hz の矩形波
+					Enumerable.Repeat(1f, 50).Concat(Enumerable.Repeat(-1f, 50)).ToList(),
+					44100);
+			var osc = WaveformPlayer.New(waveform, 441, seq.Select(v => v.NoteOperation), freq, loopOffset:0);
+
+			var master = osc * 0.125f;
+
+
+			using (ModuleSpace.Play(master.AsFloat())) Console.ReadKey(); // Thread.Sleep(10000);
+
 
 		}
 	}
