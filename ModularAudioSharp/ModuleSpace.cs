@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ModularAudioSharp.Sequencer;
 using NAudio.Wave;
 
 namespace ModularAudioSharp {
@@ -16,13 +17,15 @@ namespace ModularAudioSharp {
 		public static int Channels { get; } = 1;
 
 		private static IList<Node> cachingNodes = new List<Node>();
-		public static void AddCachingNode<T>(Node<T> node, bool updatePrior = false) where T : struct {
+		public static void AddCachingNode(Node node) {
 			Debug.Assert(! cachingNodes.Contains(node));
-			if (updatePrior) {
-				cachingNodes.Insert(0, node);
-			} else {
-				cachingNodes.Add(node);
-			}
+			cachingNodes.Add(node);
+		}
+
+		private static IList<Tick> ticks = new List<Tick>();
+		public static void AddTick(Tick tick) {
+			Debug.Assert(! ticks.Contains(tick));
+			ticks.Add(tick);
 		}
 
 		/// <summary>
@@ -47,10 +50,11 @@ namespace ModularAudioSharp {
 		private static IEnumerable<float> MakeMasterSignal(Node<float> master) {
 			// TODO use してしまうと 2 回再生できない
 			var masterOut = master.UseAsStream();
-			foreach (var cache in cachingNodes) cache.Update();
+
 			foreach (var value in masterOut) {
-				yield return value;
+				foreach (var tick in ticks) tick.Sample();
 				foreach (var cache in cachingNodes) cache.Update();
+				yield return value;
 			}
 		}
 	}

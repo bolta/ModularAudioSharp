@@ -13,10 +13,6 @@ namespace ModularAudioSharp.Sequencer {
 		internal abstract void Execute(SequenceThread thread);
 	}
 
-	//public class LoopInstruction<T> : Instruction<T> where T : struct {
-
-	//}
-
 	public class ValueInstruction<T> : Instruction where T : struct {
 		private readonly VarController<T> target;
 		private readonly T value;
@@ -29,7 +25,9 @@ namespace ModularAudioSharp.Sequencer {
 		internal override void Execute(SequenceThread thread) {
 			this.target.Set(this.value);
 		}
-	}
+
+		public override string ToString() => $"Value ({this.value}) -> {this.target}";
+    }
 
 	public class NoteInstruction : Instruction {
 		private readonly INotable target;
@@ -43,17 +41,8 @@ namespace ModularAudioSharp.Sequencer {
 		internal override void Execute(SequenceThread thread) {
 			if (this.noteOn) this.target.NoteOn(); else this.target.NoteOff();
 		}
+		public override string ToString() => $"Note{(this.noteOn ? "On" : "Off")} -> {this.target}";
 	}
-
-	//public class ValueOnceInstruction<T> : Instruction<T> where T : struct {
-	//	private readonly T value;
-
-	//	public ValueOnceInstruction(T value) { this.value = value; }
-
-	//	internal override void Execute(SequenceThread<T> thread) {
-	//		thread.ValueOnce = this.value;
-	//	}
-	//}
 
 	public class WaitInstruction : Instruction {
 		private readonly int wait;
@@ -62,6 +51,8 @@ namespace ModularAudioSharp.Sequencer {
 			Debug.Assert(thread.Wait == 0);
 			thread.Wait = this.wait;
 		}
+
+		public override string ToString() => $"Wait ({this.wait})";
 	}
 
 	public class JumpInstruction : Instruction {

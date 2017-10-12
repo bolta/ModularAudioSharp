@@ -8,41 +8,20 @@ using ModularAudioSharp.Data;
 
 namespace ModularAudioSharp.Sequencer {
 	/// <summary>
-	/// シーケンサとして動作するノード
+	/// Tick で駆動されるシーケンサ
 	/// </summary>
-	public class Sequencer : Node<Unit> {
+	public class Sequencer : ITickUser {
 
-		// TODO ここで ticksPerBeat を持っている必要性はないのでは？
-		private readonly int ticksPerBeat;
+		// TODO いずれは複数持てるようにする
+		private readonly SequenceThread thread;
 
-		private Sequencer(Node tick, int ticksPerBeat, SequenceThread thread)
-				: base(RunThread(tick.AsBool().UseAsStream(), thread)) {
-			this.ticksPerBeat = ticksPerBeat;
-
-			// 出力が使われない（他から UseAsStream() を呼ばれることがない）ため、明示的に呼ぶ必要がある。
-			// 
-			this.Use(true);
+		public Sequencer(Tick tick, SequenceThread thread) {
+			tick.AddUser(this);
+			this.thread = thread;
 		}
 
-		public static Sequencer New(Node tick, int ticksPerBeat, SequenceThread thread) {
-			return new Sequencer(tick, ticksPerBeat, thread);
-		}
-
-		private static IEnumerable<Unit> RunThread(IEnumerable<bool> tick, SequenceThread thread) {
-			return tick.Select(t => {
-				if (t) thread.Tick();
-
-				return Unit.Value;
-
-				//if (thread.ValueOnce.HasValue) {
-				//	var value = thread.ValueOnce.Value;
-				//	thread.ValueOnce = null;
-				//	return value;
-
-				//} else {
-				//	return thread.CurrentValue;
-				//}
-			});
+		public void Tick() {
+			this.thread.Tick();
 		}
 	}
 }

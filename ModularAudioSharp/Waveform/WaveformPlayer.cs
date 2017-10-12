@@ -13,11 +13,6 @@ namespace ModularAudioSharp.Waveform {
 	/// TODO 名前は WaveformPlayerController とすべきか？　Node と NodeController の区別は必ずしも必要ないかも
 	/// </summary>
 	public class WaveformPlayer : NodeController<float>, INotable {
-		//public static WaveformPlayer New(Waveform waveform, float masterFreq, Node<NoteOperation> notes, Node<float> freq,
-		//		int? startOffset = null, int? endOffset = null, int? loopOffset = null)
-		//		=> new Node<float>(Signal(waveform, masterFreq, notes.UseAsStream(), freq.UseAsStream(),
-		//				startOffset, endOffset, loopOffset));
-
 		// TODO ファクトリメソッドを作る
 
 		private readonly Waveform waveform;
@@ -47,8 +42,6 @@ namespace ModularAudioSharp.Waveform {
 			this.endOffset = endOffset ?? waveform.Length_smp;
 			this.loopOffset = loopOffset;
 		}
-				//=> new Node<float>(Signal(waveform, masterFreq, notes.UseAsStream(), freq.UseAsStream(),
-				//		startOffset, endOffset, loopOffset));
 
 		///// <summary>
 		///// 
@@ -65,8 +58,6 @@ namespace ModularAudioSharp.Waveform {
 			// TODO ステレオ
 			var interp = new LinearInterpolator(this.waveform.Samples(0));
 
-			this.state = State.Idle;
-//			var offset = 0f;
 			foreach (var f in this.freq) {
 				if (this.state == State.Idle) {
 					yield return 0f;

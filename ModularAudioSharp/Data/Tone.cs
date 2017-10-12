@@ -24,5 +24,6 @@ namespace ModularAudioSharp.Data {
 		/// </summary>
 		public int Accidental { get; set; }
 
+		public override string ToString() => $"o{this.Octave}{this.ToneName}{Data.Util.RepeatString(this.Accidental > 0 ? "+" : "-", Math.Abs(this.Accidental))}";
 	}
 }

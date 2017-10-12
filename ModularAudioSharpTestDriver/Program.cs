@@ -17,7 +17,7 @@ namespace ModularAudioTestDriver {
 		static void Main(string[] args) {
 #if true
 			//			VarSample();
-						//SeqSample();
+			//SeqSample();
 			//			ParserSample();
 			//MmlSample();
 			WavetableSample();
@@ -38,7 +38,7 @@ namespace ModularAudioTestDriver {
 #elif true
 			{
 				var tempo = 120 + 80 * SinOsc(0.125f);
-				var tick = Tick.New(tempo, 48);
+				var tick = new Tick(tempo, 48);
 				var seq = SequencerExper1.New(tick, 48, 1);
 				var osc = SquareOsc(seq.GetMember(s => s.Freq));
 
@@ -55,7 +55,7 @@ namespace ModularAudioTestDriver {
 #else
 			{
 				var tempo = 120 + 80 * SinOsc(0.125f);
-				var tick = Tick.New(tempo, 48);
+				var tick = new Tick(tempo, 48);
 				tick.Name = "tick";
 				var seq = Sequencer_old.New(tick, 48);
 
@@ -114,9 +114,9 @@ namespace ModularAudioTestDriver {
 		private static void SeqSample() {
 //			var tempo = Const(160f);
 			Func<int, float> semi = s => (float) (440 * Math.Pow(2, s / 12.0));
-			var tick = Tick.New(134, 4);
+			var tick = new Tick(134, 4);
 			var freq = Var(0f);
-			var seq = Sequencer.New(tick, 0, new SequenceThread(new List<Instruction>(){
+			var seq = new Sequencer(tick, new SequenceThread(new List<Instruction>(){
 #region sequence
 				new ValueInstruction<float>(freq, semi(3)),
 				new WaitInstruction(1),
@@ -216,8 +216,8 @@ namespace ModularAudioTestDriver {
 					.AddToneUsers(tone)
 					.GenerateInstructions(ast, ticksPerBeat).ToList();
 
-			var tick = Tick.New(60, ticksPerBeat);
-			var seq = Sequencer.New(tick, 0, new SequenceThread(instrs));
+			var tick = new Tick(60, ticksPerBeat);
+			var seq = new Sequencer(tick, new SequenceThread(instrs));
 
 //			var env = ExpEnv(1 / 32f, seq.Select(v => { /*Console.WriteLine(v.NoteOperation);*/ return v.NoteOperation; }));
 
@@ -264,9 +264,9 @@ namespace ModularAudioTestDriver {
 					.AddNoteUsers(osc)
 					.GenerateInstructions(ast, ticksPerBeat).ToList();
 
-			var tick = Tick.New(134, ticksPerBeat);
+			var tick = new Tick(134, ticksPerBeat);
 
-			var seq = Sequencer.New(tick, 0, new SequenceThread(instrs));
+			var seq = new Sequencer(tick, new SequenceThread(instrs));
 
 			var master = (Node) osc * 0.125f;
 

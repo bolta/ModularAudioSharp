@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,18 +21,6 @@ namespace ModularAudioSharp.Sequencer {
 			this.instructions = instructions;
 		}
 
-		///// <summary>
-		///// 現在の出力値
-		///// </summary>
-		//internal T CurrentValue { get; set; } = default(T);
-
-		///// <summary>
-		///// 有効値を設定すると、その値を直後の 1 サンプルのみ、CurrentValue に優先して使う。
-		///// 次のサンプルからは CurrentValue を出力する。
-		///// Tick 単位ではなく 1 サンプルだけ出力したい値（NoteOn/Off など）があるときに使う
-		///// </summary>
-		//internal T? ValueOnce { get; set; } = null;
-
 		/// <summary>
 		/// 待機中の場合、正の値（tick 単位）。
 		/// 0 のときは直ちに次のインストラクションを実行できる
@@ -39,7 +28,7 @@ namespace ModularAudioSharp.Sequencer {
 		internal int Wait { get; set; } = 0;
 
 		/// <summary>
-		/// Sequencer の入力である tick が true になったときに呼び出される。スレッドごとの動作を行い、プログラムカウンタを進める
+		/// Sequencer.Tick() を契機として呼び出される。スレッドごとの動作を行い、インストラクションポインタを進める
 		/// </summary>
 		/// <returns>
 		/// このスレッドにまだ続きがあるかどうか

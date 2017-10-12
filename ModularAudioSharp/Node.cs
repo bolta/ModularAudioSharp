@@ -131,9 +131,9 @@ namespace ModularAudioSharp {
 		/// Sequencer での使用を想定
 		/// </param>
 		/// <returns></returns>
-		public Out Use(bool updatePrior = false) {
+		public Out Use() {
 			if (this.userCount == 0) {
-				ModuleSpace.AddCachingNode(this, updatePrior);
+				ModuleSpace.AddCachingNode(this);
 			}
 			++ this.userCount;
 			return new Out(this);

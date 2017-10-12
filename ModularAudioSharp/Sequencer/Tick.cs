@@ -6,31 +6,37 @@ using System.Threading.Tasks;
 
 namespace ModularAudioSharp.Sequencer {
 	public class Tick {
+		private IList<ITickUser> users = new List<ITickUser>();
+
+		public float Tempo { get; set; }
+
+		private readonly int ticksPerBeat;
+
 		/// <summary>
-		/// シーケンサの時間の最小単位となる tick を発生させるノード
+		/// タイマ。1 以上で Sample() が呼ばれると Tick が発行され、タイマは 1 で割った余りまで減る。
+		/// 最初のサンプルで最初の Tick を発行するよう 1 から始める
 		/// </summary>
-		/// <param name="tempo">テンポ（BPM）</param>
-		/// <param name="ticksPerBeat">1 拍に何回 tick を発生させるか</param>
-		/// <returns>tick が発生するとき true、そうでないとき false の値をとるノード</returns>
-		public static Node<bool> New(Node tempo, int ticksPerBeat) {
-			return new Node<bool>(New(tempo.AsFloat().UseAsStream(), ticksPerBeat));
+		private float timer = 1f;
+
+		public Tick(float tempo, int ticksPerBeat) {
+			this.Tempo = tempo;
+			this.ticksPerBeat = ticksPerBeat;
+			ModuleSpace.AddTick(this);
 		}
 
-		private static IEnumerable<bool> New(IEnumerable<float> tempo, int ticksPerBeat) {
-			// 初回（演奏開始の瞬間）は trigger する
-			yield return true;
+		public void AddUser(ITickUser user) {
+			this.users.Add(user);
+		}
 
-			// その後は timer をサンプルごとに増やし、1 増えるごとに trigger する
-			var timer = 0f;
-			var trigger = true;
-			foreach (var t in tempo) {
-				var newTimer = timer + t * ticksPerBeat / 60 / ModuleSpace.SampleRate;
-				trigger = Math.Floor(newTimer) != Math.Floor(timer);
-				timer = newTimer % 1f;
-
-				yield return trigger;
+		internal void Sample() {
+			// while の中が複数回実行されることは通常ありえない
+			// （tempo * ticksPerBeat がきわめて大きい場合のみ）が、
+			// その場合でも発行する tick の数は正しくなるよう if ではなく while にしておく
+			while (this.timer >= 1f) {
+				foreach (var u in this.users) u.Tick();
+				this.timer -= 1f;
 			}
+			this.timer += this.Tempo * this.ticksPerBeat / 60 / ModuleSpace.SampleRate;
 		}
-
 	}
 }

@@ -70,6 +70,7 @@
     <Compile Include="Sequencer\Sequencer.cs" />
     <Compile Include="Sequencer\SequenceThread.cs" />
     <Compile Include="Sequencer\Tick.cs" />
+    <Compile Include="Sequencer\ITickUser.cs" />
     <Compile Include="Temperament.cs" />
     <Compile Include="Data\Util.cs" />
     <Compile Include="VarController.cs" />
