@@ -17,9 +17,9 @@ namespace ModularAudioTestDriver {
 		static void Main(string[] args) {
 #if true
 			//			VarSample();
-			//			SeqSample();
+						//SeqSample();
 			//			ParserSample();
-//			MmlSample();
+			//MmlSample();
 			WavetableSample();
 
 			//NoteSample();
@@ -115,78 +115,79 @@ namespace ModularAudioTestDriver {
 //			var tempo = Const(160f);
 			Func<int, float> semi = s => (float) (440 * Math.Pow(2, s / 12.0));
 			var tick = Tick.New(134, 4);
-			var seq = Sequencer<float>.New(tick, 0, new SequenceThread<float>(new List<Instruction<float>>(){
+			var freq = Var(0f);
+			var seq = Sequencer.New(tick, 0, new SequenceThread(new List<Instruction>(){
 #region sequence
-				new ValueInstruction<float>(semi(3)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(15)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(14)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(15)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(19)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(15)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(14)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(15)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(3)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(15)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(13)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(15)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(19)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(15)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(13)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(15)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(3)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(15)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(12)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(15)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(19)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(15)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(12)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(15)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(3)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(15)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(11)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(15)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(19)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(15)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(11)),
-				new WaitInstruction<float>(1),
-				new ValueInstruction<float>(semi(15)),
-				new WaitInstruction<float>(1),
-				new JumpInstruction<float>(0),
+				new ValueInstruction<float>(freq, semi(3)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(15)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(14)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(15)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(19)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(15)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(14)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(15)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(3)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(15)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(13)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(15)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(19)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(15)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(13)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(15)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(3)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(15)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(12)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(15)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(19)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(15)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(12)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(15)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(3)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(15)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(11)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(15)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(19)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(15)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(11)),
+				new WaitInstruction(1),
+				new ValueInstruction<float>(freq, semi(15)),
+				new WaitInstruction(1),
+				new JumpInstruction(0),
 #endregion
 			}));
 
 
-			var sin = SinOsc(seq) * 0.125f;
+			var sin = SinOsc(freq) * 0.125f;
 
 			using (ModuleSpace.Play(sin.AsFloat())) Console.ReadKey(); // Thread.Sleep(10000);
 
@@ -204,17 +205,23 @@ namespace ModularAudioTestDriver {
 		private static void MmlSample() {
 			var ticksPerBeat = 96;
 
+			var env = ExpEnv(1 / 32f);
+			var tone = Var<Tone>();
+
 			var parser = new SimpleMmlParser();
 //			var ast = parser.Parse("o4L4b>ef+<b>a2g+f+ed+8e8f+ee2d+2");
 			var ast = parser.Parse("o5L16c>c<b>cec<b>c<c>c<b->cec<b->c<c>c<a>cec<a>c<c>c<a->cec<a->c<");
-			var instrs = new SimpleMmlInstructionGenerator().GenerateInstructions(ast, ticksPerBeat).ToList();
+			var instrs = new SimpleMmlInstructionGenerator()
+					.AddNoteUsers(env)
+					.AddToneUsers(tone)
+					.GenerateInstructions(ast, ticksPerBeat).ToList();
 
 			var tick = Tick.New(60, ticksPerBeat);
-			var seq = Sequencer<SimpleMmlValue>.New(tick, 0, new SequenceThread<SimpleMmlValue>(instrs));
+			var seq = Sequencer.New(tick, 0, new SequenceThread(instrs));
 
-			var env = ExpEnv(1 / 32f, seq.Select(v => { /*Console.WriteLine(v.NoteOperation);*/ return v.NoteOperation; }));
+//			var env = ExpEnv(1 / 32f, seq.Select(v => { /*Console.WriteLine(v.NoteOperation);*/ return v.NoteOperation; }));
 
-			var master = SinOsc(Temperament.Equal(seq.Select(v => v.Tone))) * env * 0.125f;
+			var master = SinOsc(Temperament.Equal(tone)) * env * 0.125f;
 
 
 			using (ModuleSpace.Play(master.AsFloat())) Console.ReadKey(); // Thread.Sleep(10000);
@@ -238,31 +245,32 @@ namespace ModularAudioTestDriver {
 		private static void WavetableSample() {
 			var ticksPerBeat = 96;
 
-			var parser = new SimpleMmlParser();
-			var ast = parser.Parse(
-				"o5L16c>c<b>cec<b>c<c>c<b->cec<b->c<c>c<a>cec<a>c<c>c<a->cec<a->c<"
-			//	"o5c1^1^1^1^1"
-				);
-			var instrs = new SimpleMmlInstructionGenerator().GenerateInstructions(ast, ticksPerBeat).ToList();
-
-			var tick = Tick.New(134, ticksPerBeat);
-			var seq = Sequencer<SimpleMmlValue>.New(tick, 0, new SequenceThread<SimpleMmlValue>(instrs));
-
-//			var env = ExpEnv(1 / 32f, seq.Select(v => { /*Console.WriteLine(v.NoteOperation);*/ return v.NoteOperation; }));
-
-			var freq = Temperament.Equal(seq.Select(v => v.Tone));
+			var tone = Var<Tone>();
+			var freq = Temperament.Equal(tone);
 
 			var waveform = new Waveform(
 					// 100 smp/s = 441 Hz の矩形波
 					Enumerable.Repeat(1f, 50).Concat(Enumerable.Repeat(-1f, 50)).ToList(),
 					44100);
-			var osc = WaveformPlayer.New(waveform, 441, seq.Select(v => v.NoteOperation), freq, loopOffset:0);
+			var osc = new WaveformPlayer(waveform, 441, freq, loopOffset:0);
 
-			var master = osc * 0.125f;
+			var parser = new SimpleMmlParser();
+			var ast = parser.Parse(
+				"o5L16c>c<b>cec<b>c<c>c<b->cec<b->c<c>c<a>cec<a>c<c>c<a->cec<a->c<"
+			//	"o5c1^1^1^1^1"
+				);
+			var instrs = new SimpleMmlInstructionGenerator()
+					.AddToneUsers(tone)
+					.AddNoteUsers(osc)
+					.GenerateInstructions(ast, ticksPerBeat).ToList();
 
+			var tick = Tick.New(134, ticksPerBeat);
+
+			var seq = Sequencer.New(tick, 0, new SequenceThread(instrs));
+
+			var master = (Node) osc * 0.125f;
 
 			using (ModuleSpace.Play(master.AsFloat())) Console.ReadKey(); // Thread.Sleep(10000);
-
 
 		}
 	}

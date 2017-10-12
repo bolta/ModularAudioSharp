@@ -13,6 +13,7 @@ namespace ModularAudioSharp {
 	public static class Temperament {
 		private static readonly Dictionary<ToneName, int> TONE_NAME_TO_SEMITONE
 				= new Dictionary<ToneName, int> {
+			{ ToneName.None, -9 },
 			{ ToneName.C, -9 },
 			{ ToneName.D, -7 },
 			{ ToneName.E, -5 },

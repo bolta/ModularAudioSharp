@@ -7,21 +7,36 @@ using ModularAudioSharp.Data;
 using ModularAudioSharp.Sequencer;
 
 namespace ModularAudioSharp.Mml {
-	public class SimpleMmlInstructionGenerator : IInstructionGenerator<CompilationUnit, SimpleMmlValue> {
-		public IEnumerable<Instruction<SimpleMmlValue>> GenerateInstructions(CompilationUnit astRoot, int tickPerBeat) {
-			var result = new List<Instruction<SimpleMmlValue>>();
-			new Visitor(result, tickPerBeat).Visit(astRoot);
+	public class SimpleMmlInstructionGenerator : IInstructionGenerator<CompilationUnit> {
+		private readonly List<VarController<Tone>> toneUsers = new List<VarController<Tone>>();
+		private readonly List<INotable> noteUsers = new List<INotable>();
+
+		public IEnumerable<Instruction> GenerateInstructions(CompilationUnit astRoot, int tickPerBeat) {
+			var result = new List<Instruction>();
+			new Visitor(this, result, tickPerBeat).Visit(astRoot);
 
 			return result;
 		}
+
+		public SimpleMmlInstructionGenerator AddToneUsers(params VarController<Tone>[] users) {
+			this.toneUsers.AddRange(users);
+			return this;
+		}
+		public SimpleMmlInstructionGenerator AddNoteUsers(params INotable[] users) {
+			this.noteUsers.AddRange(users);
+			return this;
+		}
+
 		private class Visitor : AstVisitor {
-			private readonly IList<Instruction<SimpleMmlValue>> result;
+			private readonly SimpleMmlInstructionGenerator owner;
+			private readonly List<Instruction> result;
 			private readonly int tickPerBar;
 			private int octave = 4;
-			private int length = 8;
+			private int length = 4;
 			private float gateRatio = 1f;
 
-			internal Visitor(IList<Instruction<SimpleMmlValue>> result, int tickPerBeat) {
+			internal Visitor(SimpleMmlInstructionGenerator owner, List<Instruction> result, int tickPerBeat) {
+				this.owner = owner;
 				this.result = result;
 				this.tickPerBar = 4 * tickPerBeat;
 			}
@@ -52,26 +67,14 @@ namespace ModularAudioSharp.Mml {
 
 				var tone = new Tone { Octave = this.octave, ToneName = toneName, Accidental = visitee.ToneName.Accidental };
 
-				this.result.Add(new ValueOnceInstruction<SimpleMmlValue>(new SimpleMmlValue {
-					NoteOperation = NoteOperation.NoteOn,
-					Tone = tone,
-				}));
-				this.result.Add(new ValueInstruction<SimpleMmlValue>(new SimpleMmlValue {
-					NoteOperation = NoteOperation.None,
-					Tone = tone,
-				}));
-				this.result.Add(new WaitInstruction<SimpleMmlValue>(gateTicks));
+				this.result.AddRange(this.owner.toneUsers.Select(u => new ValueInstruction<Tone>(u, tone)));
+				this.result.AddRange(this.owner.noteUsers.Select(u => new NoteInstruction(u, true)));
+				this.result.Add(new WaitInstruction(gateTicks));
 
-				this.result.Add(new ValueOnceInstruction<SimpleMmlValue>(new SimpleMmlValue {
-					NoteOperation = NoteOperation.NoteOff,
-					Tone = tone,
-				}));
-				this.result.Add(new ValueInstruction<SimpleMmlValue>(new SimpleMmlValue {
-					NoteOperation = NoteOperation.None,
-					Tone = tone,
-				}));
+				this.result.AddRange(this.owner.noteUsers.Select(u => new NoteInstruction(u, false)));
+
 				if (stepTicks - gateTicks > 0) {
-					this.result.Add(new WaitInstruction<SimpleMmlValue>(stepTicks - gateTicks));
+					this.result.Add(new WaitInstruction(stepTicks - gateTicks));
 				}
 			}
 

@@ -50,14 +50,15 @@
   <ItemGroup>
     <Compile Include="Data\NoteOperation.cs" />
     <Compile Include="Data\Tone.cs" />
+    <Compile Include="Data\Unit.cs" />
     <Compile Include="EnumerableWaveProvider32.cs" />
     <Compile Include="ExpEnvController.cs" />
+    <Compile Include="INotable.cs" />
     <Compile Include="Mml\AstNodes.cs" />
     <Compile Include="Mml\AstVisitor.cs" />
     <Compile Include="Mml\IInstructionGenerator.cs" />
     <Compile Include="Mml\SimpleMmlInstructionGenerator.cs" />
     <Compile Include="Mml\SimpleMmlParser.cs" />
-    <Compile Include="Mml\SimpleMmlValue.cs" />
     <Compile Include="ModuleSpace.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="NodeController.cs" />

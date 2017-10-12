@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using ModularAudioSharp.Sequencer;
 
 namespace ModularAudioSharp.Sequencer {
-	public class SequenceThread<T> where T : struct {
+	public class SequenceThread {
 
-		private readonly IList<Instruction<T>> instructions;
+		private readonly IList<Instruction> instructions;
 
 		/// <summary>
 		/// これから実行するインストラクションの添字。
@@ -16,21 +16,21 @@ namespace ModularAudioSharp.Sequencer {
 		/// </summary>
 		internal int Pointer { get; set; } = 0;
 
-		public SequenceThread(IList<Instruction<T>> instructions) {
+		public SequenceThread(IList<Instruction> instructions) {
 			this.instructions = instructions;
 		}
 
-		/// <summary>
-		/// 現在の出力値
-		/// </summary>
-		internal T CurrentValue { get; set; } = default(T);
+		///// <summary>
+		///// 現在の出力値
+		///// </summary>
+		//internal T CurrentValue { get; set; } = default(T);
 
-		/// <summary>
-		/// 有効値を設定すると、その値を直後の 1 サンプルのみ、CurrentValue に優先して使う。
-		/// 次のサンプルからは CurrentValue を出力する。
-		/// Tick 単位ではなく 1 サンプルだけ出力したい値（NoteOn/Off など）があるときに使う
-		/// </summary>
-		internal T? ValueOnce { get; set; } = null;
+		///// <summary>
+		///// 有効値を設定すると、その値を直後の 1 サンプルのみ、CurrentValue に優先して使う。
+		///// 次のサンプルからは CurrentValue を出力する。
+		///// Tick 単位ではなく 1 サンプルだけ出力したい値（NoteOn/Off など）があるときに使う
+		///// </summary>
+		//internal T? ValueOnce { get; set; } = null;
 
 		/// <summary>
 		/// 待機中の場合、正の値（tick 単位）。

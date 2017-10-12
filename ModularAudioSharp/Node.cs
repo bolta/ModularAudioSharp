@@ -126,10 +126,14 @@ namespace ModularAudioSharp {
 		/// 1 度だけ、ノードを ModuleSpace に登録する。
 		/// 普通はこれをラップした UseAsStream() を使えばよい
 		/// </summary>
+		/// <param param name="updatePrior">
+		/// 他のノードに先立って更新することを明示する場合に true を指定する。
+		/// Sequencer での使用を想定
+		/// </param>
 		/// <returns></returns>
-		public Out Use() {
+		public Out Use(bool updatePrior = false) {
 			if (this.userCount == 0) {
-				ModuleSpace.AddCachingNode(this);
+				ModuleSpace.AddCachingNode(this, updatePrior);
 			}
 			++ this.userCount;
 			return new Out(this);

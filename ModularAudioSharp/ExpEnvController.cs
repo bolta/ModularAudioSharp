@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using ModularAudioSharp.Data;
 
 namespace ModularAudioSharp {
-	public class ExpEnvController : NodeController<float> {
+	public class ExpEnvController : NodeController<float>, INotable {
 		/// <summary>
 		/// これより小さくなったら自動で NoteOff する。
 		/// 16 ビット量子化では 0 に等しいレベル

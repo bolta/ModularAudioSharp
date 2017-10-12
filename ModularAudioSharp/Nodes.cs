@@ -31,7 +31,7 @@ namespace ModularAudioSharp {
 		/// <typeparam name="T"></typeparam>
 		/// <param name="initValue"></param>
 		/// <returns></returns>
-		public static VarController<T> Var<T>(T initValue) where T : struct => new VarController<T>(initValue);
+		public static VarController<T> Var<T>(T initValue = default(T)) where T : struct => new VarController<T>(initValue);
 
 		public static ExpEnvController ExpEnv(float ratioPerSec, Node<NoteOperation> oper = null)
 				=> new ExpEnvController(ratioPerSec, oper);

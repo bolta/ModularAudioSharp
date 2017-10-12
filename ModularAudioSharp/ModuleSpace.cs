@@ -16,9 +16,13 @@ namespace ModularAudioSharp {
 		public static int Channels { get; } = 1;
 
 		private static IList<Node> cachingNodes = new List<Node>();
-		public static void AddCachingNode<T>(Node<T> node) where T : struct {
+		public static void AddCachingNode<T>(Node<T> node, bool updatePrior = false) where T : struct {
 			Debug.Assert(! cachingNodes.Contains(node));
-			cachingNodes.Add(node);
+			if (updatePrior) {
+				cachingNodes.Insert(0, node);
+			} else {
+				cachingNodes.Add(node);
+			}
 		}
 
 		/// <summary>
