@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="Data\NoteOperation.cs" />
     <Compile Include="Data\Tone.cs" />
+    <Compile Include="Data\Stereo.cs" />
     <Compile Include="Data\Unit.cs" />
     <Compile Include="EnumerableWaveProvider32.cs" />
     <Compile Include="ExpEnvController.cs" />

@@ -18,7 +18,7 @@ namespace ModularAudioSharp {
 		/// </summary>
 		/// <param name="value"></param>
 		/// <returns></returns>
-		public static Node<T> Const<T>(T value) where T : struct { return new Node<T>(Const_(value)); }
+		public static Node<T> Const<T>(T value) where T : struct => Node.Create(Const_(value));
 
 		private static IEnumerable<T> Const_<T>(T value) where T : struct {
 			while (true) yield return value;
@@ -42,9 +42,8 @@ namespace ModularAudioSharp {
 		/// <param name="source"></param>
 		/// <param name="amount_smp"></param>
 		/// <returns></returns>
-		public static Node<T> Delay<T>(Node<T> source, int amount_smp) where T : struct {
-			return new Node<T>(Delay(source.UseAsStream(), amount_smp));
-		}
+		public static Node<T> Delay<T>(Node<T> source, int amount_smp) where T : struct
+				=> Node.Create(Delay(source.UseAsStream(), amount_smp));
 
 		private static IEnumerable<T> Delay<T>(IEnumerable<T> source, int amount_smp) where T : struct {
 			var buffer = new T[amount_smp];
@@ -62,9 +61,8 @@ namespace ModularAudioSharp {
 		/// <param name="m"></param>
 		/// <param name="calc"></param>
 		/// <returns></returns>
-		public static Node<T> Calc<T>(Node<T> m, Func<T, T> calc) where T : struct {
-			return new Node<T>(m.UseAsStream().Select(calc));
-		}
+		public static Node<T> Calc<T>(Node<T> m, Func<T, T> calc) where T : struct
+				=> Node.Create(m.UseAsStream().Select(calc));
 
 		/// <summary>
 		/// lhs・rhs の出力に二項演算 calc を適用する
@@ -73,9 +71,8 @@ namespace ModularAudioSharp {
 		/// <param name="rhs"></param>
 		/// <param name="calc"></param>
 		/// <returns></returns>
-		public static Node<T> Calc<T>(Node<T> lhs, Node<T> rhs, Func<T, T, T> calc) where T : struct {
-			return new Node<T>(lhs.UseAsStream().Zip(rhs.UseAsStream(), calc));
-		}
+		public static Node<T> Calc<T>(Node<T> lhs, Node<T> rhs, Func<T, T, T> calc) where T : struct
+				=> Node.Create(lhs.UseAsStream().Zip(rhs.UseAsStream(), calc));
 
 		/// <summary>
 		/// 正弦波を出力するオシレータ。周波数はモジュールで与える
@@ -92,7 +89,7 @@ namespace ModularAudioSharp {
 
 		public static Node<float> Osc(Node freq, Func<float, float> func, bool crazy = false) {
 			var phaseDiffs = freq.AsFloat().UseAsStream().Select(f => (float) (2 * Math.PI * f / ModuleSpace.SampleRate));
-			return new Node<float>(Osc(phaseDiffs, func, crazy));
+			return Node.Create(Osc(phaseDiffs, func, crazy));
 		}
 
 		private static IEnumerable<float> Osc(IEnumerable<float> phaseDiffs, Func<float, float> func, bool crazy = false) {
@@ -106,15 +103,21 @@ namespace ModularAudioSharp {
 			}
 		}
 
-		public static Node<TMember> Select<TStruct, TMember>(this Node<TStruct> node, Func<TStruct, TMember> getMember)
-				where TStruct : struct
-				where TMember : struct {
-			var newStream = node.UseAsStream().Select(getMember);
-			return new Node<TMember>(newStream);
+		public static Node<float> Portamento(Node freq, float ratio)
+				=> Node.Create(Portamento(freq.AsFloat().UseAsStream(), ratio));
+
+		private static IEnumerable<float> Portamento(IEnumerable<float> freq, float ratio) {
+			float? actualFreq = null;
+
+			foreach (var f in freq) {
+				if (! actualFreq.HasValue) actualFreq = f;
+				yield return actualFreq.Value;
+
+				actualFreq = (1 - ratio) * actualFreq.Value + ratio * f;
+			}
 		}
 
-		//public static Node<float> ExpEnv(float timesBySec) {
-
-		//}
+		public static Node<Stereo<T>> ZipToStereo<T>(Node<T> left, Node<T> right) where T : struct
+				=> Node.Create(left.UseAsStream().Zip(right.UseAsStream(), Stereo.Create));
 	}
 }

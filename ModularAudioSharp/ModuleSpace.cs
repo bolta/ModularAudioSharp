@@ -13,9 +13,6 @@ namespace ModularAudioSharp {
 		// TODO 初期化手段
 		public static int SampleRate { get; } = 44101;
 
-		// ステレオ未対応のため固定
-		public static int Channels { get; } = 1;
-
 		private static IList<Node> cachingNodes = new List<Node>();
 		public static void AddCachingNode(Node node) {
 			Debug.Assert(! cachingNodes.Contains(node));
@@ -31,12 +28,12 @@ namespace ModularAudioSharp {
 		/// <summary>
 		/// 
 		/// </summary>
+		/// <typeparam name="T">float（モノラル）、Stereo&lt;float&gt;（ステレオ）のみ受け付ける。これ以外の型は実行時エラー</typeparam>
 		/// <param name="master"></param>
 		/// <returns>再生用のオブジェクトの寿命を管理するためのオブジェクト。
 		/// 再生が終わったら Dispose すること</returns>
-		public static Player Play(Node<float> master) {
-			var signal = new EnumerableWaveProvider32(MakeMasterSignal(master));
-			signal.SetWaveFormat(SampleRate, Channels);
+		public static Player Play<T>(Node<T> master) where T : struct {
+			var signal = EnumerableWaveProvider32.New(MakeMasterSignal(master));
 
 			var waveOut = new WaveOut {
 				DesiredLatency = 200,
@@ -47,7 +44,7 @@ namespace ModularAudioSharp {
 			return new Player(waveOut);
 		}
 
-		private static IEnumerable<float> MakeMasterSignal(Node<float> master) {
+		private static IEnumerable<T> MakeMasterSignal<T>(Node<T> master) where T : struct {
 			// TODO use してしまうと 2 回再生できない
 			var masterOut = master.UseAsStream();
 

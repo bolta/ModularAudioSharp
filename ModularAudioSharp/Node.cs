@@ -4,10 +4,13 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using ModularAudioSharp.Data;
 
 namespace ModularAudioSharp {
 
 	public abstract class Node {
+
+		public static Node<T> Create<T>(IEnumerable<T> signal) where T : struct => new Node<T>(signal);
 
 		// TODO ノードを一度使った状態から初期状態に戻すためのメソッドを提供する
 		// public virtual void Initialize() { }
@@ -22,11 +25,26 @@ namespace ModularAudioSharp {
 		/// </summary>
 		public string Name { get; set; } = "";
 
+
 		public Node<float> AsFloat() {
 			if (this.ValueType == typeof(float)) {
 				return (Node<float>) this;
 			} else if (this.ValueType == typeof(int)) {
-				return new Node<float>(((Node<int>) this).UseAsStream().Select(v => (float) v));
+				return Node.Create(((Node<int>) this).UseAsStream().Select(v => (float) v));
+			}
+
+			throw new InvalidCastException($"cannot convert node of type {this.ValueType} into node of float");
+		}
+
+		public Node<Stereo<float>> AsStereoFloat() {
+			if (this.ValueType == typeof(Stereo<float>)) {
+				return (Node<Stereo<float>>) this;
+			} else if (this.ValueType == typeof(Stereo<int>)) {
+				return Node.Create(((Node<Stereo<int>>) this).UseAsStream().Select(v => Stereo.Create((float) v.Left, (float) v.Right)));
+			} else if (this.ValueType == typeof(float)) {
+				return ((Node<float>) this).AsStereo();
+			} else if (this.ValueType == typeof(int)) {
+				return ((Node<int>) this).AsStereo().AsStereoFloat();
 			}
 
 			throw new InvalidCastException($"cannot convert node of type {this.ValueType} into node of float");
@@ -36,7 +54,7 @@ namespace ModularAudioSharp {
 			if (this.ValueType == typeof(int)) {
 				return (Node<int>) this;
 			} else if (this.ValueType == typeof(float)) {
-				return new Node<int>(((Node<float>) this).UseAsStream().Select(v => (int) v));
+				return Node.Create(((Node<float>) this).UseAsStream().Select(v => (int) v));
 			}
 
 			throw new InvalidCastException($"cannot convert node of type {this.ValueType} into node of int");
@@ -91,7 +109,7 @@ namespace ModularAudioSharp {
 				var lStream = ((Node<TLhs>) lhs).UseAsStream();
 				var rStream = ((Node<TRhs>) rhs).UseAsStream();
 
-				return new Node<TResult>(lStream.Zip(rStream, calc));
+				return Node.Create(lStream.Zip(rStream, calc));
 			}
 
 			return null;
@@ -179,5 +197,13 @@ namespace ModularAudioSharp {
 
 		protected override Type ValueType { get { return typeof(T); } }
 
+		public Node<TResult> Select<TResult>(Func<T, TResult> selector) where TResult : struct {
+			var newStream = this.UseAsStream().Select(selector);
+			return Node.Create(newStream);
+		}
+
+		public Node<Stereo<T>> AsStereo()
+				// TODO Stereo の Stereo は作れないようにしたい
+				=> this.Select(v => Stereo.Create(v, v));
 	}
 }

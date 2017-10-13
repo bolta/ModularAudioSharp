@@ -20,9 +20,10 @@ namespace ModularAudioTestDriver {
 			//SeqSample();
 			//			ParserSample();
 			//MmlSample();
-			WavetableSample();
+			//WavetableSample();
 
 			//NoteSample();
+			StereoSample();
 #elif true
 			{
 				var tempo = Nodes.Const(120f);
@@ -271,6 +272,66 @@ namespace ModularAudioTestDriver {
 			var master = (Node) osc * 0.125f;
 
 			using (ModuleSpace.Play(master.AsFloat())) Console.ReadKey(); // Thread.Sleep(10000);
+
+		}
+
+		private static void StereoSample() {
+			var ticksPerBeat = 96;
+
+			var toneL = Var<Tone>();
+			var freqL = Temperament.Equal(toneL);
+			var envL = ExpEnv(1 / 16f);
+
+			var toneR = Var<Tone>();
+			var freqR = Temperament.Equal(toneR);
+			var envR = ExpEnv(1 / 16f);
+
+			var waveform = new Waveform(
+					// 100 smp/s = 441 Hz の矩形波
+					Enumerable.Repeat(1f, 50).Concat(Enumerable.Repeat(-1f, 50)).ToList(),
+					44100);
+			var oscL = new WaveformPlayer(waveform, 441, freqL, loopOffset: 0);
+			var oscR = new WaveformPlayer(waveform, 441, freqR, loopOffset: 0);
+			//var oscL = SquareOsc(freqL);
+			//var oscR = SquareOsc(freqR);
+
+			var parser = new SimpleMmlParser();
+			var mmlL = @"o3L4
+					ce>ce>ce>ce>c<ec<ec<ec<e<a>ca>ca>ca>cac<ac<ac<ac
+					ce>ce>ce>ce>c<ec<ec<ec<e<a>ca>ca>ca>cac<ac<ac<ac
+					<a>fa>fa>fa>faf<af<af<af<b>gb>gb>gb>gbg<bg<bg<bg
+					<a->e-a->e-a->e-a->e-a-e-<a-e-<a-e-<a-e-<b->fb->fb->fb->fb-f<b-f<b-f<b-f
+					c1
+";
+			var mmlR = @"o3L4c8
+					dg>dg>dg>dggd<gd<gd<gd<b>eb>eb>eb>ee<be<be<be<b
+					>dg>dg>dg>dggd<gd<gd<gd<b>eb>eb>eb>ee<be<be<be<b
+					>cg>cg>cg>cggc<gc<gc<gcda>da>da>daad<ad<ad<ad
+					cg>cg>cg>cggc<gc<gc<gcda>da>da>daad<ad<ad<ad8
+					e1
+";
+
+			var instrsL = new SimpleMmlInstructionGenerator()
+					.AddToneUsers(toneL)
+					.AddNoteUsers(oscL, envL)
+					.GenerateInstructions(parser.Parse(mmlL), ticksPerBeat).ToList();
+
+			var instrsR = new SimpleMmlInstructionGenerator()
+					.AddToneUsers(toneR)
+					.AddNoteUsers(oscR, envR)
+					.GenerateInstructions(parser.Parse(mmlR), ticksPerBeat).ToList();
+
+			var tick = new Tick(156, ticksPerBeat);
+
+			var seqL = new Sequencer(tick, new SequenceThread(instrsL));
+			var seqR = new Sequencer(tick, new SequenceThread(instrsR));
+
+			// TODO キャストが多すぎてうんざり
+			var master = ZipToStereo(
+					(Node<float>)((Node) oscL * envL * 0.125f),
+					(Node<float>)((Node) oscR * envR * 0.125f));
+
+			using (ModuleSpace.Play(master.AsStereoFloat())) Console.ReadKey();
 
 		}
 	}
