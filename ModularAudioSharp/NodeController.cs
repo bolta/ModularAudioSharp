@@ -17,5 +17,12 @@ namespace ModularAudioSharp {
 		protected abstract IEnumerable<T> Signal();
 
 		public static implicit operator Node<T>(NodeController<T> ctrl) => ctrl.Node;
+
+		// 二項演算の一方が Node ならもう一方も Node に変換されるが、
+		// 両方 NodeController だとだめなのでこちらでも演算子を定義する
+		public static Node operator +(NodeController<T> lhs, NodeController<T> rhs) => lhs.Node + rhs.Node;
+		public static Node operator -(NodeController<T> lhs, NodeController<T> rhs) => lhs.Node - rhs.Node;
+		public static Node operator *(NodeController<T> lhs, NodeController<T> rhs) => lhs.Node * rhs.Node;
+		public static Node operator /(NodeController<T> lhs, NodeController<T> rhs) => lhs.Node / rhs.Node;
 	}
 }

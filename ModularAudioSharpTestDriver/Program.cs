@@ -326,10 +326,9 @@ namespace ModularAudioTestDriver {
 			var seqL = new Sequencer(tick, new SequenceThread(instrsL));
 			var seqR = new Sequencer(tick, new SequenceThread(instrsR));
 
-			// TODO キャストが多すぎてうんざり
 			var master = ZipToStereo(
-					(Node<float>)((Node) oscL * envL * 0.125f),
-					(Node<float>)((Node) oscR * envR * 0.125f));
+					(oscL * envL * 0.125f).AsFloat(),
+					(oscR * envR * 0.125f).AsFloat());
 
 			using (ModuleSpace.Play(master.AsStereoFloat())) Console.ReadKey();
 
