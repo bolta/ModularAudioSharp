@@ -33,6 +33,16 @@ namespace ModularAudioSharp.Mml {
 		public Length Length { get; set; } // optional
 		public override string ToString() => $"{this.ToneName}{this.Length?.ToString() ?? ""}";
 	}
+	public class LoopStatement : Statement {
+		/// <summary>
+		/// 有効な値は有限ループ、null は無限ループを表す
+		/// （MML では無限ループを [0 ... ] と書き、[ ... ] は [2 ... ] であることに注意）
+		/// </summary>
+		public uint? Times { get; set; }
+		public IEnumerable<Statement> Content { get; set; }
+		public override string ToString() => $"[{this.Times ?? 0} {this.Content.Select(s => s.ToString())}]";
+    }
+
 	public class ToneName /*: AstNode*/ {
 		/// <summary>
 		/// 調号を含まない名前。大文字

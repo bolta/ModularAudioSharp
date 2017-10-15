@@ -16,6 +16,13 @@ namespace ModularAudioSharp.Mml {
 			SParse.Regex(@"[+-]?[0-9]+").Text().Select(Convert.ToInt32);
 
 		/// <summary>
+		/// 整数値。正負の符号をつけることができる
+		/// 例：42, +42, -42
+		/// </summary>
+		public readonly static Parser<uint> unsignedInteger =
+			SParse.Regex(@"[0-9]+").Text().Select(Convert.ToUInt32);
+
+		/// <summary>
 		/// 音長の要素。
 		/// タイを使わず、数値（省略可能）と、0 個以上の付点を続けたもの
 		/// 例：（空）, 16, 4..., .
@@ -102,6 +109,14 @@ namespace ModularAudioSharp.Mml {
 																	   from l in length
 																	   select new ToneStatement { ToneName = t, Length = l };
 
+		public readonly static Parser<LoopStatement> loopStatement
+				= from _ in SParse.String("[").Text().Token()
+				  from t in unsignedInteger.Token().Optional()
+				  from c in statement.Token().Many()
+				  from __ in SParse.String("]")
+				  let tn = ToNullable(t) ?? 2
+				  select new LoopStatement { Times = tn == 0 ? null : (uint?) tn, Content = c };
+
 		/// <summary>
 		/// 任意の文
 		/// </summary>
@@ -110,7 +125,9 @@ namespace ModularAudioSharp.Mml {
 				.Or(octaveIncrStatement)
 				.Or(octaveDecrStatement)
 				.Or(lengthStatement)
-				.Or(toneStatement);
+				.Or(toneStatement)
+				.Or(loopStatement)
+				;
 
 		/// <summary>
 		/// MML 全体。文を任意個並べたもの

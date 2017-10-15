@@ -12,23 +12,19 @@ namespace ModularAudioSharp.Mml {
 		public virtual void Visit(OctaveDecrStatement visitee) { }
 		public virtual void Visit(LengthStatement visitee) { }
 		public virtual void Visit(ToneStatement visitee) { }
+		public virtual void Visit(LoopStatement visitee) { }
 	}
 
 	public static class AstVisitorExtensions {
 		public static void Accept(this CompilationUnit visitee, AstVisitor visitor) => visitor.Visit(visitee);
 		public static void Accept(this Statement visitee, AstVisitor visitor) {
-			//{
-			//	var concrete = visitee as OctaveStatement;
-			//	if (concrete != null) {
-			//		visitor.Visit(concrete);
-			//		return;
-			//	}
-			//}
 			var visited = TryVisitConcreteStatement<OctaveStatement>(visitee, c => visitor.Visit(c))
 					|| TryVisitConcreteStatement<OctaveIncrStatement>(visitee, c => visitor.Visit(c))
 					|| TryVisitConcreteStatement<OctaveDecrStatement>(visitee, c => visitor.Visit(c))
 					|| TryVisitConcreteStatement<LengthStatement>(visitee, c => visitor.Visit(c))
-					|| TryVisitConcreteStatement<ToneStatement>(visitee, c => visitor.Visit(c));
+					|| TryVisitConcreteStatement<ToneStatement>(visitee, c => visitor.Visit(c))
+					|| TryVisitConcreteStatement<LoopStatement>(visitee, c => visitor.Visit(c))
+					;
 
 			if (! visited) throw new Exception($"unknown Statement type: {visitee.GetType()}");
 		}
