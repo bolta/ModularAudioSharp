@@ -101,13 +101,18 @@ namespace ModularAudioSharp.Mml {
 																		   from l in integer.Token()
 																		   select new LengthStatement { Value = l };
 		/// <summary>
-		/// 音高を指定して発音する。
+		/// 音高・音長を指定して発音する。
 		/// 音長は省略できる（音長の定義が空の音長を許容するため）
 		/// 例：c, d+4, e--^.
 		/// </summary>
 		public readonly static Parser<ToneStatement> toneStatement = from t in toneName
 																	   from l in length
 																	   select new ToneStatement { ToneName = t, Length = l };
+
+		public readonly static Parser<RestStatement> restStatement
+				= from _ in SParse.String("r").Text().Token()
+				  from l in length
+				  select new RestStatement { Length = l };
 
 		public readonly static Parser<LoopStatement> loopStatement
 				= from _ in SParse.String("[").Text().Token()
@@ -126,6 +131,7 @@ namespace ModularAudioSharp.Mml {
 				.Or(octaveDecrStatement)
 				.Or(lengthStatement)
 				.Or(toneStatement)
+				.Or(restStatement)
 				.Or(loopStatement)
 				;
 

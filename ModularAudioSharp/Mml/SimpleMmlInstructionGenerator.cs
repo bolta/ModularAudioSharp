@@ -78,6 +78,11 @@ namespace ModularAudioSharp.Mml {
 				}
 			}
 
+			public override void Visit(RestStatement visitee) {
+				var ticks = CalcTicksFromLength(visitee.Length, this.tickPerBar, this.length);
+				this.result.Add(new WaitInstruction(ticks));
+			}
+
 			public override void Visit(LoopStatement visitee) {
 				if (visitee.Times.HasValue) {
 					// とりあえず有限ループは展開する実装とする。メモリ効率的に問題があればループのまま演奏する実装を検討する

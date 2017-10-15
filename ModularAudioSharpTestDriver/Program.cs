@@ -306,7 +306,7 @@ namespace ModularAudioTestDriver {
 					]
 					c1
 ";
-			var mmlR = @"o3L4c8
+			var mmlR = @"o3L4r8
 					[0
 						dg>dg>dg>dggd<gd<gd<gd<b>eb>eb>eb>ee<be<be<be<b
 						>dg>dg>dg>dggd<gd<gd<gd<b>eb>eb>eb>ee<be<be<be<b

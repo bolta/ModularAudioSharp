@@ -33,6 +33,10 @@ namespace ModularAudioSharp.Mml {
 		public Length Length { get; set; } // optional
 		public override string ToString() => $"{this.ToneName}{this.Length?.ToString() ?? ""}";
 	}
+	public class RestStatement : Statement {
+		public Length Length { get; set; } // optional
+		public override string ToString() => $"r{this.Length?.ToString() ?? ""}";
+	}
 	public class LoopStatement : Statement {
 		/// <summary>
 		/// 有効な値は有限ループ、null は無限ループを表す

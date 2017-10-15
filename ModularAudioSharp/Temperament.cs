@@ -27,7 +27,15 @@ namespace ModularAudioSharp {
 		}
 
 		private static IEnumerable<float> Equal(IEnumerable<Tone> tone, float a4) {
-			return tone.Select(t => (float) (a4 * Math.Pow(2, t.Octave - 4 + (TONE_NAME_TO_SEMITONE[t.ToneName] + t.Accidental) / 12.0)));
+			return tone.Select(t => {
+				var baseSemitone = TONE_NAME_TO_SEMITONE.TryGetStructValue(t.ToneName);
+				if (baseSemitone.HasValue) {
+					return (float) (a4 * Math.Pow(2, t.Octave - 4 + (baseSemitone.Value + t.Accidental) / 12.0));
+
+				} else {
+					return 0f;
+				}
+			});
 		}
 	}
 }
