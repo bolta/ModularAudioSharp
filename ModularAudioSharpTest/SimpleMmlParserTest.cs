@@ -51,7 +51,7 @@ namespace ModularAudioSharp.Mml {
 				try {
 					var result = rule.Parse("*42");
 					Assert.Fail("there must occur an exception");
-				} catch (ParseException e) {
+				} catch (ParseException) {
 					Assert.IsTrue(true);
 				}
 			}
@@ -59,7 +59,7 @@ namespace ModularAudioSharp.Mml {
 				try {
 					var result = rule.Parse("42*");
 					Assert.Fail("there must occur an exception");
-				} catch (ParseException e) {
+				} catch (ParseException) {
 					Assert.IsTrue(true);
 				}
 			}
