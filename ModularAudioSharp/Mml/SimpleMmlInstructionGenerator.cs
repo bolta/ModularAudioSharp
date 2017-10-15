@@ -79,15 +79,15 @@ namespace ModularAudioSharp.Mml {
 			}
 
 			public override void Visit(LoopStatement visitee) {
-				// TODO 無限の場合
-
 				if (visitee.Times.HasValue) {
 					// とりあえず有限ループは展開する実装とする。メモリ効率的に問題があればループのまま演奏する実装を検討する
 					for (int i=0 ; i<visitee.Times.Value ; ++i) {
 						foreach (var child in visitee.Content) child.Accept(this);
 					}
 				} else {
-					throw new NotImplementedException();
+					var start = this.result.Count;
+					foreach (var child in visitee.Content) child.Accept(this);
+					this.result.Add(new JumpInstruction(start));
 				}
 			}
 

@@ -297,7 +297,7 @@ namespace ModularAudioTestDriver {
 
 			var parser = new SimpleMmlParser();
 			var mmlL = @"o3L4
-					[2
+					[0
 						[
 							[4 ce>][4 c<e]<[4 a>c][4 ac<]>
 						]
@@ -306,13 +306,12 @@ namespace ModularAudioTestDriver {
 					]
 					c1
 ";
-			var mmlR = @"o3L4
-					[2
-						c8
+			var mmlR = @"o3L4c8
+					[0
 						dg>dg>dg>dggd<gd<gd<gd<b>eb>eb>eb>ee<be<be<be<b
 						>dg>dg>dg>dggd<gd<gd<gd<b>eb>eb>eb>ee<be<be<be<b
 						>cg>cg>cg>cggc<gc<gc<gcda>da>da>daad<ad<ad<ad
-						cg>cg>cg>cggc<gc<gc<gcda>da>da>daad<ad<ad<ad8
+						cg>cg>cg>cggc<gc<gc<gcda>da>da>daad<ad<ad<ad
 					]
 					e1
 ";
