@@ -31,5 +31,38 @@ namespace ModularAudioSharp.Mml {
 				Assert.AreEqual(3, result.Dots);
 			}
 		}
+
+		[TestMethod]
+		public void TestNumber() {
+			var rule = integer.End();
+			{
+				var result = rule.Parse("42");
+				Assert.AreEqual(42, result);
+			}
+			{
+				var result = rule.Parse("+42");
+				Assert.AreEqual(42, result);
+			}
+			{
+				var result = rule.Parse("-42");
+				Assert.AreEqual(-42, result);
+			}
+			{
+				try {
+					var result = rule.Parse("*42");
+					Assert.Fail("there must occur an exception");
+				} catch (ParseException e) {
+					Assert.IsTrue(true);
+				}
+			}
+			{
+				try {
+					var result = rule.Parse("42*");
+					Assert.Fail("there must occur an exception");
+				} catch (ParseException e) {
+					Assert.IsTrue(true);
+				}
+			}
+		}
 	}
 }
