@@ -8,8 +8,12 @@ namespace ModularAudioSharp {
 	public abstract class NodeController<T> where T : struct {
 		private readonly Node<T> node;
 
-		protected NodeController() {
-			this.node = new Node<T>(this.Signal());
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="omitUpdate">各サンプルの Update() が不要かどうか</param>
+		protected NodeController(bool omitUpdate = false) {
+			this.node = new Node<T>(this.Signal(), omitUpdate);
 		}
 
 		public Node<T> Node => this.node;

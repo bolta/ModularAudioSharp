@@ -14,11 +14,10 @@ namespace ModularAudioSharp {
 
 		/// <summary>
 		/// 定数を表すノード。
-		/// TODO Update 不要なので、その旨 ModuleSpace へ通知するように
 		/// </summary>
 		/// <param name="value"></param>
 		/// <returns></returns>
-		public static Node<T> Const<T>(T value) where T : struct => Node.Create(Const_(value));
+		public static Node<T> Const<T>(T value) where T : struct => Node.Create(Const_(value), true);
 
 		private static IEnumerable<T> Const_<T>(T value) where T : struct {
 			while (true) yield return value;
@@ -100,6 +99,51 @@ namespace ModularAudioSharp {
 				phase = phase + dp;
 				// 2π で余りをとらないと位相がどんどん大きくなり、演算誤差で音程が不安定になる。これはこれで面白い
 				if (! crazy) phase %= twoPi;
+			}
+		}
+
+		public static Node<float> Lpf(Node<float> input, Node<float> cutoffFreq, Node<float> q) {
+			var w0 = (2 * (float) Math.PI * cutoffFreq / ModuleSpace.SampleRate).AsFloat();
+			var cosw0 = w0.Select(w => (float) Math.Cos(w));
+			var sinw0 = w0.Select(w => (float) Math.Sin(w));
+			var alpha = sinw0 / (2 * q);
+
+			var b0 = (1 - cosw0) / 2;
+			var b1 = 1 - cosw0;
+			var b2 = (1 - cosw0) / 2;
+			var a0 = 1 + alpha;
+			var a1 = -2 * cosw0;
+			var a2 = 1 - alpha;
+
+			return BiQuadFilter(input, b0.AsFloat(), b1.AsFloat(), b2.AsFloat(), a0.AsFloat(), a1.AsFloat(), a2.AsFloat());
+		}
+
+		public static Node<float> BiQuadFilter(Node<float> input,
+				Node<float> b0, Node<float> b1, Node<float> b2,
+				Node<float> a0, Node<float> a1, Node<float> a2)
+				=> Node.Create(BiQuadFilter_(input.UseAsStream(),
+						b0.UseAsStream(), b1.UseAsStream(), b2.UseAsStream(),
+						a0.UseAsStream(), a1.UseAsStream(), a2.UseAsStream()));
+
+		private static IEnumerable<float> BiQuadFilter_(IEnumerable<float> input,
+				IEnumerable<float> b0, IEnumerable<float> b1, IEnumerable<float> b2,
+				IEnumerable<float> a0, IEnumerable<float> a1, IEnumerable<float> a2) {
+			var inDelay = new DelayBuffer<float>(2);
+			var outDelay = new DelayBuffer<float>(2);
+
+			foreach (var values in input.Zip(b0, b1, b2, a0, a1, a2, Tuple.Create)) {
+				var inValue = values.Item1;
+				var b0_ = values.Item2;
+				var b1_ = values.Item3;
+				var b2_ = values.Item4;
+				var a0_ = values.Item5;
+				var a1_ = values.Item6;
+				var a2_ = values.Item7;
+				var outValue = (b0_*inValue + b1_*inDelay[0] + b2_*inDelay[-1] - a1_*outDelay[0] - a2_*outDelay[-1]) / a0_;
+				inDelay.Push(inValue);
+				outDelay.Push(outValue);
+
+				yield return outValue;
 			}
 		}
 

@@ -8,8 +8,12 @@ namespace ModularAudioSharp {
 	public class VarController<T> : NodeController<T> where T : struct {
 
 		private T value;
-		public VarController(T initValue) { this.value = initValue; }
-		public void Set(T value) => this.value = value;
+		public VarController(T initValue) : base(true) { this.value = initValue; }
+		public void Set(T value) {
+			this.value = value;
+			// 値が設定されたときだけ更新が必要。普段は不要
+			this.Node.Update();
+		}
 		protected override IEnumerable<T> Signal() { while (true) yield return this.value; }
 	}
 }

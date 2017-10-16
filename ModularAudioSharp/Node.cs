@@ -10,7 +10,13 @@ namespace ModularAudioSharp {
 
 	public abstract class Node {
 
-		public static Node<T> Create<T>(IEnumerable<T> signal) where T : struct => new Node<T>(signal);
+		/// <summary>
+		/// 全体で Update() が呼ばれた回数。パフォーマンスチューニング用
+		/// </summary>
+		public static int TimesUpdated { get; set; } = 0;
+
+		public static Node<T> Create<T>(IEnumerable<T> signal, bool omitUpdate = false) where T : struct
+				=> new Node<T>(signal, omitUpdate);
 
 		// TODO ノードを一度使った状態から初期状態に戻すためのメソッドを提供する
 		// public virtual void Initialize() { }
@@ -126,17 +132,19 @@ namespace ModularAudioSharp {
 
 		//public static implicit operator Node<T>(NodeController<T> ctrl) => ctrl.Node;
 
-		private IEnumerator<T> signal;
+		private readonly IEnumerator<T> signal;
+		private readonly bool omitUpdate;
 		private T current;
 
 		/// <summary>
 		/// このモジュールの出力を何個所で使っているか。
-		/// 今のところ 0 から 1 になったときに更新セットに追加するだsけ
+		/// 今のところ 0 から 1 になったときに更新セットに追加するだけ
 		/// </summary>
 		private int userCount = 0;
 
-		public Node(IEnumerable<T> signal) {
+		public Node(IEnumerable<T> signal, bool omitUpdate = false) {
 			this.signal = signal.GetEnumerator();
+			this.omitUpdate = omitUpdate;
 		}
 
 		/// <summary>
@@ -151,7 +159,12 @@ namespace ModularAudioSharp {
 		/// <returns></returns>
 		public Out Use() {
 			if (this.userCount == 0) {
-				ModuleSpace.AddCachingNode(this);
+				if (this.omitUpdate) {
+					// 一度も Update しないと値が出力されないので、ここで一度だけ
+					this.Update();
+				} else {
+					ModuleSpace.AddCachingNode(this);
+				}
 			}
 			++ this.userCount;
 			return new Out(this);
@@ -177,6 +190,7 @@ namespace ModularAudioSharp {
 		}
 
 		public override void Update() {
+			++ Node.TimesUpdated;
 			if (this.signal.MoveNext()) {
 				this.current = this.signal.Current;
 			} else {

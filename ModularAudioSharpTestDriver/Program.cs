@@ -332,11 +332,16 @@ namespace ModularAudioTestDriver {
 			var seqR = new Sequencer(tick, new SequenceThread(instrsR));
 
 			var master = ZipToStereo(
-					(oscL * envL * 0.125f).AsFloat(),
+					(Lpf(oscL, Const(1760f), Const(9999f)) * envL * 0.125f).AsFloat(),
 					(oscR * envR * 0.125f).AsFloat());
+//					(Lpf(oscL, Const(4000f), Const(3f)) * envL * 0.125f).AsFloat(),
 
-			using (ModuleSpace.Play(master.AsStereoFloat())) Console.ReadKey();
-
+			using (ModuleSpace.Play(master.AsStereoFloat())) {
+				Thread.Sleep(10000);
+//Console.ReadKey();
+			}
+			Console.WriteLine(Node.TimesUpdated);
+			Console.ReadKey();
 		}
 	}
 }
