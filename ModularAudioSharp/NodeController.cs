@@ -11,9 +11,9 @@ namespace ModularAudioSharp {
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <param name="omitUpdate">各サンプルの Update() が不要かどうか</param>
-		protected NodeController(bool omitUpdate = false) {
-			this.node = new Node<T>(this.Signal(), omitUpdate);
+		/// <param name="intrinsicallyActive">ノードが本質的に能動的かどうか</param>
+		protected NodeController(bool intrinsicallyActive = false) {
+			this.node = new Node<T>(this.Signal(), intrinsicallyActive);
 		}
 
 		public Node<T> Node => this.node;

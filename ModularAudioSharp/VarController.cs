@@ -8,7 +8,7 @@ namespace ModularAudioSharp {
 	public class VarController<T> : NodeController<T> where T : struct {
 
 		private T value;
-		public VarController(T initValue) : base(true) { this.value = initValue; }
+		public VarController(T initValue) : base(false) { this.value = initValue; }
 		public void Set(T value) {
 			this.value = value;
 			// 値が設定されたときだけ更新が必要。普段は不要

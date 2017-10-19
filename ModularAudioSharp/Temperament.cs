@@ -23,7 +23,7 @@ namespace ModularAudioSharp {
 		};
 
 		public static Node<float> Equal(Node tone, float a4 = 440) {
-			return new Node<float>(Equal(((Node<Tone>) tone).UseAsStream(), a4));
+			return new Node<float>(Equal(((Node<Tone>) tone).UseAsStream(), a4), false, tone);
 		}
 
 		private static IEnumerable<float> Equal(IEnumerable<Tone> tone, float a4) {

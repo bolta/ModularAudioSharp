@@ -29,24 +29,17 @@ namespace ModularAudioSharp {
 		private float ratioPerSample;
 
 		/// <summary>
-		/// note on/off 入力
-		/// </summary>
-		private readonly IEnumerable<NoteOperation> notes;
-
-		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="ratioPerSec">1 秒ごとの減衰率</param>
-		public ExpEnvController(float ratioPerSec, Node<NoteOperation> notes = null) {
+		public ExpEnvController(float ratioPerSec)
+			: base(true)
+		{
 			this.RatioPerSec = ratioPerSec;
-			this.notes = (notes ?? Nodes.Const(NoteOperation.None)).UseAsStream();
 		}
 
 		protected override IEnumerable<float> Signal() {
-			foreach (var op in this.notes) {
-				if (op == NoteOperation.NoteOn) this.NoteOn();
-				else if (op == NoteOperation.NoteOff) this.NoteOff();
-
+			while (true) {
 				yield return this.amplitude;
 
 				if (this.state == State.Idle) continue;

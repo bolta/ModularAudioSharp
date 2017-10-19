@@ -34,7 +34,7 @@ namespace ModularAudioSharp.Waveform {
 		/// <param name="endOffset"></param>
 		/// <param name="loopOffset"></param>
 		public WaveformPlayer(Waveform waveform, float masterFreq, Node<float> freq,
-				int startOffset = 0, int? endOffset = null, int? loopOffset = null) {
+				int startOffset = 0, int? endOffset = null, int? loopOffset = null) : base(true) {
 			this.waveform = waveform;
 			this.masterFreq = masterFreq;
 			this.freq = freq.UseAsStream();

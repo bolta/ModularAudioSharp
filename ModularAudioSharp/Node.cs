@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -8,20 +9,123 @@ using ModularAudioSharp.Data;
 
 namespace ModularAudioSharp {
 
+	/// <summary>
+	/// 相互に接続し、サンプル単位で波形を生成するオブジェクトのクラス。
+	/// 
+	/// ノードには「能動的」なものと「受動的」なものがある。
+	/// 能動的なノードには、さらに「本質的に」能動的なものと「非本質的に」（用語検討）能動的なものがある。
+	///
+	/// 本質的に能動的、とは、内部状態を持ち、自発的に変化を起こすこと。つまり次のいずれかに該当すること：
+	/// 　・オシレータなど、自ら内部状態（位相）を変化させて波形を生成する
+	/// 　・フィルタやディレイなど、バッファを持ち、入力が必ずしも変化しなくても出力を変化させる
+	/// つまり、「時間の概念を持った」ノードであること、ともいえる。
+	/// こういったノードは毎サンプルで必ず Update を行い、連続的な出力を生成してやる必要がある。
+	///
+	/// 非本質的に能動的とは、それ自体は状態を持たないが、
+	/// 本質的に能動的なノードに直接・間接に依存するために毎サンプルの更新が必要になること。
+	/// たとえば SinOsc(freq) * 0.5 + 0.25 のかけ算・足し算ノードがそれに当たる。
+	/// 本質的には受動的だが、更新処理の都合により能動扱いされているノード、ともいえる。
+	/// （本質的かどうかによらず）能動的なノードの更新処理は ModuleSpace から一元的に行われる。
+	///
+	/// 受動的なノードは、上記のいずれにも該当しないもの、つまり、それ自体状態を持たず、
+	/// 能動的なノードに依存もしていないノードをいう。
+	/// 定数や変数のノードや、それらのみの四則演算を行うノードなどは受動的である。
+	/// 受動的なノードは、それが依存するノードの出力が更新されたときだけ更新すれば十分である。
+	/// 受動的なノードの更新は、依存されるノードから依存するノードに向かう順で再帰的に行われる。
+	/// </summary>
 	public abstract class Node {
+
+		/// <summary>
+		/// Active のバッキングフィールド
+		/// </summary>
+		private readonly bool active;
+
+		/// <summary>
+		/// このノードが（本質的かどうかによらず）能動的かどうか
+		/// </summary>
+		internal bool Active => this.active;
+
+		/// <summary>
+		/// 依存ノード（このノードの出力を使う、能動的でないノード）のセット。
+		/// このノードの状態を更新する際は、ついでにこれらの状態も更新する。
+		/// 能動的なノードはここから更新しなくても更新されるので含めない
+		/// </summary>
+		private readonly List<Node> dependents = new List<Node>();
+
+		/// <summary>
+		/// 依存ノードのセット。能動的なノードは追加しない
+		/// </summary>
+		/// <param name="dependent"></param>
+		internal void AddDependent(Node dependent) {
+			if (dependent.Active) {
+				Debug.Assert(false);
+				return;
+			}
+
+			this.dependents.Add(dependent);
+		}
+
+		/// <summary>
+		/// 次に作ったノードに振られる通し番号
+		/// </summary>
+		private static int nextNodeId = 0;
+
+		/// <summary>
+		/// ノードを作った順に振られる通し番号。デバッグ用
+		/// </summary>
+		private readonly int nodeId;
+
+		/// <summary>
+		/// ノードを識別する手がかりとなる文字列。デバッグ用
+		/// </summary>
+		private readonly string nodeTag;
+
+		protected Node(bool active) {
+			this.active = active;
+
+			// 以下はデバッグ用の情報。タグの付け方はあまりうまくないため検討の余地あり
+			this.nodeId = nextNodeId;
+			++ nextNodeId;
+			var m = new StackFrame(3).GetMethod();
+			this.nodeTag = $"{m.DeclaringType}.{m.Name}";
+		}
 
 		/// <summary>
 		/// 全体で Update() が呼ばれた回数。パフォーマンスチューニング用
 		/// </summary>
 		public static int TimesUpdated { get; set; } = 0;
 
-		public static Node<T> Create<T>(IEnumerable<T> signal, bool omitUpdate = false) where T : struct
-				=> new Node<T>(signal, omitUpdate);
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="signal"></param>
+		/// <param name="intrinsicallyActive"></param>
+		/// <param name="dependencies"></param>
+		/// <returns></returns>
+		public static Node<T> Create<T>(IEnumerable<T> signal, bool intrinsicallyActive,
+				params Node[] dependencies) where T : struct
+				=> new Node<T>(signal, intrinsicallyActive, dependencies);
 
 		// TODO ノードを一度使った状態から初期状態に戻すためのメソッドを提供する
 		// public virtual void Initialize() { }
 
-		public abstract void Update();
+		/// <summary>
+		/// このノードの内部状態を更新する。
+		/// その後、このノードに依存する受動的ノードの内部状態を再帰的に更新する
+		/// </summary>
+		public void Update() {
+			this.UpdateInner();
+			// for の方がわずかに速いというので…
+			// http://ftvoid.com/blog/post/291
+			var depCount = this.dependents.Count;
+			for (var i = 0 ; i < depCount ; ++i) this.dependents[i].Update();
+		}
+
+		/// <summary>
+		/// このノードのみの内部状態を更新する
+		/// </summary>
+		protected abstract void UpdateInner();
 
 		public static implicit operator Node(float value) => Nodes.Const(value);
 		public static implicit operator Node(int value) => Nodes.Const(value);
@@ -36,7 +140,7 @@ namespace ModularAudioSharp {
 			if (this.ValueType == typeof(float)) {
 				return (Node<float>) this;
 			} else if (this.ValueType == typeof(int)) {
-				return Node.Create(((Node<int>) this).UseAsStream().Select(v => (float) v));
+				return Node.Create(((Node<int>) this).UseAsStream().Select(v => (float) v), false, this);
 			}
 
 			throw new InvalidCastException($"cannot convert node of type {this.ValueType} into node of float");
@@ -46,7 +150,7 @@ namespace ModularAudioSharp {
 			if (this.ValueType == typeof(Stereo<float>)) {
 				return (Node<Stereo<float>>) this;
 			} else if (this.ValueType == typeof(Stereo<int>)) {
-				return Node.Create(((Node<Stereo<int>>) this).UseAsStream().Select(v => Stereo.Create((float) v.Left, (float) v.Right)));
+				return Node.Create(((Node<Stereo<int>>) this).UseAsStream().Select(v => Stereo.Create((float) v.Left, (float) v.Right)), false, this);
 			} else if (this.ValueType == typeof(float)) {
 				return ((Node<float>) this).AsStereo();
 			} else if (this.ValueType == typeof(int)) {
@@ -60,7 +164,7 @@ namespace ModularAudioSharp {
 			if (this.ValueType == typeof(int)) {
 				return (Node<int>) this;
 			} else if (this.ValueType == typeof(float)) {
-				return Node.Create(((Node<float>) this).UseAsStream().Select(v => (int) v));
+				return Node.Create(((Node<float>) this).UseAsStream().Select(v => (int) v), false, this);
 			}
 
 			throw new InvalidCastException($"cannot convert node of type {this.ValueType} into node of int");
@@ -115,7 +219,7 @@ namespace ModularAudioSharp {
 				var lStream = ((Node<TLhs>) lhs).UseAsStream();
 				var rStream = ((Node<TRhs>) rhs).UseAsStream();
 
-				return Node.Create(lStream.Zip(rStream, calc));
+				return Node.Create(lStream.Zip(rStream, calc), false, lhs, rhs);
 			}
 
 			return null;
@@ -133,7 +237,7 @@ namespace ModularAudioSharp {
 		//public static implicit operator Node<T>(NodeController<T> ctrl) => ctrl.Node;
 
 		private readonly IEnumerator<T> signal;
-		private readonly bool omitUpdate;
+		//private readonly bool omitUpdate;
 		private T current;
 
 		/// <summary>
@@ -142,9 +246,13 @@ namespace ModularAudioSharp {
 		/// </summary>
 		private int userCount = 0;
 
-		public Node(IEnumerable<T> signal, bool omitUpdate = false) {
+		public Node(IEnumerable<T> signal, bool intrinsicallyActive, params Node[] dependencies)
+			: base(intrinsicallyActive || dependencies.Any(d => d.Active))
+		{
 			this.signal = signal.GetEnumerator();
-			this.omitUpdate = omitUpdate;
+			if (! this.Active) {
+				foreach (var d in dependencies) d.AddDependent(this);
+			}
 		}
 
 		/// <summary>
@@ -159,11 +267,11 @@ namespace ModularAudioSharp {
 		/// <returns></returns>
 		public Out Use() {
 			if (this.userCount == 0) {
-				if (this.omitUpdate) {
+				if (this.Active) {
+					ModuleSpace.AddCachingNode(this);
+				} else {
 					// 一度も Update しないと値が出力されないので、ここで一度だけ
 					this.Update();
-				} else {
-					ModuleSpace.AddCachingNode(this);
 				}
 			}
 			++ this.userCount;
@@ -189,7 +297,7 @@ namespace ModularAudioSharp {
 			}
 		}
 
-		public override void Update() {
+		protected override void UpdateInner() {
 			++ Node.TimesUpdated;
 			if (this.signal.MoveNext()) {
 				this.current = this.signal.Current;
@@ -213,7 +321,7 @@ namespace ModularAudioSharp {
 
 		public Node<TResult> Select<TResult>(Func<T, TResult> selector) where TResult : struct {
 			var newStream = this.UseAsStream().Select(selector);
-			return Node.Create(newStream);
+			return Node.Create(newStream, false, this);
 		}
 
 		public Node<Stereo<T>> AsStereo()
