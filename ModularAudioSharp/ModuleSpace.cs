@@ -11,7 +11,7 @@ namespace ModularAudioSharp {
 	public static class ModuleSpace {
 
 		// TODO 初期化手段
-		public static int SampleRate { get; } = 44101;
+		public static int SampleRate { get; } = 44100;
 
 		private static IList<Node> cachingNodes = new List<Node>();
 		public static void AddCachingNode(Node node) {
