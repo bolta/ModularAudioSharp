@@ -14,7 +14,7 @@ namespace ModularAudioSharp.Waveform {
 
 		public static Waveform Read(Stream stream) {
 			var riffHeader = stream.ReadBytesAsString(4);
-			stream.Position += 4;
+			stream.Position += 4; // RIFF チャンクのサイズは使わない
 			var riffType = stream.ReadBytesAsString(4);
 			if (riffHeader != "RIFF" || riffType != "WAVE") throw new IOException("not a wav file");
 
@@ -39,7 +39,7 @@ namespace ModularAudioSharp.Waveform {
 			var channels = stream.ReadUShortLE();
 			if (channels > 2) throw new IOException($"too many channels: {channels}");
 			var sampleRate = (int) stream.ReadUIntLE();
-			stream.Position += 6; // データ速度、ブロックサイズ
+			stream.Position += 6; // データ速度、ブロックサイズは使わない
 			var bitRate = stream.ReadUShortLE();
 
 			var samples = ReadSamples(stream, data.ContentOffset, data.Size, bitRate);
