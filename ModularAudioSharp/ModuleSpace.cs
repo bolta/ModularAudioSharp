@@ -13,10 +13,11 @@ namespace ModularAudioSharp {
 		// TODO 初期化手段
 		public static int SampleRate { get; } = 44100;
 
-		private static IList<Node> cachingNodes = new List<Node>();
-		public static void AddCachingNode(Node node) {
-			Debug.Assert(! cachingNodes.Contains(node));
-			cachingNodes.Add(node);
+		private static IList<Node> activeNodes = new List<Node>();
+
+		public static void AddActiveNode(Node node) {
+			Debug.Assert(! activeNodes.Contains(node));
+			activeNodes.Add(node);
 		}
 
 		private static IList<Tick> ticks = new List<Tick>();
@@ -44,13 +45,20 @@ namespace ModularAudioSharp {
 			return new Player(waveOut);
 		}
 
+		/// <summary>
+		/// ノードを演奏（つまり、能動的ノードと tick を更新しながらノードの出力を取り出す）して
+		/// サンプルを列挙する IEnumerable を作る
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="master"></param>
+		/// <returns></returns>
 		private static IEnumerable<T> MakeMasterSignal<T>(Node<T> master) where T : struct {
 			// TODO use してしまうと 2 回再生できない
 			var masterOut = master.UseAsStream();
 
 			foreach (var value in masterOut) {
 				foreach (var tick in ticks) tick.Sample();
-				foreach (var cache in cachingNodes) cache.Update();
+				foreach (var cache in activeNodes) cache.Update();
 				yield return value;
 			}
 		}

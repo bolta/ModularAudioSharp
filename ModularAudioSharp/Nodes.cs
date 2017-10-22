@@ -152,6 +152,13 @@ namespace ModularAudioSharp {
 			}
 		}
 
+		public static Node<float> Limit(this Node src, Node min, Node max)
+				=> Node.Create(Limit(src.AsFloat().UseAsStream(), min.AsFloat().UseAsStream(), max.AsFloat().UseAsStream()),
+						false, src, min, max);
+		private static IEnumerable<float> Limit(IEnumerable<float> src, IEnumerable<float> min, IEnumerable<float> max)
+				=> src.Zip(min, max, (s, mn, mx) => s < mn ? mn : s > mx ? mx : s);
+
+
 		public static Node<Stereo<T>> ZipToStereo<T>(Node<T> left, Node<T> right) where T : struct
 				=> Node.Create(left.UseAsStream().Zip(right.UseAsStream(), Stereo.Create), false, left, right);
 	}

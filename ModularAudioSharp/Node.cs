@@ -268,7 +268,7 @@ namespace ModularAudioSharp {
 		public Out Use() {
 			if (this.userCount == 0) {
 				if (this.Active) {
-					ModuleSpace.AddCachingNode(this);
+					ModuleSpace.AddActiveNode(this);
 				} else {
 					// 一度も Update しないと値が出力されないので、ここで一度だけ
 					this.Update();

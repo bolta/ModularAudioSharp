@@ -79,6 +79,7 @@
     <Compile Include="Waveform\Interpolator.cs" />
     <Compile Include="Waveform\Waveform.cs" />
     <Compile Include="Waveform\WaveformPlayer.cs" />
+    <Compile Include="Waveform\WavFileReader.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

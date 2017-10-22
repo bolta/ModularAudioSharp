@@ -22,7 +22,8 @@ namespace ModularAudioTestDriver {
 			//WavetableSample();
 
 			//NoteSample();
-			StereoSample();
+//			StereoSample();
+			WaveSample();
 		}
 
 		private static void VarSample() {
@@ -181,11 +182,11 @@ namespace ModularAudioTestDriver {
 			var tone = Var<Tone>();
 			var freq = Temperament.Equal(tone);
 
-			var waveform = new Waveform(
+			var waveform = new Waveform<float>(
 					// 100 smp/s = 441 Hz の矩形波
 					Enumerable.Repeat(1f, 50).Concat(Enumerable.Repeat(-1f, 50)).ToList(),
 					44100);
-			var osc = new WaveformPlayer(waveform, 441, freq, loopOffset:0);
+			var osc = new WaveformPlayer<float>(waveform, 441, freq, loopOffset:0);
 
 			var parser = new SimpleMmlParser();
 			var ast = parser.Parse(
@@ -218,12 +219,14 @@ namespace ModularAudioTestDriver {
 			var freqR = Temperament.Equal(toneR);
 			var envR = ExpEnv(1 / 16f);
 
-			var waveform = new Waveform(
+			var waveform = new Waveform<float>(
 					// 100 smp/s = 441 Hz の矩形波
 					Enumerable.Repeat(1f, 50).Concat(Enumerable.Repeat(-1f, 50)).ToList(),
 					44100);
-			var oscL = new WaveformPlayer(waveform, 441, freqL, loopOffset: 0);
-			var oscR = new WaveformPlayer(waveform, 441, freqR, loopOffset: 0);
+			//var waveform = (Waveform<float>) WavFileReader.Read(@"H:\dropbox\sounds\beam2002\lead14.wav");
+
+			var oscL = new WaveformPlayer<float>(waveform, 441, freqL, loopOffset: 0);
+			var oscR = new WaveformPlayer<float>(waveform, 441, freqR, loopOffset: 0);
 			//var oscL = SquareOsc(freqL);
 			//var oscR = SquareOsc(freqR);
 
@@ -266,20 +269,56 @@ namespace ModularAudioTestDriver {
 			var cutoff = Var(1760f);
 
 			var master = ZipToStereo(
-					(Lpf(oscL, ((Node) cutoff).AsFloat(), Const(9f)) * envL * 0.125f).AsFloat(),
+					((Lpf(oscL, ((Node) cutoff).AsFloat(), Const(9f)) * envL).Limit(-1f/32, 1f/32)*4).AsFloat(),
 					(oscR * envR * 0.125f).AsFloat());
 
-			//new Thread(() => {
-			//	var rand = new Random();
-			//	while (true) {
-			//		Thread.Sleep(50);
-			//		Console.Write("* ");
-			//		cutoff.Set(rand.Next(4900) + 100);
-			//	}
-			//}).Start();
+			new Thread(() => {
+				var rand = new Random();
+				while (true) {
+					Thread.Sleep(500);
+					Console.Write("* ");
+					cutoff.Set(rand.Next(4900) + 100);
+				}
+			}).Start();
 			using (ModuleSpace.Play(master.AsStereoFloat())) {
-				Thread.Sleep(10000);
-				//Console.ReadKey();
+				//Thread.Sleep(10000);
+				Console.ReadKey();
+			}
+			Console.WriteLine(Node.TimesUpdated);
+			Console.ReadKey();
+		}
+
+		private static void WaveSample() {
+			var ticksPerBeat = 96;
+
+			var tone = Var<Tone>();
+			var freq = Temperament.Equal(tone);
+
+			var waveform = (Waveform<float>) WavFileReader.Read(@"H:\dropbox\sounds\beam2002\pad03.wav");
+
+			var osc = WaveformPlayer.Create(waveform, 261.6256f /* C4 */, freq, endOffset: 44100+11025, loopOffset:44100);
+			//var oscL = SquareOsc(freqL);
+			//var oscR = SquareOsc(freqR);
+
+			var parser = new SimpleMmlParser();
+			var mml = @"o5L12 arba2 arba2 arbar>d<baf gbae2 ^2r4 dred4.g8c+egb-agec+d f<a->ce2 d4c2 ^2<b-4 a8a8a2";
+
+
+			var instrs = new SimpleMmlInstructionGenerator()
+					.AddToneUsers(tone)
+					.AddNoteUsers(osc/*, envL*/)
+					.GenerateInstructions(parser.Parse(mml), ticksPerBeat).ToList();
+
+
+			var tick = new Tick(110, ticksPerBeat);
+
+			var seq = new Sequencer(tick, new SequenceThread(instrs));
+
+			var master = (Node) osc * 0.125f;
+
+			using (ModuleSpace.Play(master.AsStereoFloat())) {
+				//Thread.Sleep(10000);
+				Console.ReadKey();
 			}
 			Console.WriteLine(Node.TimesUpdated);
 			Console.ReadKey();

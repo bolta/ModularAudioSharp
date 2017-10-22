@@ -8,14 +8,18 @@ using ModularAudioSharp.Data;
 
 namespace ModularAudioSharp.Waveform {
 
+	public class WaveformPlayer {
+		public static WaveformPlayer<T> Create<T>(Waveform<T> waveform, float masterFreq, Node<float> freq,
+				int startOffset = 0, int? endOffset = null, int? loopOffset = null) where T : struct
+				=> new WaveformPlayer<T>(waveform, masterFreq, freq, startOffset, endOffset, loopOffset);
+	}
+
 	/// <summary>
 	/// Waveform を再生するノード
 	/// TODO 名前は WaveformPlayerController とすべきか？　Node と NodeController の区別は必ずしも必要ないかも
 	/// </summary>
-	public class WaveformPlayer : NodeController<float>, INotable {
-		// TODO ファクトリメソッドを作る
-
-		private readonly Waveform waveform;
+	public class WaveformPlayer<T> : NodeController<T>, INotable where T : struct {
+		private readonly Waveform<T> waveform;
 		private readonly float masterFreq;
 		private readonly IEnumerable<float> freq;
 		private int startOffset;
@@ -33,7 +37,7 @@ namespace ModularAudioSharp.Waveform {
 		/// <param name="startOffset"></param>
 		/// <param name="endOffset"></param>
 		/// <param name="loopOffset"></param>
-		public WaveformPlayer(Waveform waveform, float masterFreq, Node<float> freq,
+		public WaveformPlayer(Waveform<T> waveform, float masterFreq, Node<float> freq,
 				int startOffset = 0, int? endOffset = null, int? loopOffset = null) : base(true) {
 			this.waveform = waveform;
 			this.masterFreq = masterFreq;
@@ -54,17 +58,17 @@ namespace ModularAudioSharp.Waveform {
 		///// <param name="endOffset"></param>
 		///// <param name="loopOffset"></param>
 		///// <returns></returns>
-		protected override IEnumerable<float> Signal() {
-			// TODO ステレオ
-			var interp = new LinearInterpolator(this.waveform.Samples(0));
+		protected override IEnumerable<T> Signal() {
+			var interp = Util.OnChannelCountLazy(default(T),
+					() => new LinearMonoInterpolator((this as WaveformPlayer<float>).waveform.Samples) as Interpolator<T>,
+					() => new LinearStereoInterpolator((this as WaveformPlayer<Stereo<float>>).waveform.Samples) as Interpolator<T>);
 
 			foreach (var f in this.freq) {
 				if (this.state == State.Idle) {
-					yield return 0f;
+					yield return default(T);
 				} else if (this.state == State.Note) {
 					yield return interp[this.offset];
 
-					// オフセットの進む速さはサンプリングレートと音高の分だけ速くなる
 					this.offset += this.waveform.SampleRate * f / ModuleSpace.SampleRate / this.masterFreq;
 					if (this.offset >= this.endOffset && this.loopOffset.HasValue) {
 						// ループ時は誤差を足してやらないとピッチがずれる
