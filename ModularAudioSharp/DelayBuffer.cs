@@ -51,7 +51,7 @@ namespace ModularAudioSharp {
 		public T this[int offset] {
 			get {
 				if (offset <= -this.buffer.Length || 0 < offset) {
-					throw new IndexOutOfRangeException("offset must be > -size, and <= 0");
+					throw new IndexOutOfRangeException("offset must satisfy -size < offseet <= 0");
 				}
 
 				return this.buffer[(this.head + offset + this.buffer.Length) % this.buffer.Length];

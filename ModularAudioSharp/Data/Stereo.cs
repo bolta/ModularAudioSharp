@@ -19,5 +19,9 @@ namespace ModularAudioSharp.Data {
 		}
 
 		public override string ToString() => $"({this.Left}, {this.Right})";
-    }
+
+		//public Stereo<U> Select<U>(Func<T, U> selector) => new Stereo<U>(selector(this.Left), selector(this.Right));
+	}
+
+
 }

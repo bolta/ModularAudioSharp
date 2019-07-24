@@ -81,7 +81,7 @@ namespace ModularAudioSharp {
 		/// <param name="cutoffFreq"></param>
 		/// <param name="q"></param>
 		/// <returns></returns>
-		public static Node<float> Lpf(Node<float> input, Node<float> cutoffFreq, Node<float> q) {
+		public static Node<float> Lpf(this Node input, Node cutoffFreq, Node q) {
 			var w0 = (2 * (float) Math.PI * cutoffFreq / ModuleSpace.SampleRate).AsFloat();
 			var cosw0 = w0.Select(w => (float) Math.Cos(w));
 			var sinw0 = w0.Select(w => (float) Math.Sin(w));
@@ -94,7 +94,9 @@ namespace ModularAudioSharp {
 			var a1 = -2 * cosw0;
 			var a2 = 1 - alpha;
 
-			return BiQuadFilter(input, b0.AsFloat(), b1.AsFloat(), b2.AsFloat(), a0.AsFloat(), a1.AsFloat(), a2.AsFloat());
+			return BiQuadFilter(input.AsFloat(),
+					b0.AsFloat(), b1.AsFloat(), b2.AsFloat(),
+					a0.AsFloat(), a1.AsFloat(), a2.AsFloat());
 		}
 
 		/// <summary>
@@ -149,6 +151,23 @@ namespace ModularAudioSharp {
 				yield return actualFreq.Value;
 
 				actualFreq = (1 - ratio) * actualFreq.Value + ratio * f;
+			}
+		}
+
+		public static Node<float> Delay(this Node src, Node time_smp, Node feedbackLevel, Node wetLevel, int maxTime_smp)
+				=> Node.Create(Delay(src.AsFloat().UseAsStream(),
+						time_smp.AsInt().UseAsStream(),
+						feedbackLevel.AsFloat().UseAsStream(),
+						wetLevel.AsFloat().UseAsStream(),
+						maxTime_smp), true, src, time_smp, feedbackLevel, wetLevel);
+
+		private static IEnumerable<float> Delay(IEnumerable<float> src, IEnumerable<int> time_smp,
+				IEnumerable<float> feedbackLevel, IEnumerable<float> wetLevel, int maxTime_smp) {
+			var buffer = new DelayBuffer<float>(maxTime_smp);
+			foreach (var stfw in src.Zip(time_smp, feedbackLevel, wetLevel, Tuple.Create)) {
+				// TODO 添字が誤っていないかチェック
+				yield return stfw.Item1 + buffer[- (stfw.Item2 - 1)] * stfw.Item4;
+				buffer.Push(stfw.Item1 + stfw.Item3 * buffer[- (stfw.Item2 - 1)]);
 			}
 		}
 

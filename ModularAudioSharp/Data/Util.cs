@@ -48,6 +48,17 @@ namespace ModularAudioSharp.Data {
 				yield return zipElem(e1.Current, e2.Current, e3.Current);
 			}
 		}
+		internal static IEnumerable<TResult> Zip<T1, T2, T3, T4, TResult>(this IEnumerable<T1> t1s,
+				IEnumerable<T2> t2s, IEnumerable<T3> t3s, IEnumerable<T4> t4s,
+				Func<T1, T2, T3, T4, TResult> zipElem) {
+			var e1 = t1s.GetEnumerator();
+			var e2 = t2s.GetEnumerator();
+			var e3 = t3s.GetEnumerator();
+			var e4 = t4s.GetEnumerator();
+			while (e1.MoveNext() && e2.MoveNext() && e3.MoveNext() && e4.MoveNext()) {
+				yield return zipElem(e1.Current, e2.Current, e3.Current, e4.Current);
+			}
+		}
 
 		internal static IEnumerable<TResult> Zip<T1, T2, T3, T4, T5, T6, T7, TResult>(this IEnumerable<T1> t1s,
 				IEnumerable<T2> t2s, IEnumerable<T3> t3s, IEnumerable<T4> t4s, IEnumerable<T5> t5s, IEnumerable<T6> t6s, IEnumerable<T7> t7s,

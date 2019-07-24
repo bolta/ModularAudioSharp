@@ -22,8 +22,9 @@ namespace ModularAudioTestDriver {
 			//WavetableSample();
 
 			//NoteSample();
-//			StereoSample();
-			WaveSample();
+			//StereoSample();
+			//WaveSample();
+			PolySample();
 		}
 
 		private static void VarSample() {
@@ -223,7 +224,7 @@ namespace ModularAudioTestDriver {
 					// 100 smp/s = 441 Hz の矩形波
 					Enumerable.Repeat(1f, 50).Concat(Enumerable.Repeat(-1f, 50)).ToList(),
 					44100);
-			//var waveform = (Waveform<float>) WavFileReader.Read(@"H:\dropbox\sounds\beam2002\lead14.wav");
+			//var waveform = (Waveform<float>) WavFileReader.Read(@"H:\dropbox\sounds\beam2002\pad04.wav");
 
 			var oscL = new WaveformPlayer<float>(waveform, 441, freqL, loopOffset: 0);
 			var oscR = new WaveformPlayer<float>(waveform, 441, freqR, loopOffset: 0);
@@ -232,24 +233,26 @@ namespace ModularAudioTestDriver {
 
 			var parser = new SimpleMmlParser();
 			var mmlL = @"o3L4
-					[0
-						[
-							[4 ce>][4 c<e]<[4 a>c][4 ac<]>
-						]
-						<[4 a>f][4af<][4 b>g][4 bg<]
-						[4a->e-][4a-e-<][4b->f][4b-f<]>
-					]
-					c1
-";
+								[0
+									[
+										[4 ce>][4 c<e]<[4 a>c][4 ac<]>
+									]
+									<[4 a>f][4af<][4 b>g][4 bg<]
+									[4a->e-][4a-e-<][4b->f][4b-f<]>
+								]
+								c1
+			";
 			var mmlR = @"o3L4r8
-					[0
-						dg>dg>dg>dggd<gd<gd<gd<b>eb>eb>eb>ee<be<be<be<b
-						>dg>dg>dg>dggd<gd<gd<gd<b>eb>eb>eb>ee<be<be<be<b
-						>cg>cg>cg>cggc<gc<gc<gcda>da>da>daad<ad<ad<ad
-						cg>cg>cg>cggc<gc<gc<gcda>da>da>daad<ad<ad<ad
-					]
-					e1
-";
+								[0
+									dg>dg>dg>dggd<gd<gd<gd<b>eb>eb>eb>ee<be<be<be<b
+									>dg>dg>dg>dggd<gd<gd<gd<b>eb>eb>eb>ee<be<be<be<b
+									>cg>cg>cg>cggc<gc<gc<gcda>da>da>daad<ad<ad<ad
+									cg>cg>cg>cggc<gc<gc<gcda>da>da>daad<ad<ad<ad
+								]
+								e1
+			";
+			//var mmlL = "o3L4r4c16";
+			//			var mmlR = "";
 
 			var instrsL = new SimpleMmlInstructionGenerator()
 					.AddToneUsers(toneL)
@@ -268,18 +271,22 @@ namespace ModularAudioTestDriver {
 
 			var cutoff = Var(1760f);
 
-			var master = ZipToStereo(
-					((Lpf(oscL, ((Node) cutoff).AsFloat(), Const(9f)) * envL).Limit(-1f/32, 1f/32)*4).AsFloat(),
-					(oscR * envR * 0.125f).AsFloat());
+//			var lfo = SinOsc(0.0625f) + 0.02f * SinOsc(40f + 20 * SinOsc(3f));
+			var lfo = 0.5f + 0.4f * SinOsc(5f + 2.5f * SinOsc(5f)); //.Delay(400 0, 0.9f, 0.9f, 4000);
 
-			new Thread(() => {
-				var rand = new Random();
-				while (true) {
-					Thread.Sleep(500);
-					Console.Write("* ");
-					cutoff.Set(rand.Next(4900) + 100);
-				}
-			}).Start();
+			var master = ZipToStereo(
+					//((Lpf(oscL, ((Node) cutoff).AsFloat(), Const(9f)) * envL).Limit(-1f/32, 1f/32)*4).AsFloat(),
+					(oscL * envL * 0.5f * lfo)/*.Delay(300 + 280 * lfo, 0.9f, 0.25f, 21499)*/.AsFloat(),
+					(oscR * envR * 0.5f * lfo)/*.Delay(300 + 280 * lfo, 0.9f, 0.25f, 21499)*/.AsFloat());
+
+			//new Thread(() => {
+			//	var rand = new Random();
+			//	while (true) {
+			//		Thread.Sleep(500);
+			//		Console.Write("* ");
+			//		cutoff.Set(rand.Next(4900) + 100);
+			//	}
+			//}).Start();
 			using (ModuleSpace.Play(master.AsStereoFloat())) {
 				//Thread.Sleep(10000);
 				Console.ReadKey();
@@ -322,6 +329,75 @@ namespace ModularAudioTestDriver {
 			}
 			Console.WriteLine(Node.TimesUpdated);
 			Console.ReadKey();
+		}
+
+		private static void PolySample() {
+			var ticksPerBeat = 96;
+
+			Func<string, Node> mmlOsc = mml => {
+				var tone = Var<Tone>();
+
+				var freq = Temperament.Equal(tone, 440);
+
+				var waveform = new Waveform<float>(
+						// 100 smp/s = 441 Hz の矩形波
+						Enumerable.Repeat(1f, 13).Concat(Enumerable.Repeat(-1f, 87)).ToList(),
+						44100);
+				var osc = new WaveformPlayer<float>(waveform, 441, freq, loopOffset:0);
+
+				var env = ExpEnv(1 / 8f);
+
+				var parser = new SimpleMmlParser();
+				var ast = parser.Parse(mml);
+				var instrs = new SimpleMmlInstructionGenerator()
+						.AddToneUsers(tone)
+						.AddNoteUsers(osc, env)
+						.GenerateInstructions(ast, ticksPerBeat).ToList();
+
+				var tick = new Tick(144, ticksPerBeat);
+
+				var seq = new Sequencer(tick, new SequenceThread(instrs));
+
+				return osc * env; //  + (osc * env).Delay(44100 * 0.5f * 120 / 144 * 0.75f, 0.5f, 1f, (int)(44100 * 0.5f * 120 / 144 * 0.75f) + 1);
+
+//				return Portamento(osc, 0.1f);
+			};
+
+			var oscA = mmlOsc(@"o5L4
+g+d+ef+ g2f+e e1 d+2...r16
+c2e2 d+2^8.r16<b> e2g2 f+2...r16
+e2g2 f+2^8.r16d+4 a2>c2< bag+f+
+o4L4
+b>ef+<b> a2g+f+ ed+8e8f+ee2d+2 c+f+g+c+ b2ag+ f+f8g+8f+c+ g+2f+2<
+b>ef+<b> a2g+f+ ed+8e8f+ee2d+2 c+f+g+c+ b2ag+ f+f8g+8f+c+ g+2f+f+16g+16a16b16>
+c+2^8r8c+< b2^8r8g+ aa8g+8f+f f+g+ab>
+d2^8r8d c+2^8r8<a bb8>c8<bb8>c8< bag+f+<");
+			var oscB = mmlOsc(@"o4L8
+b2g4ab> c4<b4a4g4 f+2ef+ga b4f+ga4d+4
+e4ede4g4 f+4f+ef+2 >c4<cdef+gab4f+4d+4<b4>
+g2e4g4 <b4b>c+d+2 e4f+4g4e4 d+4c+4<b4a4
+o3L4
+b2.>c+8d+8ec+d+f+ c+d+8e8f+g+8a+8 bf+d+<b> f+2ff+8g+8 af+fb a2a+2 b2a2<
+b2.>c+8d+8ec+d+f+ c+d+8e8f+g+8a+8 bf+d+<b> f+2ff+8g+8 af+fb a2a+2 b2a2
+L8 e4ag+a4e4 e4bag+f+eg+> d<af+4g+c+d+f f+4<b>c+def+4
+g2^gab a2^agf+ e4edcde4 d+2e4f+4<
+L4
+");
+			var oscC = mmlOsc(@"o3L2
+ec <a>d< b>f+ b<b>>
+L8 c4<cdef+ga brf+rd+r<br> erede4c4 f+rf+ef+2
+cdef+g4f+e d+ef+ga4b4> L2 c<a f+<b
+o3L2
+ed+ c+<b aa+ b1> ag+ f+f f+e d+<b>
+ed+ c+c c+<a+ b1> ag+ f+f f+e d+<b>
+L8 ar<ab>c+d+ef+ g+rg+f+g+rer f+4d4c+4bg+ f+4e4d4c+4<
+br>babrgr f+r>c+r<ar<ab> cr>cr<ef+g4 f+4d+4<b4a4>
+L2");
+			var master = oscA * 0.25f * 15 / 15
+					+ oscB * 0.25f * 11 / 15
+					+ oscC * 0.25f * 13 / 15;
+			;
+			using (ModuleSpace.Play(master.AsFloat())) Console.ReadKey(); // Thread.Sleep(10000);
 		}
 	}
 }
