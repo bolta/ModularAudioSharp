@@ -46,33 +46,23 @@ namespace Moddl {
 
 		private static Node<float> MmlToNode(string mml) {
 			var ticksPerBeat = 96;
-			var tone = Var<Tone>();
-
-			var freq = Temperament.Equal(tone, 440);
-
-			var waveform = new Waveform<float>(
-					// 100 smp/s = 441 Hz の矩形波
-					Enumerable.Repeat(1f, 13).Concat(Enumerable.Repeat(-1f, 87)).ToList(),
-					44100);
-			var osc = new WaveformPlayer<float>(waveform, 441, freq, loopOffset:0);
-
-			var env = ExpEnv(1 / 8f);
+			var instrm = Instruments.ExponentialDecayPulseWave();
 
 			var parser = new SimpleMmlParser();
 			var ast = parser.Parse(mml);
-			var instrs = new SimpleMmlInstructionGenerator()
-					.AddToneUsers(tone)
-					.AddNoteUsers(osc, env)
-					.GenerateInstructions(ast, ticksPerBeat).ToList();
+			var instrcGen = new SimpleMmlInstructionGenerator();
+			foreach (var t in instrm.ToneUsers) instrcGen.AddToneUsers(t);
+			foreach (var n in instrm.NoteUsers) instrcGen.AddNoteUsers(n);
+			var instrcs = instrcGen.GenerateInstructions(ast, ticksPerBeat).ToList();
 
 			var tick = new Tick(144, ticksPerBeat);
 
-			var seq = new Sequencer(tick, new SequenceThread(instrs));
+			var seq = new Sequencer(tick, new SequenceThread(instrcs));
 
-//			return ((Node<float>) osc) * ((Node<float>) env); //  + (osc * env).Delay(44100 * 0.5f * 120 / 144 * 0.75f, 0.5f, 1f, (int)(44100 * 0.5f * 120 / 144 * 0.75f) + 1);
-			return (Node<float>) (osc * env);
-//				return Portamento(osc, 0.1f);
+			//			return ((Node<float>) osc) * ((Node<float>) env); //  + (osc * env).Delay(44100 * 0.5f * 120 / 144 * 0.75f, 0.5f, 1f, (int)(44100 * 0.5f * 120 / 144 * 0.75f) + 1);
 
+			// TODO ステレオに正しく対応（キャストを除去）
+			return (Node<float>) instrm.Output;
 		}
 	}
 }
