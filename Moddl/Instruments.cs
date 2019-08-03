@@ -23,15 +23,16 @@ namespace Moddl {
 			var tone = Var<Tone>();
 			var freq = Temperament.Equal(tone, 440);
 
-			var waveform = new Waveform<float>(
-					// 100 smp/s = 441 Hz の矩形波
-					Enumerable.Repeat(1f, 13).Concat(Enumerable.Repeat(-1f, 87)).ToList(),
-					44100);
-			var osc = new WaveformPlayer<float>(waveform, 441, freq, loopOffset:0);
+			var dutyInit = 0.5f; // TODO 初期値はスタック管理のため外から見える必要がありそう
+			var duty = Var(dutyInit);
+
+			var osc = PulseOsc(freq, duty);
 			var env = ExpEnv(1 / 8f);
 			var output = osc * env;
 
-			return new Instrument(output, new Dictionary<string, Node>(), new [] { tone }, new INotable[] { osc, env });
+			return new Instrument(output, new Dictionary<string, Node>() {
+				{ "duty", duty },
+			}, new [] { tone }, new INotable[] { /*osc,*/ env });
 
 		}
 

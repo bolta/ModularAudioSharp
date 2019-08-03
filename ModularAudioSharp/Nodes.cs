@@ -74,6 +74,29 @@ namespace ModularAudioSharp {
 			}
 		}
 
+		// TODO パルス波のオシレータはデューティ比も参照するため既存の Osc では対応できなかった。
+		// これも合わせて Osc() で一般化できるようにしたい
+
+		public static Node<float> PulseOsc(Node freq, Node duty, bool crazy = false) {
+			var phaseDiffs = freq.AsFloat().UseAsStream().Select(f => (float) (2 * Math.PI * f / ModuleSpace.SampleRate));
+			var dutyStr = duty.AsFloat().UseAsStream();
+			return Node.Create(PulseOsc(phaseDiffs, dutyStr, crazy), true, freq, duty);
+		}
+
+		private static IEnumerable<float> PulseOsc(IEnumerable<float> phaseDiffs, IEnumerable<float> duty, bool crazy = false) {
+			//return Osc((Node<float>) freq, phase => phase % (2 * Math.PI) < (float)(2 * Math.PI) * duty ? 1f : -1f, crazy);
+			const float twoPi = (float) (2 * Math.PI);
+			var phase = 0f;
+			foreach (var input in phaseDiffs.Zip(duty, Tuple.Create)) {
+				var dp = input.Item1;
+				var d = input.Item2;
+				yield return phase < twoPi * d ? 1f : -1f;
+				phase = phase + dp;
+				// 2π で余りをとらないと位相がどんどん大きくなり、演算誤差で音程が不安定になる。これはこれで面白い
+				if (! crazy) phase %= twoPi;
+			}
+		}
+
 		/// <summary>
 		/// Audio EQ Cookbook に依ったローパスフィルタ
 		/// </summary>
