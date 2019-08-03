@@ -90,7 +90,7 @@ namespace ModularAudioSharp {
 			foreach (var input in phaseDiffs.Zip(duty, Tuple.Create)) {
 				var dp = input.Item1;
 				var d = input.Item2;
-				yield return phase < twoPi * d ? 1f : -1f;
+				yield return phase % twoPi < twoPi * d ? 1f : -1f;
 				phase = phase + dp;
 				// 2π で余りをとらないと位相がどんどん大きくなり、演算誤差で音程が不安定になる。これはこれで面白い
 				if (! crazy) phase %= twoPi;
