@@ -10,47 +10,47 @@ namespace ModularAudioSharp.Mml {
 	//}
 
 	public class CompilationUnit /*: AstNode*/ {
-		public IEnumerable<Statement> Statements { get; set; }
-		public override string ToString() => string.Join(" ", this.Statements.Select(s => s.ToString()));
+		public IEnumerable<Command> Commands { get; set; }
+		public override string ToString() => string.Join(" ", this.Commands.Select(s => s.ToString()));
 	}
 
-	public class Statement /*: AstNode*/ {
+	public class Command /*: AstNode*/ {
 
 	}
 
-	public class OctaveStatement : Statement {
+	public class OctaveCommand : Command {
 		public int Value { get; set; }
 		public override string ToString() => $"o{this.Value}";
 	}
-	public class OctaveIncrStatement : Statement { public override string ToString() => ">"; }
-	public class OctaveDecrStatement : Statement { public override string ToString() => "<"; }
-	public class LengthStatement : Statement {
+	public class OctaveIncrCommand : Command { public override string ToString() => ">"; }
+	public class OctaveDecrCommand : Command { public override string ToString() => "<"; }
+	public class LengthCommand : Command {
 		public int Value { get; set; }
 		public override string ToString() => $"L{this.Value}";
 	}
-	public class ToneStatement : Statement {
+	public class ToneCommand : Command {
 		public ToneName ToneName { get; set; }
 		public Length Length { get; set; } // optional
 		public override string ToString() => $"{this.ToneName}{this.Length?.ToString() ?? ""}";
 	}
-	public class RestStatement : Statement {
+	public class RestCommand : Command {
 		public Length Length { get; set; } // optional
 		public override string ToString() => $"r{this.Length?.ToString() ?? ""}";
 	}
 
-	public class ParameterStatement : Statement {
+	public class ParameterCommand : Command {
 		public Identifier Name { get; set; }
 		public float Value { get; set; } // TODO いずれは数値以外も取れるように
 		public override string ToString() => string.Format("y`{0}`,{1}", this.Name, this.Value);
 	}
 
-	public class LoopStatement : Statement {
+	public class LoopCommand : Command {
 		/// <summary>
 		/// 有効な値は有限ループ、null は無限ループを表す
 		/// （MML では無限ループを [0 ... ] と書き、[ ... ] は [2 ... ] であることに注意）
 		/// </summary>
 		public uint? Times { get; set; }
-		public IEnumerable<Statement> Content { get; set; }
+		public IEnumerable<Command> Content { get; set; }
 		public override string ToString() => $"[{this.Times ?? 0} {this.Content.Select(s => s.ToString())}]";
     }
 

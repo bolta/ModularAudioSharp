@@ -42,14 +42,14 @@ namespace ModularAudioSharp.Mml {
 			}
 
 			public override void Visit(CompilationUnit visitee) {
-				foreach (var s in visitee.Statements) s.Accept(this);
+				foreach (var s in visitee.Commands) s.Accept(this);
 			}
 
-			public override void Visit(OctaveStatement visitee) { this.octave = visitee.Value; }
-			public override void Visit(OctaveIncrStatement visitee) { this.octave += 1; }
-			public override void Visit(OctaveDecrStatement visitee) { this.octave -= 1; }
-			public override void Visit(LengthStatement visitee) { this.length = visitee.Value; }
-			public override void Visit(ToneStatement visitee) {
+			public override void Visit(OctaveCommand visitee) { this.octave = visitee.Value; }
+			public override void Visit(OctaveIncrCommand visitee) { this.octave += 1; }
+			public override void Visit(OctaveDecrCommand visitee) { this.octave -= 1; }
+			public override void Visit(LengthCommand visitee) { this.length = visitee.Value; }
+			public override void Visit(ToneCommand visitee) {
 				var stepTicks = CalcTicksFromLength(visitee.Length, this.tickPerBar, this.length);
 				var gateTicks = (int) (stepTicks * this.gateRatio);
 
@@ -78,18 +78,18 @@ namespace ModularAudioSharp.Mml {
 				}
 			}
 
-			public override void Visit(RestStatement visitee) {
+			public override void Visit(RestCommand visitee) {
 				var ticks = CalcTicksFromLength(visitee.Length, this.tickPerBar, this.length);
 				this.result.Add(new WaitInstruction(ticks));
 			}
 
-			public override void Visit(ParameterStatement visitee) {
+			public override void Visit(ParameterCommand visitee) {
 				//var ticks = CalcTicksFromLength(visitee.Length, this.tickPerBar, this.length);
 				//this.result.Add(new WaitInstruction(ticks));
 				this.result.Add(new ParameterInstruction(visitee.Name.Name, visitee.Value));
 			}
 
-			public override void Visit(LoopStatement visitee) {
+			public override void Visit(LoopCommand visitee) {
 				if (visitee.Times.HasValue) {
 					// とりあえず有限ループは展開する実装とする。メモリ効率的に問題があればループのまま演奏する実装を検討する
 					for (int i=0 ; i<visitee.Times.Value ; ++i) {

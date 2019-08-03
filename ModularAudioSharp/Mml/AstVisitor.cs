@@ -7,35 +7,35 @@ using System.Threading.Tasks;
 namespace ModularAudioSharp.Mml {
 	public class AstVisitor {
 		public virtual void Visit(CompilationUnit visitee) { }
-		public virtual void Visit(OctaveStatement visitee) { }
-		public virtual void Visit(OctaveIncrStatement visitee) { }
-		public virtual void Visit(OctaveDecrStatement visitee) { }
-		public virtual void Visit(LengthStatement visitee) { }
-		public virtual void Visit(ToneStatement visitee) { }
-		public virtual void Visit(RestStatement visitee) { }
-		public virtual void Visit(ParameterStatement visitee) { }
-		public virtual void Visit(LoopStatement visitee) { }
+		public virtual void Visit(OctaveCommand visitee) { }
+		public virtual void Visit(OctaveIncrCommand visitee) { }
+		public virtual void Visit(OctaveDecrCommand visitee) { }
+		public virtual void Visit(LengthCommand visitee) { }
+		public virtual void Visit(ToneCommand visitee) { }
+		public virtual void Visit(RestCommand visitee) { }
+		public virtual void Visit(ParameterCommand visitee) { }
+		public virtual void Visit(LoopCommand visitee) { }
 	}
 
 	public static class AstVisitorExtensions {
 		public static void Accept(this CompilationUnit visitee, AstVisitor visitor) => visitor.Visit(visitee);
-		public static void Accept(this Statement visitee, AstVisitor visitor) {
-			var visited = TryVisitConcreteStatement<OctaveStatement>(visitee, c => visitor.Visit(c))
-					|| TryVisitConcreteStatement<OctaveIncrStatement>(visitee, c => visitor.Visit(c))
-					|| TryVisitConcreteStatement<OctaveDecrStatement>(visitee, c => visitor.Visit(c))
-					|| TryVisitConcreteStatement<LengthStatement>(visitee, c => visitor.Visit(c))
-					|| TryVisitConcreteStatement<ToneStatement>(visitee, c => visitor.Visit(c))
-					|| TryVisitConcreteStatement<RestStatement>(visitee, c => visitor.Visit(c))
-					|| TryVisitConcreteStatement<ParameterStatement>(visitee, c => visitor.Visit(c))
-					|| TryVisitConcreteStatement<LoopStatement>(visitee, c => visitor.Visit(c))
+		public static void Accept(this Command visitee, AstVisitor visitor) {
+			var visited = TryVisitConcreteCommand<OctaveCommand>(visitee, c => visitor.Visit(c))
+					|| TryVisitConcreteCommand<OctaveIncrCommand>(visitee, c => visitor.Visit(c))
+					|| TryVisitConcreteCommand<OctaveDecrCommand>(visitee, c => visitor.Visit(c))
+					|| TryVisitConcreteCommand<LengthCommand>(visitee, c => visitor.Visit(c))
+					|| TryVisitConcreteCommand<ToneCommand>(visitee, c => visitor.Visit(c))
+					|| TryVisitConcreteCommand<RestCommand>(visitee, c => visitor.Visit(c))
+					|| TryVisitConcreteCommand<ParameterCommand>(visitee, c => visitor.Visit(c))
+					|| TryVisitConcreteCommand<LoopCommand>(visitee, c => visitor.Visit(c))
 					;
 
-			if (! visited) throw new Exception($"unknown Statement type: {visitee.GetType()}");
+			if (! visited) throw new Exception($"unknown Command type: {visitee.GetType()}");
 		}
 
-		private static bool TryVisitConcreteStatement<ConcreteStatement>(Statement visitee,
-				Action<ConcreteStatement> visit) where ConcreteStatement : Statement {
-			var conc = visitee as ConcreteStatement;
+		private static bool TryVisitConcreteCommand<ConcreteCommand>(Command visitee,
+				Action<ConcreteCommand> visit) where ConcreteCommand : Command {
+			var conc = visitee as ConcreteCommand;
 			if (conc != null) {
 				visit(conc);
 				return true;

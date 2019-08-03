@@ -85,21 +85,21 @@ namespace ModularAudioSharp.Mml {
 		/// オクターブ指定
 		/// 例：o4
 		/// </summary>
-		public readonly static Parser<OctaveStatement> octaveStatement = from _ in SParse.String("o").Text().Token()
+		public readonly static Parser<OctaveCommand> octaveCommand = from _ in SParse.String("o").Text().Token()
 																		   from n in integer.Token()
-																		   select new OctaveStatement { Value = n };
+																		   select new OctaveCommand { Value = n };
 		/// <summary>
 		/// オクターブ一つ上げる
 		/// 唯一の例：&gt;
 		/// </summary>
-		public readonly static Parser<OctaveIncrStatement> octaveIncrStatement = from _ in SParse.String(">").Token()
-																				   select new OctaveIncrStatement();
+		public readonly static Parser<OctaveIncrCommand> octaveIncrCommand = from _ in SParse.String(">").Token()
+																				   select new OctaveIncrCommand();
 		/// <summary>
 		/// オクターブ一つ下げる
 		/// 唯一の例：&lt;
 		/// </summary>
-		public readonly static Parser<OctaveDecrStatement> octaveDecrStatement = from _ in SParse.String("<").Token()
-																				   select new OctaveDecrStatement();
+		public readonly static Parser<OctaveDecrCommand> octaveDecrCommand = from _ in SParse.String("<").Token()
+																				   select new OctaveDecrCommand();
 		/// <summary>
 		/// デフォルト音長指定。
 		/// 音長は数値で指定するため付点をつけることはできない。
@@ -108,57 +108,57 @@ namespace ModularAudioSharp.Mml {
 		/// 例：L8
 		/// 例でない：L4.
 		/// </summary>
-		public readonly static Parser<LengthStatement> lengthStatement = from _ in SParse.String("L").Text().Token()
+		public readonly static Parser<LengthCommand> lengthCommand = from _ in SParse.String("L").Text().Token()
 																		   from l in integer.Token()
-																		   select new LengthStatement { Value = l };
+																		   select new LengthCommand { Value = l };
 		/// <summary>
 		/// 音高・音長を指定して発音する。
 		/// 音長は省略できる（音長の定義が空の音長を許容するため）
 		/// 例：c, d+4, e--^.
 		/// </summary>
-		public readonly static Parser<ToneStatement> toneStatement = from t in toneName
+		public readonly static Parser<ToneCommand> toneCommand = from t in toneName
 																	   from l in length
-																	   select new ToneStatement { ToneName = t, Length = l };
+																	   select new ToneCommand { ToneName = t, Length = l };
 
-		public readonly static Parser<RestStatement> restStatement
+		public readonly static Parser<RestCommand> restCommand
 				= from _ in SParse.String("r").Text().Token()
 				  from l in length
-				  select new RestStatement { Length = l };
+				  select new RestCommand { Length = l };
 
-		public readonly static Parser<ParameterStatement> parameterStatement
+		public readonly static Parser<ParameterCommand> parameterCommand
 				= from _ in SParse.String("y").Text().Token()
 				  from name in identifier
 				  from __ in SParse.String(",").Text().Token()
 				  from value in real.Token()
-				  select new ParameterStatement { Name = name, Value = value };
+				  select new ParameterCommand { Name = name, Value = value };
 
-		public readonly static Parser<LoopStatement> loopStatement
+		public readonly static Parser<LoopCommand> loopCommand
 				= from _ in SParse.String("[").Text().Token()
 				  from t in unsignedInteger.Token().Optional()
-				  from c in statement.Token().Many()
+				  from c in command.Token().Many()
 				  from __ in SParse.String("]")
 				  let tn = ToNullable(t) ?? 2
-				  select new LoopStatement { Times = tn == 0 ? null : (uint?) tn, Content = c };
+				  select new LoopCommand { Times = tn == 0 ? null : (uint?) tn, Content = c };
 
 		/// <summary>
 		/// 任意の文
 		/// </summary>
-		public readonly static Parser<Statement> statement =
-				((Parser<Statement>) octaveStatement)
-				.Or(octaveIncrStatement)
-				.Or(octaveDecrStatement)
-				.Or(lengthStatement)
-				.Or(toneStatement)
-				.Or(restStatement)
-				.Or(parameterStatement)
-				.Or(loopStatement)
+		public readonly static Parser<Command> command =
+				((Parser<Command>) octaveCommand)
+				.Or(octaveIncrCommand)
+				.Or(octaveDecrCommand)
+				.Or(lengthCommand)
+				.Or(toneCommand)
+				.Or(restCommand)
+				.Or(parameterCommand)
+				.Or(loopCommand)
 				;
 
 		/// <summary>
 		/// MML 全体。文を任意個並べたもの
 		/// </summary>
-		public readonly static Parser<CompilationUnit> compilationUnit = from ss in statement.Many().Token()
-																		   select new CompilationUnit { Statements = ss };
+		public readonly static Parser<CompilationUnit> compilationUnit = from ss in command.Many().Token()
+																		   select new CompilationUnit { Commands = ss };
 
 		public CompilationUnit Parse(string mml) => compilationUnit.Parse(mml);
 
