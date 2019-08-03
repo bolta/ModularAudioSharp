@@ -37,6 +37,13 @@ namespace ModularAudioSharp.Mml {
 		public Length Length { get; set; } // optional
 		public override string ToString() => $"r{this.Length?.ToString() ?? ""}";
 	}
+
+	public class ParameterStatement : Statement {
+		public Identifier Name { get; set; }
+		public float Value { get; set; } // TODO いずれは数値以外も取れるように
+		public override string ToString() => string.Format("y`{0}`,{1}", this.Name, this.Value);
+	}
+
 	public class LoopStatement : Statement {
 		/// <summary>
 		/// 有効な値は有限ループ、null は無限ループを表す
@@ -71,5 +78,12 @@ namespace ModularAudioSharp.Mml {
 		public int Dots { get; set; }
 
 		public override string ToString() => $"{this.Number?.ToString() ?? ""}{RepeatString(".", this.Dots)}";
+	}
+
+	/// <summary>
+	/// MML 上で命名に使う識別子
+	/// </summary>
+	public class Identifier {
+		public string Name { get; set; }
 	}
 }

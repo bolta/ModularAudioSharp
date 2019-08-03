@@ -9,6 +9,8 @@ using ModularAudioSharp.Sequencer;
 namespace ModularAudioSharp.Sequencer {
 	public class SequenceThread {
 
+		internal Sequencer Sequencer { get; private set; }
+
 		private readonly IList<Instruction> instructions;
 
 		/// <summary>
@@ -17,8 +19,9 @@ namespace ModularAudioSharp.Sequencer {
 		/// </summary>
 		internal int Pointer { get; set; } = 0;
 
-		public SequenceThread(IList<Instruction> instructions) {
-			this.instructions = instructions;
+		public SequenceThread(Sequencer sequencer, IEnumerable<Instruction> instructions) {
+			this.Sequencer = sequencer;
+			this.instructions = new List<Instruction>(instructions);
 		}
 
 		/// <summary>

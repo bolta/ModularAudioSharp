@@ -22,6 +22,9 @@ namespace ModularAudioSharp.Mml {
 		public readonly static Parser<uint> unsignedInteger =
 			SParse.Regex(@"[0-9]+").Text().Select(Convert.ToUInt32);
 
+		public readonly static Parser<float> real =
+			SParse.Regex(@"[+-]?[0-9]+(\.[0-9]+)?|[+-]?\.[0-9]+").Text().Select(Convert.ToSingle);
+
 		/// <summary>
 		/// 音長の要素。
 		/// タイを使わず、数値（省略可能）と、0 個以上の付点を続けたもの
@@ -70,6 +73,14 @@ namespace ModularAudioSharp.Mml {
 															 from a in accidental.Token()
 															 select new ToneName { BaseName = b, Accidental = a };
 
+		public readonly static Parser<Identifier> identifier = (from _ in SParse.Char('`')
+																from id in SParse.Regex(@"[a-zA-Z0-9_.-]+")
+																from __ in SParse.Char('`')
+																select new Identifier { Name = id })
+														.Or(
+																from id in SParse.Regex(@"[0-9]+")
+																select new Identifier { Name = int.Parse(id).ToString() });
+
 		/// <summary>
 		/// オクターブ指定
 		/// 例：o4
@@ -114,6 +125,13 @@ namespace ModularAudioSharp.Mml {
 				  from l in length
 				  select new RestStatement { Length = l };
 
+		public readonly static Parser<ParameterStatement> parameterStatement
+				= from _ in SParse.String("y").Text().Token()
+				  from name in identifier
+				  from __ in SParse.String(",").Text().Token()
+				  from value in real.Token()
+				  select new ParameterStatement { Name = name, Value = value };
+
 		public readonly static Parser<LoopStatement> loopStatement
 				= from _ in SParse.String("[").Text().Token()
 				  from t in unsignedInteger.Token().Optional()
@@ -132,6 +150,7 @@ namespace ModularAudioSharp.Mml {
 				.Or(lengthStatement)
 				.Or(toneStatement)
 				.Or(restStatement)
+				.Or(parameterStatement)
 				.Or(loopStatement)
 				;
 

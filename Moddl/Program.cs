@@ -21,7 +21,7 @@ c	o3L2
 c	ec <a>d< b>f+ b<b>>
 c	L8 c4<cdef+ga brf+rd+r<br> erede4c4 f+rf+ef+2
 c	cdef+g4f+e d+ef+ga4b4> L2 c<a f+<b
-abc [0
+abc y`duty`,0.25 [0
 a	o4L4
 a	b>ef+<b> a2g+f+ ed+8e8f+ee2d+2 c+f+g+c+ b2ag+ f+f8g+8f+c+ g+2f+2<
 a	b>ef+<b> a2g+f+ ed+8e8f+ee2d+2 c+f+g+c+ b2ag+ f+f8g+8f+c+ g+2f+f+16g+16a16b16>

@@ -55,6 +55,19 @@ namespace ModularAudioSharp.Sequencer {
 		public override string ToString() => $"Wait ({this.wait})";
 	}
 
+	public class ParameterInstruction : Instruction {
+		private readonly string name;
+		private readonly float value;
+		public ParameterInstruction(string name, float value) {
+			this.name = name;
+			this.value = value;
+		}
+		internal override void Execute(SequenceThread thread) {
+		//	// TODO name が見つからなかったときのエラー処理をちゃんとする
+			thread.Sequencer.Parameters[this.name].Set(this.value);
+		}
+	}
+
 	public class JumpInstruction : Instruction {
 		private readonly int destination;
 		public JumpInstruction(int destination) { this.destination = destination; }

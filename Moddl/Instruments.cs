@@ -30,7 +30,7 @@ namespace Moddl {
 			var env = ExpEnv(1 / 8f);
 			var output = osc * env;
 
-			return new Instrument(output, new Dictionary<string, Node>() {
+			return new Instrument(output, new Dictionary<string, VarController<float>>() {
 				{ "duty", duty },
 			}, new [] { tone }, new INotable[] { /*osc,*/ env });
 

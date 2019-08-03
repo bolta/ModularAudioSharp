@@ -12,8 +12,9 @@ namespace ModularAudioSharp.Mml {
 		public virtual void Visit(OctaveDecrStatement visitee) { }
 		public virtual void Visit(LengthStatement visitee) { }
 		public virtual void Visit(ToneStatement visitee) { }
-		public virtual void Visit(LoopStatement visitee) { }
 		public virtual void Visit(RestStatement visitee) { }
+		public virtual void Visit(ParameterStatement visitee) { }
+		public virtual void Visit(LoopStatement visitee) { }
 	}
 
 	public static class AstVisitorExtensions {
@@ -25,6 +26,7 @@ namespace ModularAudioSharp.Mml {
 					|| TryVisitConcreteStatement<LengthStatement>(visitee, c => visitor.Visit(c))
 					|| TryVisitConcreteStatement<ToneStatement>(visitee, c => visitor.Visit(c))
 					|| TryVisitConcreteStatement<RestStatement>(visitee, c => visitor.Visit(c))
+					|| TryVisitConcreteStatement<ParameterStatement>(visitee, c => visitor.Visit(c))
 					|| TryVisitConcreteStatement<LoopStatement>(visitee, c => visitor.Visit(c))
 					;
 

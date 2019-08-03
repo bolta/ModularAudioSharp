@@ -52,7 +52,7 @@ namespace Moddl {
 
 			var tick = new Tick(144, ticksPerBeat);
 
-			var seq = new Sequencer(tick, new SequenceThread(instrcs));
+			var seq = new Sequencer(tick, instrm.Parameters, instrcs);
 
 			//			return ((Node<float>) osc) * ((Node<float>) env); //  + (osc * env).Delay(44100 * 0.5f * 120 / 144 * 0.75f, 0.5f, 1f, (int)(44100 * 0.5f * 120 / 144 * 0.75f) + 1);
 
