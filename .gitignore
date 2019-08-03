@@ -2,3 +2,5 @@ packages
 obj
 bin
 .vs
+/ModularAudioSharp/Sequencer/junk
+/ModularAudioSharp/Sequencer/junk2
