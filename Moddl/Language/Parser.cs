@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SParse = Sprache.Parse;
 using Sprache;
+using System.Text.RegularExpressions;
 
 namespace Moddl.Language {
 	public class Parser {
@@ -55,6 +56,11 @@ namespace Moddl.Language {
 				from ss in statement.Token().Many().Token() // TODO 空白の扱い、これでよいか検証
 				select new CompilationUnit { Statements = ss };
 
-		public CompilationUnit Parse(string moddl) => compilationUnit.Parse(moddl + "\n");
+		public CompilationUnit Parse(string moddl) => compilationUnit.Parse(RemoveComments(moddl + "\n"));
+
+		private static string RemoveComments(string moddl) {
+			return Regex.Replace(moddl, @"//[^\r\n]*(\r\n|\r|\n)", "\n");
+		}
+
 	}
 }
