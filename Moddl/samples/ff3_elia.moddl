@@ -1,0 +1,28 @@
+// FF3「水の巫女エリア」
+
+@tempo 76
+
+a o5L8v15 y`duty`,0.5 @d-5
+b o5L8v08 y`duty`,0.5 @d+5 r32
+c o3L8v11 y`duty`,0.5
+
+abc [0
+
+ab e4b4.a >d4<g2 r4g48f^-48ef>c r4 <f48e^-48deb
+c f>cfafc <eb>ege<b da>dfd<a cg>cec<g
+
+ab e4b4.a >d4<g2 r4g48f^-48ef>c c4<a4f4 d2e4 e2. r2^
+a L48v11 defgab L8v15
+b L48v04 defgab L8v08 // TODO push/pop
+c f>cfafc <eb>ege<b da>dfd<a <b->fa>dfa <<a->dfa->cf <cg>cec<g cg>cegb
+
+ab >c4c4.c <b4b4.b a96b4^-96afcd f4e2
+c <a>cea>ce <<g>cegb>e <<f>cfa>cf <<cg>edc<b
+
+ab >c4c4.d e4e4.g a4a4ag a2g48a^-48g a2. ^2.
+c a>cea>ce <<g>cegb>e <<b->dfa>df <<g>dgb->dg <<a>ea>c+<ae >c+<aec+<ae
+
+ab <
+
+abc ]
+
