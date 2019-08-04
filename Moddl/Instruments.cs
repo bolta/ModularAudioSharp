@@ -20,8 +20,7 @@ namespace Moddl {
 		/// </summary>
 		/// <returns></returns>
 		public static Instrument ExponentialDecayPulseWave() {
-			var tone = Var<Tone>();
-			var freq = Temperament.Equal(tone, 440);
+			var freq = Var<float>();
 
 			var dutyInit = 0.5f; // TODO 初期値はスタック管理のため外から見える必要がありそう
 			var duty = Var(dutyInit);
@@ -32,7 +31,7 @@ namespace Moddl {
 
 			return new Instrument(output, new Dictionary<string, VarController<float>>() {
 				{ "duty", duty },
-			}, new [] { tone }, new INotable[] { /*osc,*/ env });
+			}, new [] { freq }, new INotable[] { env });
 
 		}
 

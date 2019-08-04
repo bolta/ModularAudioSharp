@@ -11,18 +11,19 @@ namespace ModularAudioSharp.Mml {
 		public const string PARAM_PART_VOLUME = "#volume";
 		public const float MAX_VOLUME = 15f;
 
-		private readonly List<VarController<Tone>> toneUsers = new List<VarController<Tone>>();
+		private readonly List<VarController<float>> freqUsers = new List<VarController<float>>();
 		private readonly List<INotable> noteUsers = new List<INotable>();
 
-		public IEnumerable<Instruction> GenerateInstructions(CompilationUnit astRoot, int tickPerBeat) {
+		public IEnumerable<Instruction> GenerateInstructions(CompilationUnit astRoot, int ticksPerBeat,
+				Temperament temper) {
 			var result = new List<Instruction>();
-			new Visitor(this, result, tickPerBeat).Visit(astRoot);
+			new Visitor(this, result, ticksPerBeat, temper).Visit(astRoot);
 
 			return result;
 		}
 
-		public SimpleMmlInstructionGenerator AddToneUsers(params VarController<Tone>[] users) {
-			this.toneUsers.AddRange(users);
+		public SimpleMmlInstructionGenerator AddFreqUsers(params VarController<float>[] users) {
+			this.freqUsers.AddRange(users);
 			return this;
 		}
 		public SimpleMmlInstructionGenerator AddNoteUsers(params INotable[] users) {
@@ -33,15 +34,19 @@ namespace ModularAudioSharp.Mml {
 		private class Visitor : AstVisitor {
 			private readonly SimpleMmlInstructionGenerator owner;
 			private readonly List<Instruction> result;
-			private readonly int tickPerBar;
+			private readonly int ticksPerBar;
+			private readonly Temperament temperament;
+
 			private int octave = 4;
 			private int length = 4;
 			private float gateRatio = 1f;
 
-			internal Visitor(SimpleMmlInstructionGenerator owner, List<Instruction> result, int tickPerBeat) {
+			internal Visitor(SimpleMmlInstructionGenerator owner, List<Instruction> result, int ticksPerBeat,
+					Temperament temperament) {
 				this.owner = owner;
 				this.result = result;
-				this.tickPerBar = 4 * tickPerBeat;
+				this.ticksPerBar = 4 * ticksPerBeat;
+				this.temperament = temperament;
 			}
 
 			public override void Visit(CompilationUnit visitee) {
@@ -58,7 +63,7 @@ namespace ModularAudioSharp.Mml {
 			}
 
 			public override void Visit(ToneCommand visitee) {
-				var stepTicks = CalcTicksFromLength(visitee.Length, this.tickPerBar, this.length);
+				var stepTicks = CalcTicksFromLength(visitee.Length, this.ticksPerBar, this.length);
 				var gateTicks = (int) (stepTicks * this.gateRatio);
 
 				// TODO ちゃんと書き直す
@@ -74,8 +79,9 @@ namespace ModularAudioSharp.Mml {
 				}
 
 				var tone = new Tone { Octave = this.octave, ToneName = toneName, Accidental = visitee.ToneName.Accidental };
+				var freq = this.temperament[tone];
 
-				this.result.AddRange(this.owner.toneUsers.Select(u => new ValueInstruction<Tone>(u, tone)));
+				this.result.AddRange(this.owner.freqUsers.Select(u => new ValueInstruction<float>(u, freq)));
 				this.result.AddRange(this.owner.noteUsers.Select(u => new NoteInstruction(u, true)));
 				this.result.Add(new WaitInstruction(gateTicks));
 
@@ -87,7 +93,7 @@ namespace ModularAudioSharp.Mml {
 			}
 
 			public override void Visit(RestCommand visitee) {
-				var ticks = CalcTicksFromLength(visitee.Length, this.tickPerBar, this.length);
+				var ticks = CalcTicksFromLength(visitee.Length, this.ticksPerBar, this.length);
 				this.result.Add(new WaitInstruction(ticks));
 			}
 

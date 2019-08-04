@@ -7,6 +7,6 @@ using ModularAudioSharp.Sequencer;
 
 namespace ModularAudioSharp.Mml {
 	interface IInstructionGenerator<AstRoot> {
-		IEnumerable<Instruction> GenerateInstructions(AstRoot root, int tickPerBeat);
+		IEnumerable<Instruction> GenerateInstructions(AstRoot root, int ticksPerBeat, Temperament temper);
 	}
 }

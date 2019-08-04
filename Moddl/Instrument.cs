@@ -16,14 +16,14 @@ namespace Moddl {
 		// TODO Node に値を設定するだけでなく他のこと（メソッドを呼ぶとか）もしたい可能性がある
 		//private readonly IDictionary<string, VarController<float>> parameters;
 
-		public IEnumerable<VarController<Tone>> ToneUsers { get; private set; }
+		public IEnumerable<VarController<float>> FreqUsers { get; private set; }
 		public IEnumerable<INotable> NoteUsers { get; private set; }
 
 		public Instrument(Node output, IDictionary<string, VarController<float>> parameters,
-				IEnumerable<VarController<Tone>> toneUsers, IEnumerable<INotable> noteUsers) {
+				IEnumerable<VarController<float>> freqUsers, IEnumerable<INotable> noteUsers) {
 			this.Output = output;
 			this.Parameters  = new Dictionary<string, VarController<float>>(parameters);
-			this.ToneUsers = toneUsers;
+			this.FreqUsers = freqUsers;
 			this.NoteUsers = noteUsers;
 		}
 	}

@@ -75,6 +75,7 @@
     <Compile Include="Sequencer\ITickUser.cs" />
     <Compile Include="Temperament.cs" />
     <Compile Include="Data\Util.cs" />
+    <Compile Include="Temperaments.cs" />
     <Compile Include="VarController.cs" />
     <Compile Include="Waveform\Interpolator.cs" />
     <Compile Include="Waveform\Waveform.cs" />

@@ -8,10 +8,10 @@ using ModularAudioSharp.Data;
 namespace ModularAudioSharp {
 
 	/// <summary>
-	/// 音律のノードを提供する static クラス
+	/// 音律（音名から周波数への対応関係）を提供するクラス
 	/// </summary>
-	public static class Temperament {
-		private static readonly Dictionary<ToneName, int> TONE_NAME_TO_SEMITONE
+	public abstract class Temperament {
+		protected static readonly Dictionary<ToneName, int> TONE_NAME_TO_SEMITONE
 				= new Dictionary<ToneName, int> {
 			{ ToneName.C, -9 },
 			{ ToneName.D, -7 },
@@ -22,20 +22,7 @@ namespace ModularAudioSharp {
 			{ ToneName.B,  2 },
 		};
 
-		public static Node<float> Equal(Node tone, float a4 = 440) {
-			return new Node<float>(Equal(((Node<Tone>) tone).UseAsStream(), a4), false, tone);
-		}
+		public abstract float this[Tone tone] { get; }
 
-		private static IEnumerable<float> Equal(IEnumerable<Tone> tone, float a4) {
-			return tone.Select(t => {
-				var baseSemitone = TONE_NAME_TO_SEMITONE.TryGetStructValue(t.ToneName);
-				if (baseSemitone.HasValue) {
-					return (float) (a4 * Math.Pow(2, t.Octave - 4 + (baseSemitone.Value + t.Accidental) / 12.0));
-
-				} else {
-					return 0f;
-				}
-			});
-		}
 	}
 }
