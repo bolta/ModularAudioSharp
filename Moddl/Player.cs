@@ -15,9 +15,10 @@ using static ModularAudioSharp.Nodes;
 namespace Moddl {
 	public class Player {
 
-		private float tempo = 120;
+		private float tempo = 120f;
 
-		public void Play(string moddl) {
+		// TODO ModularAudioSharp.Player は実装詳細なので外に出さないようにしたいが…
+		public ModularAudioSharp.Player Play(string moddl) {
 			var ast = new Parser().Parse(moddl);
 			var mmls = new Dictionary<string, StringBuilder>() {
 				{ "a", new StringBuilder() },
@@ -44,7 +45,8 @@ namespace Moddl {
 			var nodes = mmls.Values.Select(mml => this.MmlToNode(mml.ToString()));
 
 			var master = nodes.Aggregate(Const(0f), (acc, node) => (Node<float>)(acc + node * 0.25f));
-			using (ModuleSpace.Play(master.AsFloat())) Console.ReadKey(); // Thread.Sleep(10000);
+
+			return ModuleSpace.Play(master.AsFloat());
 
 		}
 
