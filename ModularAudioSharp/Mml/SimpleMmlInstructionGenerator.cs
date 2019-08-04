@@ -40,6 +40,7 @@ namespace ModularAudioSharp.Mml {
 			private int octave = 4;
 			private int length = 4;
 			private float gateRatio = 1f;
+			private Detune detune = null;
 
 			internal Visitor(SimpleMmlInstructionGenerator owner, List<Instruction> result, int ticksPerBeat,
 					Temperament temperament) {
@@ -62,6 +63,11 @@ namespace ModularAudioSharp.Mml {
 				this.result.Add(new ParameterInstruction(PARAM_PART_VOLUME, visitee.Value / MAX_VOLUME));
 			}
 
+			public override void Visit(DetuneCommand visitee) {
+				//this.result.Add(new DetuneInstruction(visitee.Value));
+				this.detune = new CentDetune(visitee.Value);
+			}
+
 			public override void Visit(ToneCommand visitee) {
 				var stepTicks = CalcTicksFromLength(visitee.Length, this.ticksPerBar, this.length);
 				var gateTicks = (int) (stepTicks * this.gateRatio);
@@ -79,7 +85,7 @@ namespace ModularAudioSharp.Mml {
 				}
 
 				var tone = new Tone { Octave = this.octave, ToneName = toneName, Accidental = visitee.ToneName.Accidental };
-				var freq = this.temperament[tone];
+				var freq = this.detune?.GetDetunedFreq(this.temperament[tone]) ?? this.temperament[tone];
 
 				this.result.AddRange(this.owner.freqUsers.Select(u => new ValueInstruction<float>(u, freq)));
 				this.result.AddRange(this.owner.noteUsers.Select(u => new NoteInstruction(u, true)));

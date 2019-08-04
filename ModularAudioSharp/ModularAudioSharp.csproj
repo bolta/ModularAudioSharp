@@ -58,6 +58,7 @@
     <Compile Include="INotable.cs" />
     <Compile Include="Mml\AstNodes.cs" />
     <Compile Include="Mml\AstVisitor.cs" />
+    <Compile Include="Detune.cs" />
     <Compile Include="Mml\IInstructionGenerator.cs" />
     <Compile Include="Mml\SimpleMmlInstructionGenerator.cs" />
     <Compile Include="Mml\SimpleMmlParser.cs" />

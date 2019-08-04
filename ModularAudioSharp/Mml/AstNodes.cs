@@ -34,6 +34,11 @@ namespace ModularAudioSharp.Mml {
 		public override string ToString() => $"v{this.Value}";
 	}
 
+	public class DetuneCommand : Command {
+		public float Value { get; set; }
+		public override string ToString() => $"@d{this.Value}";
+	}
+
 	public class ToneCommand : Command {
 		public ToneName ToneName { get; set; }
 		public Length Length { get; set; } // optional
