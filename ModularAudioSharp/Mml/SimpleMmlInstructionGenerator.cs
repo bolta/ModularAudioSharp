@@ -8,6 +8,9 @@ using ModularAudioSharp.Sequencer;
 
 namespace ModularAudioSharp.Mml {
 	public class SimpleMmlInstructionGenerator : IInstructionGenerator<CompilationUnit> {
+		public const string PARAM_PART_VOLUME = "#volume";
+		public const float MAX_VOLUME = 15f;
+
 		private readonly List<VarController<Tone>> toneUsers = new List<VarController<Tone>>();
 		private readonly List<INotable> noteUsers = new List<INotable>();
 
@@ -49,6 +52,11 @@ namespace ModularAudioSharp.Mml {
 			public override void Visit(OctaveIncrCommand visitee) { this.octave += 1; }
 			public override void Visit(OctaveDecrCommand visitee) { this.octave -= 1; }
 			public override void Visit(LengthCommand visitee) { this.length = visitee.Value; }
+
+			public override void Visit(VolumeCommand visitee) {
+				this.result.Add(new ParameterInstruction(PARAM_PART_VOLUME, visitee.Value / MAX_VOLUME));
+			}
+
 			public override void Visit(ToneCommand visitee) {
 				var stepTicks = CalcTicksFromLength(visitee.Length, this.tickPerBar, this.length);
 				var gateTicks = (int) (stepTicks * this.gateRatio);
@@ -84,8 +92,6 @@ namespace ModularAudioSharp.Mml {
 			}
 
 			public override void Visit(ParameterCommand visitee) {
-				//var ticks = CalcTicksFromLength(visitee.Length, this.tickPerBar, this.length);
-				//this.result.Add(new WaitInstruction(ticks));
 				this.result.Add(new ParameterInstruction(visitee.Name.Name, visitee.Value));
 			}
 

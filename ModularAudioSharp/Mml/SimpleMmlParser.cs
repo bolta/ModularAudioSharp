@@ -111,6 +111,10 @@ namespace ModularAudioSharp.Mml {
 		public readonly static Parser<LengthCommand> lengthCommand = from _ in SParse.String("L").Text().Token()
 																		   from l in integer.Token()
 																		   select new LengthCommand { Value = l };
+
+		public readonly static Parser<VolumeCommand> volumeCommand = from _ in SParse.String("v").Token()
+																		   from v in real.Token()
+																		   select new VolumeCommand { Value = v };
 		/// <summary>
 		/// 音高・音長を指定して発音する。
 		/// 音長は省略できる（音長の定義が空の音長を許容するため）
@@ -148,6 +152,7 @@ namespace ModularAudioSharp.Mml {
 				.Or(octaveIncrCommand)
 				.Or(octaveDecrCommand)
 				.Or(lengthCommand)
+				.Or(volumeCommand)
 				.Or(toneCommand)
 				.Or(restCommand)
 				.Or(parameterCommand)

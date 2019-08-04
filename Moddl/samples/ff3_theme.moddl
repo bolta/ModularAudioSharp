@@ -1,8 +1,8 @@
 ﻿@tempo 144
 
-a	o5L4
-b	o4L8
-c	o3L2
+a	o5L4v15
+b	o4L8v11
+c	o3L2v13
 
 a	g+d+ef+ g2f+e e1 d+2...r16
 b	b2g4ab> c4<b4a4g4 f+2ef+ga b4f+ga4d+4
@@ -16,7 +16,8 @@ a	e2g2 f+2^8.r16d+4 a2>c2< bag+f+
 b	g2e4g4 <b4b>c+d+2 e4f+4g4e4 d+4c+4<b4a4
 c	cdef+g4f+e d+ef+ga4b4> L2 c<a f+<b
 
-abc y`duty`,0.25
+a	y`duty`,0.25
+b	y`duty`,0.125
 
 abc	[0
 

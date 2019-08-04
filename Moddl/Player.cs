@@ -44,9 +44,10 @@ namespace Moddl {
 
 			var nodes = mmls.Values.Select(mml => this.MmlToNode(mml.ToString()));
 
-			var master = nodes.Aggregate(Const(0f), (acc, node) => (Node<float>)(acc + node * 0.25f));
+			var master = nodes.Aggregate(Const(0f), (acc, node) => (Node<float>)(acc + node));
+			var masterVol = 0.25f;
 
-			return ModuleSpace.Play(master.AsFloat());
+			return ModuleSpace.Play((master * masterVol).AsFloat());
 
 		}
 
@@ -58,9 +59,11 @@ namespace Moddl {
 
 		}
 
+
 		private Node<float> MmlToNode(string mml) {
 			var ticksPerBeat = 96;
 			var instrm = Instruments.ExponentialDecayPulseWave();
+			var vol = Var(1f);
 
 			var parser = new SimpleMmlParser();
 			var ast = parser.Parse(mml);
@@ -71,12 +74,14 @@ namespace Moddl {
 
 			var tick = new Tick(this.tempo, ticksPerBeat);
 
-			var seq = new Sequencer(tick, instrm.Parameters, instrcs);
+			var parameters = new Dictionary<string, VarController<float>>(instrm.Parameters) {
+				{  SimpleMmlInstructionGenerator.PARAM_PART_VOLUME, vol },
+			};
 
-			//			return ((Node<float>) osc) * ((Node<float>) env); //  + (osc * env).Delay(44100 * 0.5f * 120 / 144 * 0.75f, 0.5f, 1f, (int)(44100 * 0.5f * 120 / 144 * 0.75f) + 1);
+			var seq = new Sequencer(tick, parameters, instrcs);
 
 			// TODO ステレオに正しく対応（キャストを除去）
-			return (Node<float>) instrm.Output;
+			return (Node<float>) (instrm.Output * vol);
 		}
 	}
 }

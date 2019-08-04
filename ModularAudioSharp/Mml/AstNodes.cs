@@ -28,6 +28,12 @@ namespace ModularAudioSharp.Mml {
 		public int Value { get; set; }
 		public override string ToString() => $"L{this.Value}";
 	}
+
+	public class VolumeCommand : Command {
+		public float Value { get; set; }
+		public override string ToString() => $"v{this.Value}";
+	}
+
 	public class ToneCommand : Command {
 		public ToneName ToneName { get; set; }
 		public Length Length { get; set; } // optional
