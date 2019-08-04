@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Moddl {
 	class Program {
-		static void Main(string[] args) {
-			var moddl = 
-@"
+		private static string moddl = 
+@"@tempo 144
+
 a	o5L4
 a	g+d+ef+ g2f+e e1 d+2...r16
 a	c2e2 d+2^8.r16<b> e2g2 f+2...r16
@@ -41,6 +41,8 @@ c	br>babrgr f+r>c+r<ar<ab> cr>cr<ef+g4 f+4d+4<b4a4>
 c	L2
 abc ]
 ";
+
+		static void Main(string[] args) {
 			new Player().Play(moddl);
 		}
 	}

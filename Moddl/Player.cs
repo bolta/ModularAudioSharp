@@ -14,6 +14,9 @@ using static ModularAudioSharp.Nodes;
 
 namespace Moddl {
 	public class Player {
+
+		private float tempo = 120;
+
 		public void Play(string moddl) {
 			var ast = new Parser().Parse(moddl);
 			var mmls = new Dictionary<string, StringBuilder>() {
@@ -23,23 +26,37 @@ namespace Moddl {
 			};
 
 			foreach (var stmt in ast.Statements) {
-				var mmlStmt = stmt as MmlStatement;
-				if (mmlStmt == null) continue;
+				var dirStmt = stmt as DirectiveStatement;
+				if (dirStmt != null) {
+					this.ProcessDirectiveStatement(dirStmt);
+					continue;
+				}
 
-				foreach (var part in mmlStmt.Parts) {
-					// TODO パート名が正しいかチェック
-					mmls[part].AppendLine(mmlStmt.Mml);
+				var mmlStmt = stmt as MmlStatement;
+				if (mmlStmt != null) {
+					foreach (var part in mmlStmt.Parts) {
+						// TODO パート名が正しいかチェック
+						mmls[part].AppendLine(mmlStmt.Mml);
+					}
 				}
 			}
 
-			var nodes = mmls.Values.Select(mml => MmlToNode(mml.ToString()));
+			var nodes = mmls.Values.Select(mml => this.MmlToNode(mml.ToString()));
 
 			var master = nodes.Aggregate(Const(0f), (acc, node) => (Node<float>)(acc + node * 0.25f));
 			using (ModuleSpace.Play(master.AsFloat())) Console.ReadKey(); // Thread.Sleep(10000);
 
 		}
 
-		private static Node<float> MmlToNode(string mml) {
+		private void ProcessDirectiveStatement(DirectiveStatement stmt) {
+			if (stmt.Name == "tempo") {
+				// TODO エラーチェック
+				this.tempo = ((FloatValue) stmt.Arguments[0]).Value;
+			}
+
+		}
+
+		private Node<float> MmlToNode(string mml) {
 			var ticksPerBeat = 96;
 			var instrm = Instruments.ExponentialDecayPulseWave();
 
@@ -50,7 +67,7 @@ namespace Moddl {
 			foreach (var n in instrm.NoteUsers) instrcGen.AddNoteUsers(n);
 			var instrcs = instrcGen.GenerateInstructions(ast, ticksPerBeat).ToList();
 
-			var tick = new Tick(144, ticksPerBeat);
+			var tick = new Tick(this.tempo, ticksPerBeat);
 
 			var seq = new Sequencer(tick, instrm.Parameters, instrcs);
 
