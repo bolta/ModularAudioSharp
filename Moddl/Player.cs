@@ -63,6 +63,7 @@ namespace Moddl {
 		private Node<float> MmlToNode(string mml) {
 			var ticksPerBeat = 96;
 			var instrm = Instruments.ExponentialDecayPulseWave();
+			//var instrm = Instruments.FilteredNoise();
 			var temper = new EqualTemperament(440f);
 			var vol = Var(1f);
 

@@ -35,5 +35,19 @@ namespace Moddl {
 
 		}
 
+		public static Instrument FilteredNoise() {
+			var freq = Var<float>();
+			var qInit = 30f;
+			var q = Var(qInit);
+
+			var osc = (Noise() * 0.5f).Lpf(freq, q);//.Limit(-1f, 1f);
+			var output = osc;
+
+			return new Instrument(output, new Dictionary<string, VarController<float>>() {
+				{ "q", q },
+			}, new [] { freq }, new INotable[] {  });
+
+		}
+
 	}
 }
