@@ -58,12 +58,11 @@ namespace Moddl {
 			var freq = Var<float>();
 
 			var osc = TriangleOsc(freq);
-			var output = osc.QuantCrush(-1f, 1f, 16);
+			var env = PlainEnv();
+			var output = (osc * env).QuantCrush(-1f, 1f, 16);
 
 			return new Instrument(output, new Dictionary<string, VarController<float>>() {
-			}, new [] { freq }, new INotable[] {
-				//env,
-			});
+			}, new [] { freq }, new INotable[] { env });
 
 		}
 

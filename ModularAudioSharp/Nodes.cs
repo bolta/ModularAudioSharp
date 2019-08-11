@@ -35,6 +35,9 @@ namespace ModularAudioSharp {
 		public static ExpEnvController ExpEnv(float ratioPerSec)
 				=> new ExpEnvController(ratioPerSec);
 
+		public static PlainEnvController PlainEnv()
+				=> new PlainEnvController();
+
 		private static IEnumerable<T> Delay<T>(IEnumerable<T> source, int amount_smp) where T : struct {
 			var buffer = new T[amount_smp];
 			var index = 0;
