@@ -97,6 +97,17 @@ namespace ModularAudioSharp {
 			}
 		}
 
+		public static Node<float> Noise() {
+			return Node.Create(NoiseEnum(), true);
+		}
+		private static IEnumerable<float> NoiseEnum() {
+			var rand = new Random();
+			while (true) {
+				var value = (float) (rand.NextDouble() * 2 - 1);
+				yield return value;
+			}
+		}
+
 		/// <summary>
 		/// Audio EQ Cookbook に依ったローパスフィルタ
 		/// </summary>
