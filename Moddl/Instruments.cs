@@ -42,7 +42,7 @@ namespace Moddl {
 
 			// BPF だとノイズが残っていまいちな音だった
 //			var osc = (Noise()).Bpf(freq, q);//.Limit(-1f, 1f);
-			var osc = (Noise() * 0.06125f).Lpf(freq, q).Hpf(freq, q);//.Limit(-1f, 1f);
+			var osc = (Noise() * 0.125f).Lpf(freq, q).Hpf(freq, q);//.Limit(-1f, 1f);
 //			var env = ExpEnv(1 / 8f);
 			var output = osc;// * env;
 

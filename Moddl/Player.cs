@@ -17,6 +17,8 @@ namespace Moddl {
 
 		private float tempo = 120f;
 
+		private readonly Dictionary<string, Instrument> instruments = new Dictionary<string, Instrument>();
+
 		// TODO ModularAudioSharp.Player は実装詳細なので外に出さないようにしたいが…
 		public ModularAudioSharp.Player Play(string moddl) {
 			var ast = new Parser().Parse(moddl);
@@ -42,7 +44,7 @@ namespace Moddl {
 				}
 			}
 
-			var nodes = mmls.Values.Select(mml => this.MmlToNode(mml.ToString()));
+			var nodes = mmls.Select(kv => this.MmlToNode(kv.Key, kv.Value.ToString()));
 
 			var master = nodes.Aggregate(Const(0f), (acc, node) => (Node<float>)(acc + node));
 			var masterVol = 0.25f;
@@ -55,15 +57,34 @@ namespace Moddl {
 			if (stmt.Name == "tempo") {
 				// TODO エラーチェック
 				this.tempo = ((FloatValue) stmt.Arguments[0]).Value;
-			}
 
+			} else if (stmt.Name == "instrument") {
+				// TODO 引数の型・数のチェック
+				var tracks = ((TrackSetValue) stmt.Arguments[0]).Value;
+				var instrmName = ((IdentifierValue) stmt.Arguments[1]).Value;
+
+				foreach (var track in tracks) {
+					// TODO 重複設定はエラーにする
+					this.instruments.Add(track, ResolveInstrumentByName(instrmName));
+				}
+			}
+		}
+
+		private static readonly Dictionary<string, Func<Instrument>> INSTRUMENTS = new Dictionary<string, Func<Instrument>> {
+			{ "exponentialDecayPulseWave", Instruments.ExponentialDecayPulseWave },
+			{ "filteredNoise", Instruments.FilteredNoise },
+		};
+
+		private static Instrument ResolveInstrumentByName(string name) {
+			// TODO 名前が見つからない場合エラーにする
+			return INSTRUMENTS[name]();
 		}
 
 
-		private Node<float> MmlToNode(string mml) {
+		private Node<float> MmlToNode(string track, string mml) {
 			var ticksPerBeat = 96;
-			var instrm = Instruments.ExponentialDecayPulseWave();
-			//var instrm = Instruments.FilteredNoise();
+			// TODO 該当トラックにインストゥルメントが定義されていないとこけるので、エラー処理
+			var instrm = this.instruments[track];
 			var temper = new EqualTemperament(440f);
 			var vol = Var(1f);
 

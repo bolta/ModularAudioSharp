@@ -24,8 +24,23 @@ namespace Moddl.Language {
 				from val in SParse.Regex(@"[+-]?[0-9]+(\.[0-9]+)?|[+-]?\.[0-9]+").WithWhiteSpace()
 				select new FloatValue { Value = Convert.ToSingle(val) };
 
+		public readonly static Parser<IEnumerable<string>> trackSet =
+				from tracks in SParse.Chars("abc").AtLeastOnce() // TODO case insensitive で任意の英字を許す
+				select tracks.Select(c => c.ToString());
+
+		public readonly static Parser<Value> trackSetValue =
+				from _ in SParse.String("^")
+				from tracks in trackSet
+				select new TrackSetValue { Value = new List<string>(tracks) };
+
+		public readonly static Parser<Value> identifierValue =
+				from id in SParse.Regex(@"[a-zA-Z_][a-zA-Z_0-9]*")
+				select new IdentifierValue { Value = id };
+
 		public readonly static Parser<Value> value =
-				floatValue;
+				floatValue
+				.Or(trackSetValue)
+				.Or(identifierValue);
 
 		public readonly static Parser<IEnumerable<Value>> valueList =
 				from head in value.WithWhiteSpace()
@@ -33,12 +48,12 @@ namespace Moddl.Language {
 				select new[] { head }.Concat(tail);
 
 		public readonly static Parser<MmlStatement> mmlStatement =
-				from parts in SParse.Chars("abc").AtLeastOnce() // TODO case insensitive で任意の英字を許す
+				from parts in trackSet
 				from _ in SParse.WhiteSpace.AtLeastOnce()
 				from mml in SParse.Regex(@"[^\r\n]*")
 				from __ in SParse.LineEnd
 				select new MmlStatement {
-					Parts = parts.Select(c => c.ToString()),
+					Parts = parts,
 					Mml = mml,
 				};
 

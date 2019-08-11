@@ -2,6 +2,9 @@
 
 @tempo 76
 
+@instrument ^ab, exponentialDecayPulseWave
+@instrument ^c, filteredNoise
+
 a o5L8v15 y`duty`,0.5 @d-5
 b o5L8v08 y`duty`,0.5 @d+5 r32
 c o3L8v11 y`duty`,0.5
@@ -20,7 +23,7 @@ ab >c4c4.c <b4b4.b a96b4^-96afcd f4e2
 c <a>cea>ce <<g>cegb>e <<f>cfa>cf <<cg>edc<b
 
 ab >c4c4.d e4e4.g a4a4ag a2g48a^-48g a2. ^2.
-c a>cea>ce <<g>cegb>e <<b->dfa>df <<g>dgb->dg <<a>ea>c+<ae >c+<aec+<ae
+c a>cea>ce <<g>cegb>e <<b->dfa>df <<gb->dgb->d <<a>ea>c+<ae >c+<aec+<ae
 
 ab <
 

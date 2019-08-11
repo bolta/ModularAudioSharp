@@ -34,4 +34,12 @@ namespace Moddl.Language {
 	public class FloatValue : Value {
 		public float Value { get; set; }
 	}
+
+	public class TrackSetValue : Value {
+		public IList<string> Value { get; set; }
+	}
+
+	public class IdentifierValue : Value {
+		public string Value { get; set; }
+	}
 }
