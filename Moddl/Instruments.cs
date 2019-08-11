@@ -40,12 +40,17 @@ namespace Moddl {
 			var qInit = 30f;
 			var q = Var(qInit);
 
-			var osc = (Noise() * 0.5f).Lpf(freq, q);//.Limit(-1f, 1f);
-			var output = osc;
+			// BPF だとノイズが残っていまいちな音だった
+//			var osc = (Noise()).Bpf(freq, q);//.Limit(-1f, 1f);
+			var osc = (Noise() * 0.06125f).Lpf(freq, q).Hpf(freq, q);//.Limit(-1f, 1f);
+//			var env = ExpEnv(1 / 8f);
+			var output = osc;// * env;
 
 			return new Instrument(output, new Dictionary<string, VarController<float>>() {
 				{ "q", q },
-			}, new [] { freq }, new INotable[] {  });
+			}, new [] { freq }, new INotable[] {
+				//env,
+			});
 
 		}
 

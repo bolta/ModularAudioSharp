@@ -134,6 +134,58 @@ namespace ModularAudioSharp {
 		}
 
 		/// <summary>
+		/// Audio EQ Cookbook に依ったハイパスフィルタ
+		/// </summary>
+		/// <param name="input"></param>
+		/// <param name="cutoffFreq"></param>
+		/// <param name="q"></param>
+		/// <returns></returns>
+		public static Node<float> Hpf(this Node input, Node cutoffFreq, Node q) {
+			// TODO この 4 つ LPF と共通化
+			var w0 = (2 * (float) Math.PI * cutoffFreq / ModuleSpace.SampleRate).AsFloat();
+			var cosw0 = w0.Select(w => (float) Math.Cos(w));
+			var sinw0 = w0.Select(w => (float) Math.Sin(w));
+			var alpha = sinw0 / (2 * q);
+
+			var b0 = (1 + cosw0) / 2;
+			var b1 = -1 * (1 + cosw0);
+			var b2 = (1 + cosw0) / 2;
+			var a0 = 1 + alpha;
+			var a1 = -2 * cosw0;
+			var a2 = 1 - alpha;
+
+			return BiQuadFilter(input.AsFloat(),
+					b0.AsFloat(), b1.AsFloat(), b2.AsFloat(),
+					a0.AsFloat(), a1.AsFloat(), a2.AsFloat());
+		}
+
+		/// <summary>
+		/// Audio EQ Cookbook に依ったバンドパスフィルタ
+		/// </summary>
+		/// <param name="input"></param>
+		/// <param name="cutoffFreq"></param>
+		/// <param name="q"></param>
+		/// <returns></returns>
+		public static Node<float> Bpf(this Node input, Node cutoffFreq, Node q) {
+			// TODO この 4 つ LPF と共通化
+			var w0 = (2 * (float) Math.PI * cutoffFreq / ModuleSpace.SampleRate).AsFloat();
+			var cosw0 = w0.Select(w => (float) Math.Cos(w));
+			var sinw0 = w0.Select(w => (float) Math.Sin(w));
+			var alpha = sinw0 / (2 * q);
+
+			var b0 = q * alpha;
+			var b1 = Const(0f);
+			var b2 = -1 * q * alpha;
+			var a0 = 1 + alpha;
+			var a1 = -2 * cosw0;
+			var a2 = 1 - alpha;
+
+			return BiQuadFilter(input.AsFloat(),
+					b0.AsFloat(), b1.AsFloat(), b2.AsFloat(),
+					a0.AsFloat(), a1.AsFloat(), a2.AsFloat());
+		}
+
+		/// <summary>
 		/// Audio EQ Cookbook に依った Bi-Quad フィルタ
 		/// </summary>
 		/// <param name="input"></param>
