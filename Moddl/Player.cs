@@ -37,9 +37,9 @@ namespace Moddl {
 
 				var mmlStmt = stmt as MmlStatement;
 				if (mmlStmt != null) {
-					foreach (var part in mmlStmt.Parts) {
+					foreach (var track in mmlStmt.Tracks) {
 						// TODO パート名が正しいかチェック
-						mmls[part].AppendLine(mmlStmt.Mml);
+						mmls[track].AppendLine(mmlStmt.Mml);
 					}
 				}
 			}
@@ -98,7 +98,7 @@ namespace Moddl {
 			var tick = new Tick(this.tempo, ticksPerBeat);
 
 			var parameters = new Dictionary<string, VarController<float>>(instrm.Parameters) {
-				{  SimpleMmlInstructionGenerator.PARAM_PART_VOLUME, vol },
+				{  SimpleMmlInstructionGenerator.PARAM_TRACK_VOLUME, vol },
 			};
 
 			var seq = new Sequencer(tick, parameters, instrcs);

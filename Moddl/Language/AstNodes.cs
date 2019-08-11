@@ -20,10 +20,10 @@ namespace Moddl.Language {
 	}
 
 	public class MmlStatement : Statement {
-		public IEnumerable<string> Parts { get; set; }
+		public IEnumerable<string> Tracks { get; set; }
 		public string Mml { get; set; }
 		public override string ToString() => string.Format("{0} {1}",
-				string.Join("", this.Parts),
+				string.Join("", this.Tracks),
 				this.Mml);
 	}
 

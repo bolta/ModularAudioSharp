@@ -11,7 +11,7 @@ namespace Moddl.Language {
 			var result = parser.Parse("abc o4L8v15cde");
 			Assert.AreEqual(result.Statements.Count(), 1);
 			var stmt = (MmlStatement) result.Statements.First();
-			CollectionAssert.AreEqual(new [] { "a", "b", "c"}, stmt.Parts.ToArray());
+			CollectionAssert.AreEqual(new [] { "a", "b", "c"}, stmt.Tracks.ToArray());
 			Assert.AreEqual("o4L8v15cde", stmt.Mml);
 		}
 

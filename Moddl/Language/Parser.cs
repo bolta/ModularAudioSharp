@@ -48,12 +48,12 @@ namespace Moddl.Language {
 				select new[] { head }.Concat(tail);
 
 		public readonly static Parser<MmlStatement> mmlStatement =
-				from parts in trackSet
+				from tracks in trackSet
 				from _ in SParse.WhiteSpace.AtLeastOnce()
 				from mml in SParse.Regex(@"[^\r\n]*")
 				from __ in SParse.LineEnd
 				select new MmlStatement {
-					Parts = parts,
+					Tracks = tracks,
 					Mml = mml,
 				};
 

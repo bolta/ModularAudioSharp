@@ -8,7 +8,7 @@ using ModularAudioSharp.Sequencer;
 
 namespace ModularAudioSharp.Mml {
 	public class SimpleMmlInstructionGenerator : IInstructionGenerator<CompilationUnit> {
-		public const string PARAM_PART_VOLUME = "#volume";
+		public const string PARAM_TRACK_VOLUME = "#volume";
 		public const float MAX_VOLUME = 15f;
 
 		private readonly List<VarController<float>> freqUsers = new List<VarController<float>>();
@@ -60,7 +60,7 @@ namespace ModularAudioSharp.Mml {
 			public override void Visit(LengthCommand visitee) { this.length = visitee.Value; }
 
 			public override void Visit(VolumeCommand visitee) {
-				this.result.Add(new ParameterInstruction(PARAM_PART_VOLUME, visitee.Value / MAX_VOLUME));
+				this.result.Add(new ParameterInstruction(PARAM_TRACK_VOLUME, visitee.Value / MAX_VOLUME));
 			}
 
 			public override void Visit(DetuneCommand visitee) {
