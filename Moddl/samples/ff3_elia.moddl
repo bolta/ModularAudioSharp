@@ -1,9 +1,9 @@
 // FF3「水の巫女エリア」
 
-@tempo 76
+@tempo 80
 
 @instrument ^ab, exponentialDecayPulseWave
-@instrument ^c, filteredNoise
+@instrument ^c, triangleOsc
 
 a o5L8v15 y`duty`,0.5 @d-5
 b o5L8v08 y`duty`,0.5 @d+5 r32

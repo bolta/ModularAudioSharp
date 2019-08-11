@@ -58,6 +58,21 @@ namespace ModularAudioSharp {
 			return Osc((Node<float>) freq, phase => phase % (2 * Math.PI) < Math.PI ? 1f : -1f, crazy);
 		}
 
+		public static Node<float> TriangleOsc(Node freq, bool crazy = false) {
+			const float twoPi = (float) (2 * Math.PI);
+			return Osc((Node<float>) freq,
+					phase => {
+						var p = phase % twoPi;
+						return (float) (
+ 								p < Math.PI * 0.5
+										? (2 / Math.PI) * p
+								: p < Math.PI * 1.5
+										? - (2 / Math.PI) * p + 2
+								:
+										(2 / Math.PI) * p - 4);
+					}, crazy);
+		}
+
 		public static Node<float> Osc(Node freq, Func<float, float> func, bool crazy = false) {
 			var phaseDiffs = freq.AsFloat().UseAsStream().Select(f => (float) (2 * Math.PI * f / ModuleSpace.SampleRate));
 			return Node.Create(Osc(phaseDiffs, func, crazy), true, freq);

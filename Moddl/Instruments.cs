@@ -54,5 +54,18 @@ namespace Moddl {
 
 		}
 
+		public static Instrument TriangleOsc() {
+			var freq = Var<float>();
+
+			var osc = Nodes.TriangleOsc(freq);
+			var output = osc;
+
+			return new Instrument(output, new Dictionary<string, VarController<float>>() {
+			}, new [] { freq }, new INotable[] {
+				//env,
+			});
+
+		}
+
 	}
 }
