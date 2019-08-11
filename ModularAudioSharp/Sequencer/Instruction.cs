@@ -63,8 +63,11 @@ namespace ModularAudioSharp.Sequencer {
 			this.value = value;
 		}
 		internal override void Execute(SequenceThread thread) {
-		//	// TODO name が見つからなかったときのエラー処理をちゃんとする
-			thread.Sequencer.Parameters[this.name].Set(this.value);
+		// name が見つからなかったときはとりあえず無視するようにしたがエラーを出すべきかもしれない
+			var @params = thread.Sequencer.Parameters;
+			if (@params.ContainsKey(this.name)) {
+				@params[this.name].Set(this.value);
+			}
 		}
 	}
 
