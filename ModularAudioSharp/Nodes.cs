@@ -112,9 +112,8 @@ namespace ModularAudioSharp {
 			}
 		}
 
-		public static Node<float> Noise() {
-			return Node.Create(NoiseEnum(), true);
-		}
+		public static Node<float> Noise() => Node.Create(NoiseEnum(), true);
+
 		private static IEnumerable<float> NoiseEnum() {
 			var rand = new Random();
 			while (true) {
