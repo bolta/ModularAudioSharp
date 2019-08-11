@@ -1,5 +1,9 @@
 ﻿@tempo 144
 
+@instrument ^ab, exponentialDecayPulseWave
+@instrument ^c, nesTriangle
+// @instrument ^abc, filteredNoise
+
 a	o5L4v15
 b	o4L8v11
 c	o3L2v13
