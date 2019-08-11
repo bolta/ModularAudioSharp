@@ -37,20 +37,18 @@ namespace Moddl {
 
 		public static Instrument FilteredNoise() {
 			var freq = Var<float>();
-			var qInit = 30f;
+			var qInit = 17.5f;
 			var q = Var(qInit);
 
 			// BPF だとノイズが残っていまいちな音だった
 //			var osc = (Noise()).Bpf(freq, q);//.Limit(-1f, 1f);
 			var osc = (Noise() * 0.125f).Lpf(freq, q).Hpf(freq, q);//.Limit(-1f, 1f);
-//			var env = ExpEnv(1 / 8f);
-			var output = osc;// * env;
+			var env = PlainEnv();
+			var output = osc * env;
 
 			return new Instrument(output, new Dictionary<string, VarController<float>>() {
 				{ "q", q },
-			}, new [] { freq }, new INotable[] {
-				//env,
-			});
+			}, new [] { freq }, new INotable[] { env });
 
 		}
 
