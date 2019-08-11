@@ -3,7 +3,7 @@
 @tempo 80
 
 @instrument ^ab, exponentialDecayPulseWave
-@instrument ^c, triangleOsc
+@instrument ^c, nesTriangle
 
 a o5L8v15 y`duty`,0.5 @d-5
 b o5L8v08 y`duty`,0.5 @d+5 r32

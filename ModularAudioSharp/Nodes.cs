@@ -277,6 +277,21 @@ namespace ModularAudioSharp {
 		private static IEnumerable<float> Limit(IEnumerable<float> src, IEnumerable<float> min, IEnumerable<float> max)
 				=> src.Zip(min, max, (s, mn, mx) => s < mn ? mn : s > mx ? mx : s);
 
+		public static Node<float> QuantCrush(this Node src, Node min, Node max, Node resolution)
+				=> Node.Create(QuantCrush(src.AsFloat().UseAsStream(), min.AsFloat().UseAsStream(),
+						max.AsFloat().UseAsStream(), resolution.AsInt().UseAsStream()), false, src, min, max, resolution);
+		private static IEnumerable<float> QuantCrush(IEnumerable<float> src, IEnumerable<float> min, IEnumerable<float> max,
+				IEnumerable<int> resolution)
+				=> src.Zip(min, max, resolution, (s, mn, mx, r) => {
+					return mn == mx
+							? 0f
+					: s < mn
+							? mn
+					: s > mx
+							? mx
+					:
+							(float) (Math.Floor(r * (s - mn) / (mx - mn)) / r * (mx - mn) + mn);
+				});
 
 		public static Node<Stereo<T>> ZipToStereo<T>(Node<T> left, Node<T> right) where T : struct
 				=> Node.Create(left.UseAsStream().Zip(right.UseAsStream(), Stereo.Create), false, left, right);

@@ -54,11 +54,11 @@ namespace Moddl {
 
 		}
 
-		public static Instrument TriangleOsc() {
+		public static Instrument NesTriangle() {
 			var freq = Var<float>();
 
-			var osc = Nodes.TriangleOsc(freq);
-			var output = osc;
+			var osc = TriangleOsc(freq);
+			var output = osc.QuantCrush(-1f, 1f, 16);
 
 			return new Instrument(output, new Dictionary<string, VarController<float>>() {
 			}, new [] { freq }, new INotable[] {

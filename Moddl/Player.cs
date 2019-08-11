@@ -73,7 +73,7 @@ namespace Moddl {
 		private static readonly Dictionary<string, Func<Instrument>> INSTRUMENTS = new Dictionary<string, Func<Instrument>> {
 			{ "exponentialDecayPulseWave", Instruments.ExponentialDecayPulseWave },
 			{ "filteredNoise", Instruments.FilteredNoise },
-			{ "triangleOsc", Instruments.TriangleOsc },
+			{ "nesTriangle", Instruments.NesTriangle },
 		};
 
 		private static Instrument ResolveInstrumentByName(string name) {
