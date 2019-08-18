@@ -42,7 +42,11 @@ namespace ModularAudioSharp.Mml {
 	public class ToneCommand : Command {
 		public ToneName ToneName { get; set; }
 		public Length Length { get; set; } // optional
-		public override string ToString() => $"{this.ToneName}{this.Length?.ToString() ?? ""}";
+		public bool Slur { get; set; } // optional
+		public override string ToString() => string.Format("{0}{1}[2}",
+				this.ToneName,
+				this.Length?.ToString() ?? "",
+				this.Slur ? "&" : "");
 	}
 	public class RestCommand : Command {
 		public Length Length { get; set; } // optional

@@ -127,8 +127,13 @@ namespace ModularAudioSharp.Mml {
 		/// 例：c, d+4, e--^.
 		/// </summary>
 		public readonly static Parser<ToneCommand> toneCommand = from t in toneName
-																	   from l in length
-																	   select new ToneCommand { ToneName = t, Length = l };
+																 from l in length
+																 from s in SParse.String("&").Optional().Token()
+																 select new ToneCommand {
+																	 ToneName = t,
+																	 Length = l,
+																	 Slur = s.IsDefined,
+																 };
 
 		public readonly static Parser<RestCommand> restCommand
 				= from _ in SParse.String("r").Text().Token()

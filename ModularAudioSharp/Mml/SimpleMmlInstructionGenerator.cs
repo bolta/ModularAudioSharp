@@ -39,6 +39,10 @@ namespace ModularAudioSharp.Mml {
 
 			private int octave = 4;
 			private int length = 4;
+			/// <summary>
+			/// スラーの途中（前の音符にスラーがついていた）かどうか
+			/// </summary>
+			private bool slur = false;
 			private float gateRatio = 1f;
 			private Detune detune = null;
 
@@ -88,14 +92,20 @@ namespace ModularAudioSharp.Mml {
 				var freq = this.detune?.GetDetunedFreq(this.temperament[tone]) ?? this.temperament[tone];
 
 				this.result.AddRange(this.owner.freqUsers.Select(u => new ValueInstruction<float>(u, freq)));
-				this.result.AddRange(this.owner.noteUsers.Select(u => new NoteInstruction(u, true)));
+				if (! this.slur) {
+					this.result.AddRange(this.owner.noteUsers.Select(u => new NoteInstruction(u, true)));
+				}
 				this.result.Add(new WaitInstruction(gateTicks));
 
-				this.result.AddRange(this.owner.noteUsers.Select(u => new NoteInstruction(u, false)));
+				if (! visitee.Slur) {
+					this.result.AddRange(this.owner.noteUsers.Select(u => new NoteInstruction(u, false)));
+				}
 
 				if (stepTicks - gateTicks > 0) {
 					this.result.Add(new WaitInstruction(stepTicks - gateTicks));
 				}
+
+				this.slur = visitee.Slur;
 			}
 
 			public override void Visit(RestCommand visitee) {
