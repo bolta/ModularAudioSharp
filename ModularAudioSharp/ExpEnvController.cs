@@ -26,25 +26,25 @@ namespace ModularAudioSharp {
 		/// <summary>
 		/// <strong>サンプル</strong>ごとの減衰率。プロパティ RatioPer<strong>Sec</strong> から設定される
 		/// </summary>
-		private float ratioPerSample;
+		private IEnumerable<float> ratioPerSample;
 
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="ratioPerSec">1 秒ごとの減衰率</param>
-		public ExpEnvController(float ratioPerSec)
+		public ExpEnvController(Node ratioPerSec)
 			: base(true)
 		{
-			this.RatioPerSec = ratioPerSec;
+			this.ratioPerSample = ratioPerSec.AsFloat().UseAsStream().Select(rPS =>
+					(float) Math.Pow(rPS, 1.0 / ModuleSpace.SampleRate));
 		}
 
 		protected override IEnumerable<float> Signal() {
-			while (true) {
+			foreach (var r in this.ratioPerSample) {
 				yield return this.amplitude;
-
 				if (this.state == State.Idle) continue;
 
-				this.amplitude *= this.ratioPerSample;
+				this.amplitude *= r;
 				if (this.amplitude < AMPLITUDE_MIN) this.NoteOff();
 			}
 		}
@@ -64,21 +64,6 @@ namespace ModularAudioSharp {
 			this.amplitude = 0;
 			this.state = State.Idle;
 		}
-
-		/// <summary>
-		/// 1 秒ごとの減衰率を設定する
-		/// </summary>
-		public float RatioPerSec {
-			set { this.ratioPerSample = ToRatioPerSample(value); }
-		}
-
-		/// <summary>
-		/// 減衰率を秒単位からサンプル単位に変換
-		/// </summary>
-		/// <param name="ratioPerSec"></param>
-		/// <returns></returns>
-		private static float ToRatioPerSample(float ratioPerSec)
-				=> (float) Math.Pow(ratioPerSec, 1.0 / ModuleSpace.SampleRate);
 
 		private enum State {
 			/// <summary>

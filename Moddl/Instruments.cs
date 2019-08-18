@@ -26,11 +26,13 @@ namespace Moddl {
 			var duty = Var(dutyInit);
 
 			var osc = PulseOsc(freq, duty);
-			var env = ExpEnv(1 / 8f);
+			var decay = Var(1 / 8f);
+			var env = ExpEnv(decay);
 			var output = osc * env;
 
 			return new Instrument(output, new Dictionary<string, VarController<float>>() {
 				{ "duty", duty },
+				{ "decay", decay },
 			}, new [] { freq }, new INotable[] { env });
 
 		}
