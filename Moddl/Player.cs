@@ -74,6 +74,7 @@ namespace Moddl {
 			{ "exponentialDecayPulseWave", Instruments.ExponentialDecayPulseWave },
 			{ "filteredNoise", Instruments.FilteredNoise },
 			{ "nesTriangle", Instruments.NesTriangle },
+			{ "adsrPulseWave", Instruments.AdsrPulseWave },
 		};
 
 		private static Instrument ResolveInstrumentByName(string name) {

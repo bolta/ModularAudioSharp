@@ -19,7 +19,7 @@ namespace Moddl {
 		/// 指数的に減衰するパルス波
 		/// </summary>
 		/// <returns></returns>
-		public static Instrument ExponentialDecayPulseWave() {
+		internal static Instrument ExponentialDecayPulseWave() {
 			var freq = Var<float>();
 
 			var dutyInit = 0.5f; // TODO 初期値はスタック管理のため外から見える必要がありそう
@@ -34,10 +34,33 @@ namespace Moddl {
 				{ "duty", duty },
 				{ "decay", decay },
 			}, new [] { freq }, new INotable[] { env });
-
 		}
 
-		public static Instrument FilteredNoise() {
+		internal static Instrument AdsrPulseWave() {
+			var freq = Var<float>();
+
+			// TODO 初期値はスタック管理のため外から見える必要がありそう
+			var duty = Var(0.5f);
+
+			var attack = Var(0.15f);
+			var decay = Var(0.1f);
+			var sustain = Var(0.8f);
+			var release = Var(0.25f);
+
+			var osc = PulseOsc(freq, duty);
+			var env = AdsrEnv(attack, decay, sustain, release);
+			var output = osc * env;//.Node.Select(Amplitude.VolumeToAmplitude);
+
+			return new Instrument(output, new Dictionary<string, VarController<float>>() {
+				{ "duty", duty },
+				{ "attack", attack },
+				{ "decay", decay },
+				{ "sustain", sustain },
+				{ "release", release },
+			}, new [] { freq }, new INotable[] { env });
+		}
+
+		internal static Instrument FilteredNoise() {
 			var freq = Var<float>();
 			var qInit = 17.5f;
 			var q = Var(qInit);
@@ -54,7 +77,7 @@ namespace Moddl {
 
 		}
 
-		public static Instrument NesTriangle() {
+		internal static Instrument NesTriangle() {
 			var freq = Var<float>();
 
 			var osc = TriangleOsc(freq);

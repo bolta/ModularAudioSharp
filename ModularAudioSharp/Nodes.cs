@@ -35,6 +35,10 @@ namespace ModularAudioSharp {
 		public static ExpEnvController ExpEnv(Node<float> ratioPerSec)
 				=> new ExpEnvController(ratioPerSec);
 
+		public static AdsrEnvController AdsrEnv(Node<float> attackTimeSecs, Node<float> decayTimeSecs,
+				Node<float> sustainLevelVol, Node<float> releaseTimeSecs)
+				=> new AdsrEnvController(attackTimeSecs, decayTimeSecs, sustainLevelVol, releaseTimeSecs);
+
 		public static PlainEnvController PlainEnv()
 				=> new PlainEnvController();
 

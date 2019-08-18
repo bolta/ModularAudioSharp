@@ -48,6 +48,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AdsrEnvController.cs" />
+    <Compile Include="Amplitude.cs" />
     <Compile Include="Data\NoteOperation.cs" />
     <Compile Include="Data\Tone.cs" />
     <Compile Include="Data\Stereo.cs" />
