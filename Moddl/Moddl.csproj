@@ -58,6 +58,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="samples\dq4_ryan.moddl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="samples\ff3_elia.moddl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
