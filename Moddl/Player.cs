@@ -86,14 +86,20 @@ namespace Moddl {
 		private Node<float> MmlToNode(string track, string mml) {
 			var ticksPerBeat = 96;
 			// TODO 該当トラックにインストゥルメントが定義されていないとこけるので、エラー処理
-			var instrm = this.instruments[track];
+			var instrm = this.instruments[track]
+					// TODO 仮にディレイをハードコードでかます
+					.Then(Instruments.Delay());
 			var temper = new EqualTemperament(440f);
 			var vol = Var(1f);
 
 			var parser = new SimpleMmlParser();
 			var ast = parser.Parse(mml);
 			var instrcGen = new SimpleMmlInstructionGenerator();
-			foreach (var t in instrm.FreqUsers) instrcGen.AddFreqUsers(t);
+			//foreach (var t in instrm.FreqUsers) instrcGen.AddFreqUsers(t);
+			var freq = Var<float>();
+			// TODO Input がちょうど 1 つでない場合はエラー
+			instrm.Input[0].Source = freq;
+			instrcGen.AddFreqUsers(freq);
 			foreach (var n in instrm.NoteUsers) instrcGen.AddNoteUsers(n);
 			var instrcs = instrcGen.GenerateInstructions(ast, ticksPerBeat, temper).ToList();
 

@@ -32,6 +32,8 @@ namespace ModularAudioSharp {
 		public static VarController<T> Var<T>(T initValue = default(T)) where T : struct
 				=> new VarController<T>(initValue);
 
+		public static ProxyController<T> Proxy<T>() where T : struct => new ProxyController<T>();
+
 		public static ExpEnvController ExpEnv(Node<float> ratioPerSec)
 				=> new ExpEnvController(ratioPerSec);
 

@@ -20,7 +20,7 @@ namespace Moddl {
 		/// </summary>
 		/// <returns></returns>
 		internal static Instrument ExponentialDecayPulseWave() {
-			var freq = Var<float>();
+			var freq = Proxy<float>();
 
 			var dutyInit = 0.5f; // TODO 初期値はスタック管理のため外から見える必要がありそう
 			var duty = Var(dutyInit);
@@ -28,16 +28,16 @@ namespace Moddl {
 			var osc = PulseOsc(freq, duty);
 			var decay = Var(1 / 8f);
 			var env = ExpEnv(decay);
-			var output = osc * env;
+			var output = (osc * env).AsFloat();
 
-			return new Instrument(output, new Dictionary<string, VarController<float>>() {
+			return new Instrument(freq, output, new Dictionary<string, VarController<float>>() {
 				{ "duty", duty },
 				{ "decay", decay },
-			}, new [] { freq }, new INotable[] { env });
+			}, new INotable[] { env });
 		}
 
 		internal static Instrument AdsrPulseWave() {
-			var freq = Var<float>();
+			var freq = Proxy<float>();
 
 			// TODO 初期値はスタック管理のため外から見える必要がありそう
 			var duty = Var(0.5f);
@@ -49,19 +49,19 @@ namespace Moddl {
 
 			var osc = PulseOsc(freq, duty);
 			var env = AdsrEnv(attack, decay, sustain, release);
-			var output = osc * env;//.Node.Select(Amplitude.VolumeToAmplitude);
+			var output = (osc * env).AsFloat();
 
-			return new Instrument(output, new Dictionary<string, VarController<float>>() {
+			return new Instrument(freq, output, new Dictionary<string, VarController<float>>() {
 				{ "duty", duty },
 				{ "attack", attack },
 				{ "decay", decay },
 				{ "sustain", sustain },
 				{ "release", release },
-			}, new [] { freq }, new INotable[] { env });
+			}, new INotable[] { env });
 		}
 
 		internal static Instrument FilteredNoise() {
-			var freq = Var<float>();
+			var freq = Proxy<float>();
 			var qInit = 17.5f;
 			var q = Var(qInit);
 
@@ -69,25 +69,33 @@ namespace Moddl {
 //			var osc = (Noise()).Bpf(freq, q);//.Limit(-1f, 1f);
 			var osc = (Noise() * 0.125f).Lpf(freq, q).Hpf(freq, q);//.Limit(-1f, 1f);
 			var env = PlainEnv();
-			var output = osc * env;
+			var output = (osc * env).AsFloat();
 
-			return new Instrument(output, new Dictionary<string, VarController<float>>() {
+			return new Instrument(freq, output, new Dictionary<string, VarController<float>>() {
 				{ "q", q },
-			}, new [] { freq }, new INotable[] { env });
+			}, new INotable[] { env });
 
 		}
 
 		internal static Instrument NesTriangle() {
-			var freq = Var<float>();
+			var freq = Proxy<float>();
 
 			var osc = TriangleOsc(freq);
 			var env = PlainEnv();
 			var output = (osc * env).QuantCrush(-1f, 1f, 16);
 
-			return new Instrument(output, new Dictionary<string, VarController<float>>() {
-			}, new [] { freq }, new INotable[] { env });
+			return new Instrument(freq, output, new Dictionary<string, VarController<float>>() {
+			}, new INotable[] { env });
 
 		}
 
+		// 接続の動作検証用
+		internal static Instrument Delay() {
+			var input = Proxy<float>();
+			var output = input.Node.Delay(24806, 0.5f, 0.5f, 24806);
+
+			return new Instrument(input, output, new Dictionary<string, VarController<float>>(),
+				Enumerable.Empty<INotable>());
+		}
 	}
 }

@@ -22,13 +22,20 @@ namespace ModularAudioSharp.Mml {
 			return result;
 		}
 
-		public SimpleMmlInstructionGenerator AddFreqUsers(params VarController<float>[] users) {
+		public SimpleMmlInstructionGenerator AddFreqUsers(IEnumerable<VarController<float>> users) {
 			this.freqUsers.AddRange(users);
 			return this;
 		}
-		public SimpleMmlInstructionGenerator AddNoteUsers(params INotable[] users) {
+		public SimpleMmlInstructionGenerator AddFreqUsers(params VarController<float>[] users) {
+			return this.AddFreqUsers((IEnumerable<VarController<float>>) users);
+		}
+
+		public SimpleMmlInstructionGenerator AddNoteUsers(IEnumerable<INotable> users) {
 			this.noteUsers.AddRange(users);
 			return this;
+		}
+		public SimpleMmlInstructionGenerator AddNoteUsers(params INotable[] users) {
+			return this.AddNoteUsers((IEnumerable<INotable>) users);
 		}
 
 		private class Visitor : AstVisitor {
