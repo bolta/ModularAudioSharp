@@ -17,7 +17,7 @@ namespace Moddl {
 
 		private float tempo = 120f;
 
-		private readonly Dictionary<string, Instrument> instruments = new Dictionary<string, Instrument>();
+		private readonly Dictionary<string, Module> instruments = new Dictionary<string, Module>();
 		private readonly Evaluator evaluator = new Evaluator();
 
 		// TODO ModularAudioSharp.Player は実装詳細なので外に出さないようにしたいが…
@@ -66,7 +66,7 @@ namespace Moddl {
 				var tracks = this.evaluator.Evaluate(stmt.Arguments[0]).AsTrackSet();
 
 				foreach (var track in tracks) {
-					var instrm = this.evaluator.Evaluate(stmt.Arguments[1]).AsInstrument();
+					var instrm = this.evaluator.Evaluate(stmt.Arguments[1]).AsModule();
 					// TODO 重複設定はエラーにする
 					this.instruments.Add(track, instrm);
 				}

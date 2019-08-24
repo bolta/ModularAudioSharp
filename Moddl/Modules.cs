@@ -11,15 +11,15 @@ using static ModularAudioSharp.Nodes;
 
 namespace Moddl {
 	/// <summary>
-	/// 組み込みインストゥルメント各種
+	/// 組み込みモジュール各種
 	/// </summary>
-	static class Instruments {
+	static class Modules {
 
 		/// <summary>
 		/// 指数的に減衰するパルス波
 		/// </summary>
 		/// <returns></returns>
-		internal static Instrument ExponentialDecayPulseWave() {
+		internal static Module ExponentialDecayPulseWave() {
 			var freq = Proxy<float>();
 
 			var dutyInit = 0.5f; // TODO 初期値はスタック管理のため外から見える必要がありそう
@@ -30,13 +30,13 @@ namespace Moddl {
 			var env = ExpEnv(decay);
 			var output = (osc * env).AsFloat();
 
-			return new Instrument(freq, output, new Dictionary<string, VarController<float>>() {
+			return new Module(freq, output, new Dictionary<string, VarController<float>>() {
 				{ "duty", duty },
 				{ "decay", decay },
 			}, new INotable[] { env });
 		}
 
-		internal static Instrument AdsrPulseWave() {
+		internal static Module AdsrPulseWave() {
 			var freq = Proxy<float>();
 
 			// TODO 初期値はスタック管理のため外から見える必要がありそう
@@ -51,7 +51,7 @@ namespace Moddl {
 			var env = AdsrEnv(attack, decay, sustain, release);
 			var output = (osc * env).AsFloat();
 
-			return new Instrument(freq, output, new Dictionary<string, VarController<float>>() {
+			return new Module(freq, output, new Dictionary<string, VarController<float>>() {
 				{ "duty", duty },
 				{ "attack", attack },
 				{ "decay", decay },
@@ -60,7 +60,7 @@ namespace Moddl {
 			}, new INotable[] { env });
 		}
 
-		internal static Instrument FilteredNoise() {
+		internal static Module FilteredNoise() {
 			var freq = Proxy<float>();
 			var qInit = 17.5f;
 			var q = Var(qInit);
@@ -71,39 +71,39 @@ namespace Moddl {
 			var env = PlainEnv();
 			var output = (osc * env).AsFloat();
 
-			return new Instrument(freq, output, new Dictionary<string, VarController<float>>() {
+			return new Module(freq, output, new Dictionary<string, VarController<float>>() {
 				{ "q", q },
 			}, new INotable[] { env });
 
 		}
 
-		internal static Instrument NesTriangle() {
+		internal static Module NesTriangle() {
 			var freq = Proxy<float>();
 
 			var osc = TriangleOsc(freq);
 			var env = PlainEnv();
 			var output = (osc * env).QuantCrush(-1f, 1f, 16);
 
-			return new Instrument(freq, output, new Dictionary<string, VarController<float>>() {
+			return new Module(freq, output, new Dictionary<string, VarController<float>>() {
 			}, new INotable[] { env });
 
 		}
 
 		// 接続の動作検証用
-		internal static Instrument Delay() {
+		internal static Module Delay() {
 			var input = Proxy<float>();
 			var output = input.Node.Delay(24806, 0.5f, 0.4f, 24806);
 
-			return new Instrument(input, output, new Dictionary<string, VarController<float>>(),
+			return new Module(input, output, new Dictionary<string, VarController<float>>(),
 				Enumerable.Empty<INotable>());
 		}
 
 		// 接続の動作検証用
-		internal static Instrument Portamento() {
+		internal static Module Portamento() {
 			var input = Proxy<float>();
 			var output = Nodes.Portamento(input, 0.002f);
 
-			return new Instrument(input, output, new Dictionary<string, VarController<float>>(),
+			return new Module(input, output, new Dictionary<string, VarController<float>>(),
 				Enumerable.Empty<INotable>());
 		}
 	}

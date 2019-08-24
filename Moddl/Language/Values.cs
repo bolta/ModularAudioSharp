@@ -18,8 +18,8 @@ namespace Moddl.Language {
 			return ((TrackSetValue) this)?.Value;
 		}
 
-		public Instrument AsInstrument() {
-			return ((InstrumentValue) this)?.Value;
+		public Module AsModule() {
+			return ((ModuleValue) this)?.Value;
 		}
 	}
 
@@ -31,7 +31,7 @@ namespace Moddl.Language {
 		public IEnumerable<string> Value { get; set; }
 	}
 
-	class InstrumentValue : Value {
-		public Instrument Value { get; set; }
+	class ModuleValue : Value {
+		public Module Value { get; set; }
 	}
 }

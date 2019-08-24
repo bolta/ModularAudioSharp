@@ -47,8 +47,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Instrument.cs" />
-    <Compile Include="Instruments.cs" />
+    <Compile Include="Module.cs" />
+    <Compile Include="Modules.cs" />
     <Compile Include="Language\AstNodes.cs" />
     <Compile Include="Language\Evaluator.cs" />
     <Compile Include="Language\ExprVisitor.cs" />
