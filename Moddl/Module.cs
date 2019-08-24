@@ -34,8 +34,8 @@ namespace Moddl {
 		/// <param name="after"></param>
 		/// <returns></returns>
 		public Module Then(Module after) {
-			// TODO input が 1 個ではない場合は例外を投げる
-			after.Input[0].Source = this.Output;
+			// TODO input が 1 個ではない場合これでよいか？
+			foreach (var i in after.Input) i.Source = this.Output;
 			return new Module(this.Input, after.Output,
 					// TODO キーが重複すると例外が発生する。
 					// 重複を回避できるよう名前にプレフィックスをつけるしくみを設け、

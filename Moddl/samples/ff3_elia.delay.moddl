@@ -3,6 +3,7 @@
 @tempo 80
 
 @instrument ^ab, (pulseOsc * expEnv) | delay
+// @instrument ^c, portamento | (nesTriangle + filteredNoise)
 @instrument ^c, portamento | nesTriangle
 
 a o5L8v15 y`duty`,0.5 @d-10

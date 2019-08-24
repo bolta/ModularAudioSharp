@@ -5,6 +5,7 @@ using ModularAudioSharp.Waveform;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using static ModularAudioSharp.Nodes;
@@ -14,6 +15,32 @@ namespace Moddl {
 	/// 組み込みモジュール各種
 	/// </summary>
 	static class Modules {
+
+		/// <summary>
+		/// 全ての組み込みモジュールの一覧。
+		/// 名前から、モジュールを生成する関数を引くことができる
+		/// </summary>
+		/// <remarks>
+		/// Dictionary {
+		///   { "pulseOsc", PulseOsc },
+		///	  { "expEnv", ExpEnv },
+		///	  ...
+		///	} 
+		///	のような内容をリフレクションで生成している。
+		///	シグネチャが internal static Module [ModuleName]() であるメソッドをこのクラスに作ると勝手に登録される
+		/// </remarks>
+		internal static readonly Dictionary<string, Func<Module>> BUILT_INS;
+		static Modules() {
+			BUILT_INS = typeof(Modules).GetMethods(BindingFlags.NonPublic | BindingFlags.Static)
+					.Where(m =>
+							(m.IsPublic || m.IsAssembly)
+							&& m.IsStatic
+							&& m.ReturnType == typeof(Module)
+							&& m.GetParameters().Length == 0)
+					.ToDictionary(
+							m => m.Name.Substring(0, 1).ToLower() + m.Name.Substring(1),
+							m => { return (Func<Module>) (() => (Module) m.Invoke(null, new object[] { })); });
+		}
 
 		/// <summary>
 		/// 指数的に減衰するパルス波
@@ -48,7 +75,7 @@ namespace Moddl {
 			var release = Var(0.25f);
 
 			var osc = Nodes.PulseOsc(freq, duty);
-			var env = AdsrEnv(attack, decay, sustain, release);
+			var env = Nodes.AdsrEnv(attack, decay, sustain, release);
 			var output = (osc * env).AsFloat();
 
 			return new Module(freq, output, new Dictionary<string, VarController<float>>() {
@@ -68,7 +95,7 @@ namespace Moddl {
 			// BPF だとノイズが残っていまいちな音だった
 //			var osc = (Noise()).Bpf(freq, q);//.Limit(-1f, 1f);
 			var osc = (Noise() * 0.125f).Lpf(freq, q).Hpf(freq, q);//.Limit(-1f, 1f);
-			var env = PlainEnv();
+			var env = Nodes.PlainEnv();
 			var output = (osc * env).AsFloat();
 
 			return new Module(freq, output, new Dictionary<string, VarController<float>>() {
@@ -81,7 +108,7 @@ namespace Moddl {
 			var freq = Proxy<float>();
 
 			var osc = TriangleOsc(freq);
-			var env = PlainEnv();
+			var env = Nodes.PlainEnv();
 			var output = (osc * env).QuantCrush(-1f, 1f, 16);
 
 			return new Module(freq, output, new Dictionary<string, VarController<float>>() {
@@ -107,6 +134,8 @@ namespace Moddl {
 				Enumerable.Empty<INotable>());
 		}
 
+		#region Oscillators
+
 		/// <summary>
 		/// パルス波オシレータ
 		/// </summary>
@@ -127,6 +156,25 @@ namespace Moddl {
 					});
 		}
 
+		#endregion
+
+		#region Envelopes
+
+		/// <summary>
+		/// 音量が 1 か 0 しかないエンベロープ
+		/// </summary>
+		/// <returns></returns>
+		internal static Module PlainEnv() {
+			var output = Nodes.PlainEnv();
+
+			return new Module(Enumerable.Empty<ProxyController<float>>(), output,
+					new Dictionary<string, VarController<float>>() {
+					},
+					new INotable[] {
+						output,
+					});
+		}
+
 		/// <summary>
 		/// 指数的に減衰するエンベロープ
 		/// </summary>
@@ -143,5 +191,28 @@ namespace Moddl {
 						output,
 					});
 		}
+
+		internal static Module AdsrEnv() {
+			var attack = Var(0.15f);
+			var decay = Var(0.1f);
+			var sustain = Var(0.8f);
+			var release = Var(0.25f);
+
+			var output = Nodes.AdsrEnv(attack, decay, sustain, release);
+
+			return new Module(Enumerable.Empty<ProxyController<float>>(), output,
+					new Dictionary<string, VarController<float>>() {
+						{ "attack", attack },
+						{ "decay", decay },
+						{ "sustain", sustain },
+						{ "release", release },
+					},
+					new INotable[] {
+						output,
+					});
+		}
+
+		#endregion
+
 	}
 }

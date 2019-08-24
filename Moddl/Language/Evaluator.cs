@@ -7,17 +7,6 @@ using System.Threading.Tasks;
 namespace Moddl.Language {
 	class Evaluator {
 
-		private static readonly Dictionary<string, Func<Module>> BUILT_IN_MODULES = new Dictionary<string, Func<Module>> {
-			{ "exponentialDecayPulseWave", Modules.ExponentialDecayPulseWave },
-			{ "filteredNoise", Modules.FilteredNoise },
-			{ "nesTriangle", Modules.NesTriangle },
-			{ "adsrPulseWave", Modules.AdsrPulseWave },
-			{ "delay", Modules.Delay },
-			{ "portamento", Modules.Portamento },
-			{ "pulseOsc", Modules.PulseOsc },
-			{ "expEnv", Modules.ExpEnv },
-		};
-
 		public Value Evaluate(Expr expr) => expr.Accept(new Visitor());
 
 		private class Visitor : ExprVisitor<Value> {
@@ -43,7 +32,7 @@ namespace Moddl.Language {
 
 			// TODO 今のところ識別子は常に Module の名前とする。いずれは他の型の値もサポートする必要があるだろう
 			public override Value Visit(IdentifierLiteral visitee)
-					=> new ModuleValue { Value = BUILT_IN_MODULES[visitee.Value]() };
+					=> new ModuleValue { Value = Modules.BUILT_INS[visitee.Value]() };
 
 			public override Value Visit(TrackSetLiteral visitee)
 					=> new TrackSetValue { Value = visitee.Value };
