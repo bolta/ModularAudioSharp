@@ -27,6 +27,13 @@ namespace Moddl {
 		public Module(ProxyController<float> input, Node<float> output, IDictionary<string, VarController<float>> parameters,
 				IEnumerable<INotable> noteUsers) : this(new [] { input }, output, parameters, noteUsers) { }
 
+		public static Module FromFloat(float value) {
+			return new Module(Enumerable.Empty<ProxyController<float>>(),
+					Nodes.Const(value),
+					new Dictionary<string, VarController<float>>(),
+					Enumerable.Empty<INotable>());
+		}
+
 		/// <summary>
 		/// this の出力を after の入力として 2 つの module を接続し、
 		/// 全体で 1 つの module とする

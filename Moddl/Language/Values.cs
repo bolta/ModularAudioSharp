@@ -18,8 +18,15 @@ namespace Moddl.Language {
 			return ((TrackSetValue) this)?.Value;
 		}
 
+		// nullable
 		public Module AsModule() {
-			return ((ModuleValue) this)?.Value;
+			if (this is ModuleValue) {
+				return ((ModuleValue) this).Value;
+			} else if (this is FloatValue) {
+				return Module.FromFloat(((FloatValue) this).Value);
+			} else {
+				return null;
+			}
 		}
 	}
 
