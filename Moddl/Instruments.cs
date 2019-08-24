@@ -92,7 +92,16 @@ namespace Moddl {
 		// 接続の動作検証用
 		internal static Instrument Delay() {
 			var input = Proxy<float>();
-			var output = input.Node.Delay(24806, 0.5f, 0.5f, 24806);
+			var output = input.Node.Delay(24806, 0.5f, 0.4f, 24806);
+
+			return new Instrument(input, output, new Dictionary<string, VarController<float>>(),
+				Enumerable.Empty<INotable>());
+		}
+
+		// 接続の動作検証用
+		internal static Instrument Portamento() {
+			var input = Proxy<float>();
+			var output = Nodes.Portamento(input, 0.002f);
 
 			return new Instrument(input, output, new Dictionary<string, VarController<float>>(),
 				Enumerable.Empty<INotable>());

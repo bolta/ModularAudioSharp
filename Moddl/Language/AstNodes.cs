@@ -16,7 +16,7 @@ namespace Moddl.Language {
 
 	public class DirectiveStatement : Statement {
 		public string Name { get; set; }
-		public IList<Value> Arguments { get; set; }
+		public IList<Expr> Arguments { get; set; }
 	}
 
 	public class MmlStatement : Statement {
@@ -27,19 +27,23 @@ namespace Moddl.Language {
 				this.Mml);
 	}
 
-	public class Value {
+	public class Expr {
 
 	}
 
-	public class FloatValue : Value {
+	public class ConnectiveExpr : Expr {
+		public IEnumerable<Expr> Args { get; set; }
+	}
+
+	public class FloatLiteral : Expr {
 		public float Value { get; set; }
 	}
 
-	public class TrackSetValue : Value {
+	public class TrackSetLiteral : Expr {
 		public IList<string> Value { get; set; }
 	}
 
-	public class IdentifierValue : Value {
+	public class IdentifierLiteral : Expr {
 		public string Value { get; set; }
 	}
 }

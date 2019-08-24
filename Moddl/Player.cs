@@ -18,6 +18,7 @@ namespace Moddl {
 		private float tempo = 120f;
 
 		private readonly Dictionary<string, Instrument> instruments = new Dictionary<string, Instrument>();
+		private readonly Evaluator evaluator = new Evaluator();
 
 		// TODO ModularAudioSharp.Player は実装詳細なので外に出さないようにしたいが…
 		public ModularAudioSharp.Player Play(string moddl) {
@@ -56,46 +57,32 @@ namespace Moddl {
 		private void ProcessDirectiveStatement(DirectiveStatement stmt) {
 			if (stmt.Name == "tempo") {
 				// TODO エラーチェック
-				this.tempo = ((FloatValue) stmt.Arguments[0]).Value;
+				this.tempo = this.evaluator.Evaluate(stmt.Arguments[0]).AsFloat()
+						// TODO エラーチェック
+						.Value;
 
 			} else if (stmt.Name == "instrument") {
 				// TODO 引数の型・数のチェック
-				var tracks = ((TrackSetValue) stmt.Arguments[0]).Value;
-				var instrmName = ((IdentifierValue) stmt.Arguments[1]).Value;
+				var tracks = this.evaluator.Evaluate(stmt.Arguments[0]).AsTrackSet();
 
 				foreach (var track in tracks) {
+					var instrm = this.evaluator.Evaluate(stmt.Arguments[1]).AsInstrument();
 					// TODO 重複設定はエラーにする
-					this.instruments.Add(track, ResolveInstrumentByName(instrmName));
+					this.instruments.Add(track, instrm);
 				}
 			}
 		}
 
-		private static readonly Dictionary<string, Func<Instrument>> INSTRUMENTS = new Dictionary<string, Func<Instrument>> {
-			{ "exponentialDecayPulseWave", Instruments.ExponentialDecayPulseWave },
-			{ "filteredNoise", Instruments.FilteredNoise },
-			{ "nesTriangle", Instruments.NesTriangle },
-			{ "adsrPulseWave", Instruments.AdsrPulseWave },
-		};
-
-		private static Instrument ResolveInstrumentByName(string name) {
-			// TODO 名前が見つからない場合エラーにする
-			return INSTRUMENTS[name]();
-		}
-
-
 		private Node<float> MmlToNode(string track, string mml) {
 			var ticksPerBeat = 96;
 			// TODO 該当トラックにインストゥルメントが定義されていないとこけるので、エラー処理
-			var instrm = this.instruments[track]
-					// TODO 仮にディレイをハードコードでかます
-					.Then(Instruments.Delay());
+			var instrm = this.instruments[track];
 			var temper = new EqualTemperament(440f);
 			var vol = Var(1f);
 
 			var parser = new SimpleMmlParser();
 			var ast = parser.Parse(mml);
 			var instrcGen = new SimpleMmlInstructionGenerator();
-			//foreach (var t in instrm.FreqUsers) instrcGen.AddFreqUsers(t);
 			var freq = Var<float>();
 			// TODO Input がちょうど 1 つでない場合はエラー
 			instrm.Input[0].Source = freq;
