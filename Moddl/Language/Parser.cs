@@ -13,7 +13,7 @@ namespace Moddl.Language {
 		public readonly static Parser<DirectiveStatement> directiveStatement =
 				from _ in SParse.String("@").WithWhiteSpace()
 				from name in SParse.Regex("[a-zA-Z0-9_]+").WithWhiteSpace()
-				from args in valueList.Optional()
+				from args in exprList.Optional()
 				from __ in SParse.LineEnd // TODO LineTerminator とはどう違う？
 				select new DirectiveStatement {
 					Name = name,
@@ -37,27 +37,50 @@ namespace Moddl.Language {
 				from id in SParse.Regex(@"[a-zA-Z_][a-zA-Z_0-9]*")
 				select new IdentifierLiteral { Value = id };
 
-		public readonly static Parser<Expr> primitiveExpr =
+		public readonly static Parser<Expr> primaryExpr =
 				((Parser<Expr>) floatValue)
 				.Or(trackSetValue)
-				.Or(identifierValue);
+				.Or(identifierValue)
+				.Or(
+					from _ in SParse.String("(").WithWhiteSpace()
+					from x in expr
+					from __ in SParse.String(")").WithWhiteSpace()
+					select x
+				);
 
-		public readonly static Parser<ConnectiveExpr> connectiveExpr =
-				from head in primitiveExpr.WithWhiteSpace()
+		public readonly static Parser<Expr> connectiveExpr =
+				BinaryExpr(primaryExpr, SParse.String("|").Text(), _ => new ConnectiveExpr());
+
+		public readonly static Parser<Expr> mulDivExpr =
+				BinaryExpr(connectiveExpr, SParse.Regex(@"\*|/"), op => op == "*"
+						? (BinaryExpr) new MultiplicativeExpr()
+						: new DivisiveExpr());
+
+		public readonly static Parser<Expr> addSubExpr =
+				BinaryExpr(mulDivExpr, SParse.Regex(@"\+|-"), op => op == "+"
+						? (BinaryExpr) new AdditiveExpr()
+						: new SubtractiveExpr());
+
+		public static Parser<Expr> BinaryExpr(Parser<Expr> constituentExpr, Parser<string> oper,
+				Func<string, BinaryExpr> makeNodeByOperator)
+				=> from head in constituentExpr.WithWhiteSpace()
 				from tail in (
-					from _ in SParse.String("|").WithWhiteSpace()
-					from p in primitiveExpr.WithWhiteSpace()
-					select p
+					from o in oper.WithWhiteSpace()
+					from x in constituentExpr.WithWhiteSpace()
+					select new { o, x }
 				).Many()
-				select new ConnectiveExpr { Args = new[] { head }.Concat(tail) };
+				select tail.Aggregate(head, (lhs, rhs) => {
+					var result = makeNodeByOperator(rhs.o);
+					result.Lhs = lhs;
+					result.Rhs = rhs.x;
+					return result;
+				});
 
-		public readonly static Parser<Expr> value =
-				connectiveExpr
-				;
+		public readonly static Parser<Expr> expr = addSubExpr;
 
-		public readonly static Parser<IEnumerable<Expr>> valueList =
-				from head in value.WithWhiteSpace()
-				from tail in SParse.String(",").Token().Then(_ => value.WithWhiteSpace()).Many()
+		public readonly static Parser<IEnumerable<Expr>> exprList =
+				from head in expr.WithWhiteSpace()
+				from tail in SParse.String(",").Token().Then(_ => expr.WithWhiteSpace()).Many()
 				select new[] { head }.Concat(tail);
 
 		public readonly static Parser<MmlStatement> mmlStatement =

@@ -14,23 +14,29 @@ namespace Moddl.Language {
 			{ "adsrPulseWave", Modules.AdsrPulseWave },
 			{ "delay", Modules.Delay },
 			{ "portamento", Modules.Portamento },
+			{ "pulseOsc", Modules.PulseOsc },
+			{ "expEnv", Modules.ExpEnv },
 		};
 
 		public Value Evaluate(Expr expr) => expr.Accept(new Visitor());
 
 		private class Visitor : ExprVisitor<Value> {
-			public override Value Visit(ConnectiveExpr visitee) {
-				var result = visitee.Args.Aggregate((Value) null, (acc, arg) => {
-					var val = arg.Accept(this);
+			public override Value Visit(ConnectiveExpr visitee)
+					=> this.VisitBinary(visitee, (lhs, rhs) => lhs.Then(rhs));
+			public override Value Visit(MultiplicativeExpr visitee)
+					=> this.VisitBinary(visitee, (lhs, rhs) => lhs.Multiply(rhs));
+			public override Value Visit(DivisiveExpr visitee)
+					=> this.VisitBinary(visitee, (lhs, rhs) => lhs.Divide(rhs));
+			public override Value Visit(AdditiveExpr visitee)
+					=> this.VisitBinary(visitee, (lhs, rhs) => lhs.Add(rhs));
+			public override Value Visit(SubtractiveExpr visitee)
+					=> this.VisitBinary(visitee, (lhs, rhs) => lhs.Subtract(rhs));
 
-					if (acc == null) {
-						return val;
-					} else {
-						return new ModuleValue { Value = acc.AsModule().Then(val.AsModule()) };
-					}
-				});
+			private Value VisitBinary(BinaryExpr visitee, Func<Module, Module, Module> oper) {
+				var lhs = visitee.Lhs.Accept(this).AsModule();
+				var rhs = visitee.Rhs.Accept(this).AsModule();
 
-				return result;
+				return new ModuleValue { Value = oper(lhs, rhs) };
 			}
 
 			public override Value Visit(FloatLiteral visitee) => new FloatValue { Value = visitee.Value };

@@ -13,6 +13,9 @@ namespace ModularAudioSharp {
 
 		private IEnumerator<T> source = null;
 
+		public ProxyController(Node<T> source) { this.Source = source; }
+		public ProxyController() { }
+
 		public Node<T> Source {
 			set {
 				if (this.source != null) throw new InvalidOperationException("source node already set");

@@ -25,9 +25,9 @@ namespace Moddl {
 			var dutyInit = 0.5f; // TODO 初期値はスタック管理のため外から見える必要がありそう
 			var duty = Var(dutyInit);
 
-			var osc = PulseOsc(freq, duty);
+			var osc = Nodes.PulseOsc(freq, duty);
 			var decay = Var(1 / 8f);
-			var env = ExpEnv(decay);
+			var env = Nodes.ExpEnv(decay);
 			var output = (osc * env).AsFloat();
 
 			return new Module(freq, output, new Dictionary<string, VarController<float>>() {
@@ -47,7 +47,7 @@ namespace Moddl {
 			var sustain = Var(0.8f);
 			var release = Var(0.25f);
 
-			var osc = PulseOsc(freq, duty);
+			var osc = Nodes.PulseOsc(freq, duty);
 			var env = AdsrEnv(attack, decay, sustain, release);
 			var output = (osc * env).AsFloat();
 
@@ -105,6 +105,43 @@ namespace Moddl {
 
 			return new Module(input, output, new Dictionary<string, VarController<float>>(),
 				Enumerable.Empty<INotable>());
+		}
+
+		/// <summary>
+		/// パルス波オシレータ
+		/// </summary>
+		/// <returns></returns>
+		internal static Module PulseOsc() {
+			var freq = Proxy<float>();
+
+			var dutyInit = 0.5f; // TODO 初期値はスタック管理のため外から見える必要がありそう
+			var duty = Var(dutyInit);
+
+			var output = Nodes.PulseOsc(freq, duty);
+
+			return new Module(freq, output,
+					new Dictionary<string, VarController<float>>() {
+						{ "duty", duty },
+					},
+					new INotable[] {
+					});
+		}
+
+		/// <summary>
+		/// 指数的に減衰するエンベロープ
+		/// </summary>
+		/// <returns></returns>
+		internal static Module ExpEnv() {
+			var decay = Var(1 / 8f);
+			var output = Nodes.ExpEnv(decay);
+
+			return new Module(Enumerable.Empty<ProxyController<float>>(), output,
+					new Dictionary<string, VarController<float>>() {
+						{ "decay", decay },
+					},
+					new INotable[] {
+						output,
+					});
 		}
 	}
 }

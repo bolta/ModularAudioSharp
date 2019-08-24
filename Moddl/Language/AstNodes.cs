@@ -31,9 +31,16 @@ namespace Moddl.Language {
 
 	}
 
-	public class ConnectiveExpr : Expr {
-		public IEnumerable<Expr> Args { get; set; }
+	public class BinaryExpr : Expr {
+		public Expr Lhs { get; set; }
+		public Expr Rhs { get; set; }
 	}
+
+	public class ConnectiveExpr : BinaryExpr { }
+	public class MultiplicativeExpr : BinaryExpr { }
+	public class DivisiveExpr : BinaryExpr { }
+	public class AdditiveExpr : BinaryExpr { }
+	public class SubtractiveExpr : BinaryExpr { }
 
 	public class FloatLiteral : Expr {
 		public float Value { get; set; }

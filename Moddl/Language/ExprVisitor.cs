@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 namespace Moddl.Language {
 	public class ExprVisitor<Result> {
 		public virtual Result Visit(ConnectiveExpr visitee) { return default(Result); }
+		public virtual Result Visit(MultiplicativeExpr visitee) { return default(Result); }
+		public virtual Result Visit(DivisiveExpr visitee) { return default(Result); }
+		public virtual Result Visit(AdditiveExpr visitee) { return default(Result); }
+		public virtual Result Visit(SubtractiveExpr visitee) { return default(Result); }
 		public virtual Result Visit(FloatLiteral visitee) { return default(Result); }
 		public virtual Result Visit(TrackSetLiteral visitee) { return default(Result); }
 		public virtual Result Visit(IdentifierLiteral visitee) { return default(Result); }
@@ -17,6 +21,10 @@ namespace Moddl.Language {
 		public static Result Accept<Result>(this Expr visitee, ExprVisitor<Result> visitor) {
 			var result = default(Result);
 			var visited = TryVisitConcreteExpr<ConnectiveExpr, Result>(visitee, ref result, c => visitor.Visit(c))
+					|| TryVisitConcreteExpr<MultiplicativeExpr, Result>(visitee, ref result, c => visitor.Visit(c))
+					|| TryVisitConcreteExpr<DivisiveExpr, Result>(visitee, ref result, c => visitor.Visit(c))
+					|| TryVisitConcreteExpr<AdditiveExpr, Result>(visitee, ref result, c => visitor.Visit(c))
+					|| TryVisitConcreteExpr<SubtractiveExpr, Result>(visitee, ref result, c => visitor.Visit(c))
 					|| TryVisitConcreteExpr<FloatLiteral, Result>(visitee, ref result, c => visitor.Visit(c))
 					|| TryVisitConcreteExpr<TrackSetLiteral, Result>(visitee, ref result, c => visitor.Visit(c))
 					|| TryVisitConcreteExpr<IdentifierLiteral, Result>(visitee, ref result, c => visitor.Visit(c))
