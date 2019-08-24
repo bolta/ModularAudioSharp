@@ -25,8 +25,8 @@ namespace Moddl.Language {
 				select new FloatLiteral { Value = Convert.ToSingle(val) };
 
 		public readonly static Parser<IEnumerable<string>> trackSet =
-				from tracks in SParse.Chars("abc").AtLeastOnce() // TODO case insensitive で任意の英字を許す
-				select tracks.Select(c => c.ToString());
+				from tracks in SParse.Regex("[a-z0-9]").AtLeastOnce()
+				select tracks;
 
 		public readonly static Parser<TrackSetLiteral> trackSetValue =
 				from _ in SParse.String("^")

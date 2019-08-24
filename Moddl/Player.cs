@@ -23,23 +23,18 @@ namespace Moddl {
 		// TODO ModularAudioSharp.Player は実装詳細なので外に出さないようにしたいが…
 		public ModularAudioSharp.Player Play(string moddl) {
 			var ast = new Parser().Parse(moddl);
-			var mmls = new Dictionary<string, StringBuilder>() {
-				{ "a", new StringBuilder() },
-				{ "b", new StringBuilder() },
-				{ "c", new StringBuilder() },
-			};
+			var mmls = new Dictionary<string, StringBuilder>();
 
 			foreach (var stmt in ast.Statements) {
-				var dirStmt = stmt as DirectiveStatement;
-				if (dirStmt != null) {
-					this.ProcessDirectiveStatement(dirStmt);
-					continue;
-				}
+				if (stmt is DirectiveStatement) {
+					this.ProcessDirectiveStatement((DirectiveStatement) stmt);
 
-				var mmlStmt = stmt as MmlStatement;
-				if (mmlStmt != null) {
+				} else if (stmt is MmlStatement) {
+					var mmlStmt = (MmlStatement) stmt;
 					foreach (var track in mmlStmt.Tracks) {
-						// TODO パート名が正しいかチェック
+						if (! mmls.ContainsKey(track)) {
+							mmls.Add(track, new StringBuilder());
+						}
 						mmls[track].AppendLine(mmlStmt.Mml);
 					}
 				}
