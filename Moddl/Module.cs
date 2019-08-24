@@ -43,5 +43,18 @@ namespace Moddl {
 					this.Parameters.Concat(after.Parameters).ToDictionary(kv => kv.Key, kv => kv.Value),
 					this.NoteUsers.Concat(after.NoteUsers));
 		}
+
+		public Module Add(Module that) => this.Binary(that, (lhs, rhs) => (lhs + rhs).AsFloat());
+		public Module Subtract(Module that) => this.Binary(that, (lhs, rhs) => (lhs - rhs).AsFloat());
+		public Module Multiply(Module that) => this.Binary(that, (lhs, rhs) => (lhs * rhs).AsFloat());
+		public Module Divide(Module that) => this.Binary(that, (lhs, rhs) => (lhs / rhs).AsFloat());
+
+		private Module Binary(Module that, Func<Node<float>, Node<float>, Node<float>> oper) {
+			return new Module(
+					this.Input.Concat(that.Input),
+					oper(this.Output, that.Output),
+					this.Parameters.Concat(that.Parameters).ToDictionary(kv => kv.Key, kv => kv.Value),
+					this.NoteUsers.Concat(that.NoteUsers));
+		}
 	}
 }

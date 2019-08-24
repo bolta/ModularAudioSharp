@@ -84,8 +84,9 @@ namespace Moddl {
 			var ast = parser.Parse(mml);
 			var instrcGen = new SimpleMmlInstructionGenerator();
 			var freq = Var<float>();
-			// TODO Input がちょうど 1 つでない場合はエラー
-			instrm.Input[0].Source = freq;
+			// TODO input が複数の場合はとりあえず全てに freq を設定するが、
+			// Input がちょうど 1 つでない場合はエラーにすべきか？
+			foreach (var i in instrm.Input) i.Source = freq;
 			instrcGen.AddFreqUsers(freq);
 			foreach (var n in instrm.NoteUsers) instrcGen.AddNoteUsers(n);
 			var instrcs = instrcGen.GenerateInstructions(ast, ticksPerBeat, temper).ToList();
