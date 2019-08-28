@@ -50,14 +50,14 @@ namespace Moddl {
 			var freq = Proxy<float>();
 
 			var dutyInit = 0.5f; // TODO 初期値はスタック管理のため外から見える必要がありそう
-			var duty = Var(dutyInit);
+			var duty = Proxy(dutyInit);
 
 			var osc = Nodes.PulseOsc(freq, duty);
-			var decay = Var(1 / 8f);
+			var decay = Proxy(1 / 8f);
 			var env = Nodes.ExpEnv(decay);
 			var output = (osc * env).AsFloat();
 
-			return new Module(freq, output, new Dictionary<string, VarController<float>>() {
+			return new Module(freq, output, new Dictionary<string, ProxyController<float>>() {
 				{ "duty", duty },
 				{ "decay", decay },
 			}, new INotable[] { env });
@@ -67,18 +67,18 @@ namespace Moddl {
 			var freq = Proxy<float>();
 
 			// TODO 初期値はスタック管理のため外から見える必要がありそう
-			var duty = Var(0.5f);
+			var duty = Proxy(0.5f);
 
-			var attack = Var(0.15f);
-			var decay = Var(0.1f);
-			var sustain = Var(0.8f);
-			var release = Var(0.25f);
+			var attack = Proxy(0.15f);
+			var decay = Proxy(0.1f);
+			var sustain = Proxy(0.8f);
+			var release = Proxy(0.25f);
 
 			var osc = Nodes.PulseOsc(freq, duty);
 			var env = Nodes.AdsrEnv(attack, decay, sustain, release);
 			var output = (osc * env).AsFloat();
 
-			return new Module(freq, output, new Dictionary<string, VarController<float>>() {
+			return new Module(freq, output, new Dictionary<string, ProxyController<float>>() {
 				{ "duty", duty },
 				{ "attack", attack },
 				{ "decay", decay },
@@ -90,7 +90,7 @@ namespace Moddl {
 		internal static Module FilteredNoise() {
 			var freq = Proxy<float>();
 			var qInit = 17.5f;
-			var q = Var(qInit);
+			var q = Proxy(qInit);
 
 			// BPF だとノイズが残っていまいちな音だった
 //			var osc = (Noise()).Bpf(freq, q);//.Limit(-1f, 1f);
@@ -98,7 +98,7 @@ namespace Moddl {
 			var env = Nodes.PlainEnv();
 			var output = (osc * env).AsFloat();
 
-			return new Module(freq, output, new Dictionary<string, VarController<float>>() {
+			return new Module(freq, output, new Dictionary<string, ProxyController<float>>() {
 				{ "q", q },
 			}, new INotable[] { env });
 
@@ -111,7 +111,7 @@ namespace Moddl {
 			var env = Nodes.PlainEnv();
 			var output = (osc * env).QuantCrush(-1f, 1f, 16);
 
-			return new Module(freq, output, new Dictionary<string, VarController<float>>() {
+			return new Module(freq, output, new Dictionary<string, ProxyController<float>>() {
 			}, new INotable[] { env });
 
 		}
@@ -121,7 +121,7 @@ namespace Moddl {
 			var input = Proxy<float>();
 			var output = input.Node.Delay(24806, 0.5f, 0.4f, 24806);
 
-			return new Module(input, output, new Dictionary<string, VarController<float>>(),
+			return new Module(input, output, new Dictionary<string, ProxyController<float>>(),
 				Enumerable.Empty<INotable>());
 		}
 
@@ -130,11 +130,52 @@ namespace Moddl {
 			var input = Proxy<float>();
 			var output = Nodes.Portamento(input, 0.002f);
 
-			return new Module(input, output, new Dictionary<string, VarController<float>>(),
+			return new Module(input, output, new Dictionary<string, ProxyController<float>>(),
 				Enumerable.Empty<INotable>());
 		}
 
 		#region Oscillators
+
+		/// <summary>
+		/// 正弦波オシレータ
+		/// </summary>
+		/// <returns></returns>
+		internal static Module SinOsc() {
+			var freq = Proxy<float>();
+
+			var output = Nodes.SinOsc(freq);
+
+			return new Module(freq, output,
+					new Dictionary<string, ProxyController<float>>() {
+					},
+					new INotable[] {
+					});
+		}
+
+		/// <summary>
+		/// 正弦波オシレータ（テスト用設定）
+		/// </summary>
+		/// <returns></returns>
+		internal static Module FixedSinOsc() {
+			var output = (Nodes.SinOsc(5f) * 2000 + 4000).AsFloat();
+
+			return new Module(Enumerable.Empty<ProxyController<float>>(), output,
+					new Dictionary<string, ProxyController<float>>() {
+					},
+					new INotable[] {
+					});
+		}
+
+		internal static Module FixedSinOscWithDummyInput() {
+			var dummy = Proxy<float>();
+			var output = (Nodes.SinOsc(5f) * 2000 + 4000).AsFloat();
+
+			return new Module(new[] { dummy }, output,
+					new Dictionary<string, ProxyController<float>>() {
+					},
+					new INotable[] {
+					});
+		}
 
 		/// <summary>
 		/// パルス波オシレータ
@@ -144,17 +185,38 @@ namespace Moddl {
 			var freq = Proxy<float>();
 
 			var dutyInit = 0.5f; // TODO 初期値はスタック管理のため外から見える必要がありそう
-			var duty = Var(dutyInit);
+			var duty = Proxy(dutyInit);
 
 			var output = Nodes.PulseOsc(freq, duty);
 
 			return new Module(freq, output,
-					new Dictionary<string, VarController<float>>() {
+					new Dictionary<string, ProxyController<float>>() {
 						{ "duty", duty },
 					},
 					new INotable[] {
 					});
 		}
+
+		#endregion
+
+		#region Filters
+
+		internal static Module Lpf() {
+			var input = Proxy<float>();
+
+			var cutoff = Proxy(500f);
+			var q = Proxy(5f);
+			var output = Nodes.Lpf(input, cutoff, q);
+
+			return new Module(input, output,
+					new Dictionary<string, ProxyController<float>>() {
+						{ "cutoff", cutoff },
+						{ "q", q },
+					},
+					new INotable[] {
+					});
+		}
+
 
 		#endregion
 
@@ -168,7 +230,7 @@ namespace Moddl {
 			var output = Nodes.PlainEnv();
 
 			return new Module(Enumerable.Empty<ProxyController<float>>(), output,
-					new Dictionary<string, VarController<float>>() {
+					new Dictionary<string, ProxyController<float>>() {
 					},
 					new INotable[] {
 						output,
@@ -180,11 +242,11 @@ namespace Moddl {
 		/// </summary>
 		/// <returns></returns>
 		internal static Module ExpEnv() {
-			var decay = Var(1 / 8f);
+			var decay = Proxy(1 / 8f);
 			var output = Nodes.ExpEnv(decay);
 
 			return new Module(Enumerable.Empty<ProxyController<float>>(), output,
-					new Dictionary<string, VarController<float>>() {
+					new Dictionary<string, ProxyController<float>>() {
 						{ "decay", decay },
 					},
 					new INotable[] {
@@ -193,15 +255,15 @@ namespace Moddl {
 		}
 
 		internal static Module AdsrEnv() {
-			var attack = Var(0.15f);
-			var decay = Var(0.1f);
-			var sustain = Var(0.8f);
-			var release = Var(0.25f);
+			var attack = Proxy(0.15f);
+			var decay = Proxy(0.1f);
+			var sustain = Proxy(0.8f);
+			var release = Proxy(0.25f);
 
 			var output = Nodes.AdsrEnv(attack, decay, sustain, release);
 
 			return new Module(Enumerable.Empty<ProxyController<float>>(), output,
-					new Dictionary<string, VarController<float>>() {
+					new Dictionary<string, ProxyController<float>>() {
 						{ "attack", attack },
 						{ "decay", decay },
 						{ "sustain", sustain },

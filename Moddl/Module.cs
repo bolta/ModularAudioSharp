@@ -12,25 +12,25 @@ namespace Moddl {
 	class Module {
 		public IList<ProxyController<float>> Input { get; private set; }
 		public Node<float> Output { get; private set; }
-		public IDictionary<string, VarController<float>> Parameters { get; private set; }
+		public IDictionary<string, ProxyController<float>> Parameters { get; private set; }
 		public IEnumerable<INotable> NoteUsers { get; private set; }
 
 		public Module(IEnumerable<ProxyController<float>> input, Node<float> output,
-				IDictionary<string, VarController<float>> parameters,
+				IDictionary<string, ProxyController<float>> parameters,
 				IEnumerable<INotable> noteUsers) {
 			this.Input = new List<ProxyController<float>>(input);
 			this.Output = output;
-			this.Parameters = new Dictionary<string, VarController<float>>(parameters);
+			this.Parameters = new Dictionary<string, ProxyController<float>>(parameters);
 			this.NoteUsers = noteUsers;
 		}
 
-		public Module(ProxyController<float> input, Node<float> output, IDictionary<string, VarController<float>> parameters,
+		public Module(ProxyController<float> input, Node<float> output, IDictionary<string, ProxyController<float>> parameters,
 				IEnumerable<INotable> noteUsers) : this(new [] { input }, output, parameters, noteUsers) { }
 
 		public static Module FromFloat(float value) {
 			return new Module(Enumerable.Empty<ProxyController<float>>(),
-					Nodes.Const(value),
-					new Dictionary<string, VarController<float>>(),
+					Nodes.Var(value),
+					new Dictionary<string, ProxyController<float>>(),
 					Enumerable.Empty<INotable>());
 		}
 

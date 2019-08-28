@@ -31,8 +31,16 @@ namespace Moddl.Language {
 			public override Value Visit(FloatLiteral visitee) => new FloatValue { Value = visitee.Value };
 
 			// TODO 今のところ識別子は常に Module の名前とする。いずれは他の型の値もサポートする必要があるだろう
-			public override Value Visit(IdentifierLiteral visitee)
-					=> new ModuleValue { Value = Modules.BUILT_INS[visitee.Value]() };
+			public override Value Visit(ModuleCallExpr visitee) {
+				var module = Modules.BUILT_INS[visitee.Identifier]();
+
+				foreach (var param in visitee.Parameters) {
+					var value = param.Item2.Accept(this);
+					module.Parameters[param.Item1].Source = value.AsModule().Output;
+				}
+
+				return new ModuleValue { Value = module };
+			}
 
 			public override Value Visit(TrackSetLiteral visitee)
 					=> new TrackSetValue { Value = visitee.Value };

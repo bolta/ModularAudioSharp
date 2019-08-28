@@ -50,7 +50,8 @@ namespace Moddl.Language {
 		public IList<string> Value { get; set; }
 	}
 
-	public class IdentifierLiteral : Expr {
-		public string Value { get; set; }
+	public class ModuleCallExpr : Expr {
+		public string Identifier { get; set; }
+		public IList<Tuple<string, Expr>> Parameters { get; set; }
 	}
 }

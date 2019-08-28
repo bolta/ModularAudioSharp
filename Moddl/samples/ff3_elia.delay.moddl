@@ -1,8 +1,11 @@
 // FF3「水の巫女エリア」
+// エフェクト実験
 
 @tempo 80
 
-@instrument ^ab, (pulseOsc * (1 - expEnv) * plainEnv) | delay
+@instrument ^ab, (pulseOsc * expEnv) | lpf { cutoff: 4000 + 3000 * 0.1 | sinOsc, q: 5 } | delay
+
+// @instrument ^ab, (pulseOsc * (1 - expEnv) * plainEnv) | delay
 // @instrument ^c, portamento | (nesTriangle + filteredNoise)
 @instrument ^c, portamento | nesTriangle
 
@@ -25,7 +28,7 @@ c f>cfafc <eb>ege<b da>dfd<a <b->fa>dfa <<a->dfa->cf <cg>cec<g cg>cegb
 ab >c4c4.c <b4b4.b a96b4^-96afcd f4e2
 c <a>cea>ce <<g>cegb>e <<f>cfa>cf <<cg>edc<b
 
-ab >c4c4.d e4e4.g a4a4ag a2g48a^-48g a2. ^2.
+ab >c4c4.d e4e4.g a4a4ag a2g48a^-48g a2. r2.
 c a>cea>ce <<g>cegb>e <<b->dfa>df <<gb->dgb->d <<a>ea>c+<ae >c+<aec+<ae
 
 ab <

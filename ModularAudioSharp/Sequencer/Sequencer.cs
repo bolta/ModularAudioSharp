@@ -12,15 +12,15 @@ namespace ModularAudioSharp.Sequencer {
 	/// </summary>
 	public class Sequencer : ITickUser {
 
-		public IDictionary<string, VarController<float>> Parameters { get; private set; }
+		public IDictionary<string, ProxyController<float>> Parameters { get; private set; }
 
 		// TODO いずれは複数持てるようにする
 		private readonly SequenceThread thread;
 
-		public Sequencer(Tick tick, IDictionary<string, VarController<float>> parameters,
+		public Sequencer(Tick tick, IDictionary<string, ProxyController<float>> parameters,
 				IEnumerable<Instruction> instrcs) {
 			tick.AddUser(this);
-			this.Parameters = new Dictionary<string, VarController<float>>(parameters);
+			this.Parameters = new Dictionary<string, ProxyController<float>>(parameters);
 			this.thread = new SequenceThread(this, instrcs);
 		}
 

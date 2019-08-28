@@ -20,7 +20,7 @@ namespace Moddl.Language {
 					Arguments = args.GetOrElse(new Expr[] { }).ToList(),
 				};
 
-		public readonly static Parser<FloatLiteral> floatValue =
+		public readonly static Parser<FloatLiteral> floatLiteral =
 				from val in SParse.Regex(@"[+-]?[0-9]+(\.[0-9]+)?|[+-]?\.[0-9]+").WithWhiteSpace()
 				select new FloatLiteral { Value = Convert.ToSingle(val) };
 
@@ -28,25 +28,44 @@ namespace Moddl.Language {
 				from tracks in SParse.Regex("[a-z0-9]").AtLeastOnce()
 				select tracks;
 
-		public readonly static Parser<TrackSetLiteral> trackSetValue =
+		public readonly static Parser<TrackSetLiteral> trackSetLiteral =
 				from _ in SParse.String("^")
 				from tracks in trackSet
 				select new TrackSetLiteral { Value = new List<string>(tracks) };
 
-		public readonly static Parser<IdentifierLiteral> identifierValue =
-				from id in SParse.Regex(@"[a-zA-Z_][a-zA-Z_0-9]*")
-				select new IdentifierLiteral { Value = id };
+		public readonly static Parser<string> identifier = SParse.Regex(@"[a-zA-Z_][a-zA-Z_0-9]*");
+
+		// TODO 途中で改行できるように
+		public readonly static Parser<Expr> moduleCallExpr =
+				from id in identifier.WithWhiteSpace()
+				from @params in (
+					from _ in SParse.String("{").WithWhiteSpace()
+					from @params in (
+						from name in identifier.WithWhiteSpace()
+						from __ in SParse.String(":").WithWhiteSpace()
+						from value in expr.WithWhiteSpace()
+						select Tuple.Create(name, value)
+					).DelimitedBy(SParse.String(",").WithWhiteSpace())
+					from ___ in SParse.String(",").WithWhiteSpace().Optional()
+					from ____ in SParse.String("}").WithWhiteSpace()
+					select @params
+				).Optional()
+				select new ModuleCallExpr {
+					Identifier = id,
+					Parameters = new List<Tuple<string, Expr>>(@params.GetOrElse(Enumerable.Empty<Tuple<string, Expr>>())),
+				};
+
+		public readonly static Parser<Expr> parenthesizedExpr =
+				from _ in SParse.String("(").WithWhiteSpace()
+				from x in expr
+				from __ in SParse.String(")").WithWhiteSpace()
+				select x;
 
 		public readonly static Parser<Expr> primaryExpr =
-				((Parser<Expr>) floatValue)
-				.Or(trackSetValue)
-				.Or(identifierValue)
-				.Or(
-					from _ in SParse.String("(").WithWhiteSpace()
-					from x in expr
-					from __ in SParse.String(")").WithWhiteSpace()
-					select x
-				);
+				((Parser<Expr>) floatLiteral)
+				.Or(trackSetLiteral)
+				.Or(moduleCallExpr)
+				.Or(parenthesizedExpr);
 
 		public readonly static Parser<Expr> connectiveExpr =
 				BinaryExpr(primaryExpr, SParse.String("|").Text(), _ => new ConnectiveExpr());

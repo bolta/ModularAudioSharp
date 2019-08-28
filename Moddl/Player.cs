@@ -73,7 +73,7 @@ namespace Moddl {
 			// TODO 該当トラックにインストゥルメントが定義されていないとこけるので、エラー処理
 			var instrm = this.instruments[track];
 			var temper = new EqualTemperament(440f);
-			var vol = Var(1f);
+			var vol = Proxy(1f);
 
 			var parser = new SimpleMmlParser();
 			var ast = parser.Parse(mml);
@@ -88,7 +88,7 @@ namespace Moddl {
 
 			var tick = new Tick(this.tempo, ticksPerBeat);
 
-			var parameters = new Dictionary<string, VarController<float>>(instrm.Parameters) {
+			var parameters = new Dictionary<string, ProxyController<float>>(instrm.Parameters) {
 				{  SimpleMmlInstructionGenerator.PARAM_TRACK_VOLUME, vol },
 			};
 
