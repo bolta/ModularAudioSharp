@@ -49,23 +49,38 @@ namespace Moddl {
 
 		}
 
-		private void ProcessDirectiveStatement(DirectiveStatement stmt) {
-			if (stmt.Name == "tempo") {
-				// TODO エラーチェック
-				this.tempo = this.evaluator.Evaluate(stmt.Arguments[0]).AsFloat()
-						// TODO エラーチェック
-						.Value;
+		private static void TryWithNode(AstNode node, Action action) {
+			try {
+				action();
 
-			} else if (stmt.Name == "instrument") {
-				// TODO 引数の型・数のチェック
-				var tracks = this.evaluator.Evaluate(stmt.Arguments[0]).AsTrackSet();
+			} catch (ModdlException e) {
+				e.Position = node.Position;
+				throw;
 
-				foreach (var track in tracks) {
-					var instrm = this.evaluator.Evaluate(stmt.Arguments[1]).AsModule();
-					// TODO 重複設定はエラーにする
-					this.instruments.Add(track, instrm);
-				}
+			} catch (Exception e) {
+				throw new ModdlException("An internal error occurred.", e) { Position = node.Position };
 			}
+		}
+
+		private void ProcessDirectiveStatement(DirectiveStatement stmt) {
+			TryWithNode(stmt, () => {
+				if (stmt.Name == "tempo") {
+					// TODO エラーチェック
+					this.tempo = this.evaluator.Evaluate(stmt.Arguments.TryGet(0)).AsFloat()
+							// TODO エラーチェック
+							.Value;
+
+				} else if (stmt.Name == "instrument") {
+					// TODO 引数の型・数のチェック
+					var tracks = this.evaluator.Evaluate(stmt.Arguments.TryGet(0)).AsTrackSet();
+
+					foreach (var track in tracks) {
+						var instrm = this.evaluator.Evaluate(stmt.Arguments.TryGet(1)).AsModule();
+						// TODO 重複設定はエラーにする
+						this.instruments.Add(track, instrm);
+					}
+				}
+			});
 		}
 
 		private Node<float> MmlToNode(string track, string mml) {

@@ -1,18 +1,32 @@
-﻿using System;
+﻿using Moddl;
+using Sprache;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Moddl.Language {
-	public class CompilationUnit {
+
+	public abstract class AstNode {
+		public Position Position { get; protected set; }
+		public int Length { get; protected set; }
+	}
+
+	public abstract class PositionAwareNode<T> : AstNode, IPositionAware<T> where T : PositionAwareNode<T> {
+		public T SetPos(Position startPos, int length) {
+			this.Position = startPos;
+			this.Length = length;
+			return (T) this;
+		}
+	}
+
+	public class CompilationUnit : AstNode {
 		public IEnumerable<Statement> Statements { get; set; }
 		public override string ToString() => string.Join(" ", this.Statements.Select(s => s.ToString()));
 	}
 
-	public class Statement {
-
-	}
+	public class Statement : PositionAwareNode<Statement> { }
 
 	public class DirectiveStatement : Statement {
 		public string Name { get; set; }
@@ -27,9 +41,7 @@ namespace Moddl.Language {
 				this.Mml);
 	}
 
-	public class Expr {
-
-	}
+	public class Expr : PositionAwareNode<Expr> { }
 
 	public class BinaryExpr : Expr {
 		public Expr Lhs { get; set; }
@@ -53,5 +65,15 @@ namespace Moddl.Language {
 	public class ModuleCallExpr : Expr {
 		public string Identifier { get; set; }
 		public IList<Tuple<string, Expr>> Parameters { get; set; }
+	}
+}
+
+internal static class ListExtensions {
+	internal static T TryGet<T>(this IList<T> dis, int i) {
+		if (i >= dis.Count) {
+			throw new ModdlIndexOutOfRangeException(i, dis.Count);
+		}
+
+		return dis[i];
 	}
 }

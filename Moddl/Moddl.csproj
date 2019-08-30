@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Exceptions.cs" />
     <Compile Include="Module.cs" />
     <Compile Include="Modules.cs" />
     <Compile Include="Language\AstNodes.cs" />

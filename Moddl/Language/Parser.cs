@@ -25,7 +25,7 @@ namespace Moddl.Language {
 				select new FloatLiteral { Value = Convert.ToSingle(val) };
 
 		public readonly static Parser<IEnumerable<string>> trackSet =
-				from tracks in SParse.Regex("[a-z0-9]").AtLeastOnce()
+				from tracks in SParse.Regex("[a-z0-9]").XAtLeastOnce()
 				select tracks;
 
 		public readonly static Parser<TrackSetLiteral> trackSetLiteral =
@@ -65,7 +65,8 @@ namespace Moddl.Language {
 				((Parser<Expr>) floatLiteral)
 				.Or(trackSetLiteral)
 				.Or(moduleCallExpr)
-				.Or(parenthesizedExpr);
+				.Or(parenthesizedExpr)
+				.Positioned();
 
 		public readonly static Parser<Expr> connectiveExpr =
 				BinaryExpr(primaryExpr, SParse.String("|").Text(), _ => new ConnectiveExpr());
@@ -82,18 +83,20 @@ namespace Moddl.Language {
 
 		public static Parser<Expr> BinaryExpr(Parser<Expr> constituentExpr, Parser<string> oper,
 				Func<string, BinaryExpr> makeNodeByOperator)
-				=> from head in constituentExpr.WithWhiteSpace()
-				from tail in (
-					from o in oper.WithWhiteSpace()
-					from x in constituentExpr.WithWhiteSpace()
-					select new { o, x }
-				).Many()
-				select tail.Aggregate(head, (lhs, rhs) => {
-					var result = makeNodeByOperator(rhs.o);
-					result.Lhs = lhs;
-					result.Rhs = rhs.x;
-					return result;
-				});
+				=> (
+					from head in constituentExpr.WithWhiteSpace()
+					from tail in (
+						from o in oper.WithWhiteSpace()
+						from x in constituentExpr.WithWhiteSpace()
+						select new { o, x }
+					).XMany()
+					select tail.Aggregate(head, (lhs, rhs) => {
+						var result = makeNodeByOperator(rhs.o);
+						result.Lhs = lhs;
+						result.Rhs = rhs.x;
+						return result;
+					})
+				).Positioned();
 
 		public readonly static Parser<Expr> expr = addSubExpr;
 
@@ -104,7 +107,7 @@ namespace Moddl.Language {
 
 		public readonly static Parser<MmlStatement> mmlStatement =
 				from tracks in trackSet
-				from _ in SParse.WhiteSpace.AtLeastOnce()
+				from _ in SParse.WhiteSpace.XAtLeastOnce()
 				from mml in SParse.Regex(@"[^\r\n]*")
 				from __ in SParse.LineEnd
 				select new MmlStatement {
@@ -117,13 +120,15 @@ namespace Moddl.Language {
 		/// </summary>
 		public readonly static Parser<Statement> statement =
 				((Parser<Statement>) directiveStatement)
-				.Or(mmlStatement);
+				.Or(mmlStatement)
+
+				.Positioned();
 
 		/// <summary>
 		/// 変換単位全体。文を任意個並べたもの
 		/// </summary>
 		public readonly static Parser<CompilationUnit> compilationUnit =
-				from ss in statement.Token().Many().Token() // TODO 空白の扱い、これでよいか検証
+				from ss in statement.Token().XMany().Token().End() // TODO 空白の扱い、これでよいか検証
 				select new CompilationUnit { Statements = ss };
 
 		public CompilationUnit Parse(string moddl) => compilationUnit.Parse(RemoveComments(moddl + "\n"));
