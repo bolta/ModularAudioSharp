@@ -65,13 +65,9 @@ namespace Moddl {
 		private void ProcessDirectiveStatement(DirectiveStatement stmt) {
 			TryWithNode(stmt, () => {
 				if (stmt.Name == "tempo") {
-					// TODO エラーチェック
-					this.tempo = this.evaluator.Evaluate(stmt.Arguments.TryGet(0)).AsFloat()
-							// TODO エラーチェック
-							.Value;
+					this.tempo = this.evaluator.Evaluate(stmt.Arguments.TryGet(0)).AsFloat();
 
 				} else if (stmt.Name == "instrument") {
-					// TODO 引数の型・数のチェック
 					var tracks = this.evaluator.Evaluate(stmt.Arguments.TryGet(0)).AsTrackSet();
 
 					foreach (var track in tracks) {

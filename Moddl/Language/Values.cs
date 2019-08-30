@@ -7,38 +7,33 @@ using System.Threading.Tasks;
 namespace Moddl.Language {
 	class Value {
 
-		// TODO エラー処理をちゃんとする。暗黙の型変換もあればここで
+		internal virtual float? TryAsFloat() => null;
+		internal float AsFloat() => this.TryAsFloat() ?? this.ThrowTypeError<float>();
 
-		public float? AsFloat() {
-			return ((FloatValue) this)?.Value;
-		}
+		internal virtual IEnumerable<string> TryAsTrackSet() => null;
+		internal IEnumerable<string> AsTrackSet() => this.TryAsTrackSet() ?? this.ThrowTypeError<IEnumerable<string>>();
 
-		// nullable
-		public IEnumerable<string> AsTrackSet() {
-			return ((TrackSetValue) this)?.Value;
-		}
+		internal virtual Module TryAsModule() => null;
+		internal Module AsModule() => this.TryAsModule() ?? this.ThrowTypeError<Module>();
 
-		// nullable
-		public Module AsModule() {
-			if (this is ModuleValue) {
-				return ((ModuleValue) this).Value;
-			} else if (this is FloatValue) {
-				return Module.FromFloat(((FloatValue) this).Value);
-			} else {
-				return null;
-			}
+		private T ThrowTypeError<T>() {
+			throw new ModdlTypeException();
 		}
 	}
 
 	class FloatValue : Value {
 		public float Value { get; set; }
+		internal override float? TryAsFloat() => this.Value;
+		internal override Module TryAsModule() => Module.FromFloat(this.Value);
 	}
 
 	class TrackSetValue : Value {
 		public IEnumerable<string> Value { get; set; }
+		internal override IEnumerable<string> TryAsTrackSet() => this.Value;
 	}
 
 	class ModuleValue : Value {
 		public Module Value { get; set; }
+		internal override Module TryAsModule() => this.Value;
 	}
 }

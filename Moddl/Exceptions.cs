@@ -27,4 +27,8 @@ namespace Moddl {
 			this.MaxIndex = maxIndex;
 		}
 	}
+
+	internal class ModdlTypeException : ModdlException {
+		// TODO
+	}
 }
