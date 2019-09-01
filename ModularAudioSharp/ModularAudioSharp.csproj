@@ -71,7 +71,6 @@
     <Compile Include="Output\AudioOutput.cs" />
     <Compile Include="Output\Output.cs" />
     <Compile Include="PlainEnvController.cs" />
-    <Compile Include="Player.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Data\ToneName.cs" />
     <Compile Include="ProxyController.cs" />
