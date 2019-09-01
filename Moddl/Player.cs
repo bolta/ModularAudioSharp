@@ -26,16 +26,15 @@ namespace Moddl {
 			var mmls = new Dictionary<string, StringBuilder>();
 
 			foreach (var stmt in ast.Statements) {
-				if (stmt is DirectiveStatement) {
-					this.ProcessDirectiveStatement((DirectiveStatement) stmt);
+				if (stmt is DirectiveStatement dir) {
+					this.ProcessDirectiveStatement(dir);
 
-				} else if (stmt is MmlStatement) {
-					var mmlStmt = (MmlStatement) stmt;
-					foreach (var track in mmlStmt.Tracks) {
+				} else if (stmt is MmlStatement mml) {
+					foreach (var track in mml.Tracks) {
 						if (! mmls.ContainsKey(track)) {
 							mmls.Add(track, new StringBuilder());
 						}
-						mmls[track].AppendLine(mmlStmt.Mml);
+						mmls[track].AppendLine(mml.Mml);
 					}
 				}
 			}
@@ -103,7 +102,7 @@ namespace Moddl {
 				{  SimpleMmlInstructionGenerator.PARAM_TRACK_VOLUME, vol },
 			};
 
-			var seq = new Sequencer(tick, parameters, instrcs);
+			new Sequencer(tick, parameters, instrcs);
 
 			// TODO ステレオに正しく対応（キャストを除去）
 			return (Node<float>) (instrm.Output * vol);
