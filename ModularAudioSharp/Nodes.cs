@@ -17,10 +17,10 @@ namespace ModularAudioSharp {
 		/// </summary>
 		/// <param name="value"></param>
 		/// <returns></returns>
-		public static Node<T> Const<T>(T value) where T : struct => Node.Create(Const_(value), false);
+		public static Node<T> Const<T>(T value) where T : struct {
+			IEnumerable<T> signal() { while (true) yield return value; }
 
-		private static IEnumerable<T> Const_<T>(T value) where T : struct {
-			while (true) yield return value;
+			return Node.Create(signal(), false);
 		}
 
 		/// <summary>
@@ -85,18 +85,19 @@ namespace ModularAudioSharp {
 
 		public static Node<float> Osc(Node freq, Func<float, float> func, bool crazy = false) {
 			var phaseDiffs = freq.AsFloat().UseAsStream().Select(f => (float) (2 * Math.PI * f / ModuleSpace.SampleRate));
-			return Node.Create(Osc(phaseDiffs, func, crazy), true, freq);
-		}
 
-		private static IEnumerable<float> Osc(IEnumerable<float> phaseDiffs, Func<float, float> func, bool crazy = false) {
-			const float twoPi = (float) (2 * Math.PI);
-			var phase = 0f;
-			foreach (var dp in phaseDiffs) {
-				yield return func(phase);
-				phase = phase + dp;
-				// 2π で余りをとらないと位相がどんどん大きくなり、演算誤差で音程が不安定になる。これはこれで面白い
-				if (! crazy) phase %= twoPi;
+			IEnumerable<float> signal() {
+				const float twoPi = (float) (2 * Math.PI);
+				var phase = 0f;
+				foreach (var dp in phaseDiffs) {
+					yield return func(phase);
+					phase = phase + dp;
+					// 2π で余りをとらないと位相がどんどん大きくなり、演算誤差で音程が不安定になる。これはこれで面白い
+					if (! crazy) phase %= twoPi;
+				}
 			}
+
+			return Node.Create(signal(), true, freq);
 		}
 
 		// TODO パルス波のオシレータはデューティ比も参照するため既存の Osc では対応できなかった。
@@ -105,31 +106,32 @@ namespace ModularAudioSharp {
 		public static Node<float> PulseOsc(Node freq, Node duty, bool crazy = false) {
 			var phaseDiffs = freq.AsFloat().UseAsStream().Select(f => (float) (2 * Math.PI * f / ModuleSpace.SampleRate));
 			var dutyStr = duty.AsFloat().UseAsStream();
-			return Node.Create(PulseOsc(phaseDiffs, dutyStr, crazy), true, freq, duty);
+			IEnumerable<float> signal() {
+				const float twoPi = (float) (2 * Math.PI);
+				var phase = 0f;
+				foreach (var input in phaseDiffs.Zip(dutyStr, Tuple.Create)) {
+					var dp = input.Item1;
+					var d = input.Item2;
+					yield return phase % twoPi < twoPi * d ? 1f : -1f;
+					phase = phase + dp;
+					// 2π で余りをとらないと位相がどんどん大きくなり、演算誤差で音程が不安定になる。これはこれで面白い
+					if (! crazy) phase %= twoPi;
+				}
+			}
+
+			return Node.Create(signal(), true, freq, duty);
 		}
 
-		private static IEnumerable<float> PulseOsc(IEnumerable<float> phaseDiffs, IEnumerable<float> duty, bool crazy = false) {
-			//return Osc((Node<float>) freq, phase => phase % (2 * Math.PI) < (float)(2 * Math.PI) * duty ? 1f : -1f, crazy);
-			const float twoPi = (float) (2 * Math.PI);
-			var phase = 0f;
-			foreach (var input in phaseDiffs.Zip(duty, Tuple.Create)) {
-				var dp = input.Item1;
-				var d = input.Item2;
-				yield return phase % twoPi < twoPi * d ? 1f : -1f;
-				phase = phase + dp;
-				// 2π で余りをとらないと位相がどんどん大きくなり、演算誤差で音程が不安定になる。これはこれで面白い
-				if (! crazy) phase %= twoPi;
+		public static Node<float> Noise() {
+			IEnumerable<float> signal() {
+				var rand = new Random();
+				while (true) {
+					var value = (float) (rand.NextDouble() * 2 - 1);
+					yield return value;
+				}
 			}
-		}
 
-		public static Node<float> Noise() => Node.Create(NoiseEnum(), true);
-
-		private static IEnumerable<float> NoiseEnum() {
-			var rand = new Random();
-			while (true) {
-				var value = (float) (rand.NextDouble() * 2 - 1);
-				yield return value;
-			}
+			return Node.Create(signal(), true);
 		}
 
 		/// <summary>
@@ -222,86 +224,95 @@ namespace ModularAudioSharp {
 		/// <returns></returns>
 		public static Node<float> BiQuadFilter(Node<float> input,
 				Node<float> b0, Node<float> b1, Node<float> b2,
-				Node<float> a0, Node<float> a1, Node<float> a2)
-				=> Node.Create(BiQuadFilter_(input.UseAsStream(),
-						b0.UseAsStream(), b1.UseAsStream(), b2.UseAsStream(),
-						a0.UseAsStream(), a1.UseAsStream(), a2.UseAsStream()),
-						true, input, b0, b1, b2, a0, a1, a2);
+				Node<float> a0, Node<float> a1, Node<float> a2) {
+			IEnumerable<float> signal() {
+				var inDelay = new DelayBuffer<float>(2);
+				var outDelay = new DelayBuffer<float>(2);
 
-		private static IEnumerable<float> BiQuadFilter_(IEnumerable<float> input,
-				IEnumerable<float> b0, IEnumerable<float> b1, IEnumerable<float> b2,
-				IEnumerable<float> a0, IEnumerable<float> a1, IEnumerable<float> a2) {
-			var inDelay = new DelayBuffer<float>(2);
-			var outDelay = new DelayBuffer<float>(2);
+				foreach (var values in input.UseAsStream().Zip(
+						b0.UseAsStream(),
+						b1.UseAsStream(),
+						b2.UseAsStream(),
+						a0.UseAsStream(),
+						a1.UseAsStream(),
+						a2.UseAsStream(),
+						Tuple.Create)) {
+					var inValue = values.Item1;
+					var b0_ = values.Item2;
+					var b1_ = values.Item3;
+					var b2_ = values.Item4;
+					var a0_ = values.Item5;
+					var a1_ = values.Item6;
+					var a2_ = values.Item7;
+					var outValue = (b0_ * inValue + b1_ * inDelay[0] + b2_ * inDelay[-1] - a1_ * outDelay[0] - a2_ * outDelay[-1]) / a0_;
+					inDelay.Push(inValue);
+					outDelay.Push(outValue);
 
-			foreach (var values in input.Zip(b0, b1, b2, a0, a1, a2, Tuple.Create)) {
-				var inValue = values.Item1;
-				var b0_ = values.Item2;
-				var b1_ = values.Item3;
-				var b2_ = values.Item4;
-				var a0_ = values.Item5;
-				var a1_ = values.Item6;
-				var a2_ = values.Item7;
-				var outValue = (b0_*inValue + b1_*inDelay[0] + b2_*inDelay[-1] - a1_*outDelay[0] - a2_*outDelay[-1]) / a0_;
-				inDelay.Push(inValue);
-				outDelay.Push(outValue);
-
-				yield return outValue;
+					yield return outValue;
+				}
 			}
+
+			return Node.Create(signal(), true, input, b0, b1, b2, a0, a1, a2);
 		}
 
-		public static Node<float> Portamento(Node freq, float ratio)
-				=> Node.Create(Portamento(freq.AsFloat().UseAsStream(), ratio), true, freq);
-
-		private static IEnumerable<float> Portamento(IEnumerable<float> freq, float ratio) {
+		public static Node<float> Portamento(Node freq, float ratio) {
 			float? actualFreq = null;
 
-			foreach (var f in freq) {
-				if (! actualFreq.HasValue) actualFreq = f;
-				yield return actualFreq.Value;
-
-				actualFreq = (1 - ratio) * actualFreq.Value + ratio * f;
+			IEnumerable<float> signal() {
+				foreach (var f in freq.AsFloat().UseAsStream()) {
+					if (! actualFreq.HasValue) actualFreq = f;
+					yield return actualFreq.Value;
+					actualFreq = (1 - ratio) * actualFreq.Value + ratio * f;
+				}
 			}
+
+			return Node.Create(signal(), true, freq);
 		}
 
-		public static Node<float> Delay(this Node src, Node time_smp, Node feedbackLevel, Node wetLevel, int maxTime_smp)
-				=> Node.Create(Delay(src.AsFloat().UseAsStream(),
+		public static Node<float> Delay(this Node src, Node time_smp, Node feedbackLevel, Node wetLevel, int maxTime_smp) {
+			var buffer = new DelayBuffer<float>(maxTime_smp);
+
+			IEnumerable<float> signal() {
+				foreach (var stfw in src.AsFloat().UseAsStream().Zip(
 						time_smp.AsInt().UseAsStream(),
 						feedbackLevel.AsFloat().UseAsStream(),
 						wetLevel.AsFloat().UseAsStream(),
-						maxTime_smp), true, src, time_smp, feedbackLevel, wetLevel);
-
-		private static IEnumerable<float> Delay(IEnumerable<float> src, IEnumerable<int> time_smp,
-				IEnumerable<float> feedbackLevel, IEnumerable<float> wetLevel, int maxTime_smp) {
-			var buffer = new DelayBuffer<float>(maxTime_smp);
-			foreach (var stfw in src.Zip(time_smp, feedbackLevel, wetLevel, Tuple.Create)) {
-				// TODO 添字が誤っていないかチェック
-				yield return stfw.Item1 + buffer[- (stfw.Item2 - 1)] * stfw.Item4;
-				buffer.Push(stfw.Item1 + stfw.Item3 * buffer[- (stfw.Item2 - 1)]);
+						Tuple.Create)) {
+					// TODO 添字が誤っていないかチェック
+					yield return stfw.Item1 + buffer[- (stfw.Item2 - 1)] * stfw.Item4;
+					buffer.Push(stfw.Item1 + stfw.Item3 * buffer[- (stfw.Item2 - 1)]);
+				}
 			}
+
+			return Node.Create(signal(), true, src, time_smp, feedbackLevel, wetLevel);
 		}
 
-		public static Node<float> Limit(this Node src, Node min, Node max)
-				=> Node.Create(Limit(src.AsFloat().UseAsStream(), min.AsFloat().UseAsStream(), max.AsFloat().UseAsStream()),
-						false, src, min, max);
-		private static IEnumerable<float> Limit(IEnumerable<float> src, IEnumerable<float> min, IEnumerable<float> max)
-				=> src.Zip(min, max, (s, mn, mx) => s < mn ? mn : s > mx ? mx : s);
+		public static Node<float> Limit(this Node src, Node min, Node max) {
+			var signal = src.AsFloat().UseAsStream().Zip(
+					min.AsFloat().UseAsStream(),
+					max.AsFloat().UseAsStream(),
+					(s, mn, mx) => s < mn ? mn : s > mx ? mx : s);
 
-		public static Node<float> QuantCrush(this Node src, Node min, Node max, Node resolution)
-				=> Node.Create(QuantCrush(src.AsFloat().UseAsStream(), min.AsFloat().UseAsStream(),
-						max.AsFloat().UseAsStream(), resolution.AsInt().UseAsStream()), false, src, min, max, resolution);
-		private static IEnumerable<float> QuantCrush(IEnumerable<float> src, IEnumerable<float> min, IEnumerable<float> max,
-				IEnumerable<int> resolution)
-				=> src.Zip(min, max, resolution, (s, mn, mx, r) => {
-					return mn == mx
-							? 0f
-					: s < mn
-							? mn
-					: s > mx
-							? mx
-					:
-							(float) (Math.Floor(r * (s - mn) / (mx - mn)) / r * (mx - mn) + mn);
-				});
+			return Node.Create(signal, false, src, min, max);
+		}
+
+		public static Node<float> QuantCrush(this Node src, Node min, Node max, Node resolution) {
+			var signal = src.AsFloat().UseAsStream().Zip(
+					min.AsFloat().UseAsStream(),
+					max.AsFloat().UseAsStream(),
+					resolution.AsInt().UseAsStream(),
+					(s, mn, mx, r) =>
+							mn == mx
+									? 0f
+							: s < mn
+									? mn
+							: s > mx
+									? mx
+							:
+									(float) (Math.Floor(r * (s - mn) / (mx - mn)) / r * (mx - mn) + mn));
+
+			return Node.Create(signal, false, src, min, max, resolution);
+		}
 
 		public static Node<Stereo<T>> ZipToStereo<T>(Node<T> left, Node<T> right) where T : struct
 				=> Node.Create(left.UseAsStream().Zip(right.UseAsStream(), Stereo.Create), false, left, right);
