@@ -8,17 +8,17 @@ namespace Moddl.Language {
 	class Value {
 
 		internal virtual float? TryAsFloat() => null;
-		internal float AsFloat() => this.TryAsFloat() ?? this.ThrowTypeError<float>();
+		internal float AsFloat() => this.TryAsFloat() ?? throw new ModdlTypeException();
 
 		internal virtual IEnumerable<string> TryAsTrackSet() => null;
-		internal IEnumerable<string> AsTrackSet() => this.TryAsTrackSet() ?? this.ThrowTypeError<IEnumerable<string>>();
+		internal IEnumerable<string> AsTrackSet() => this.TryAsTrackSet() ?? throw new ModdlTypeException();
 
 		internal virtual Module TryAsModule() => null;
-		internal Module AsModule() => this.TryAsModule() ?? this.ThrowTypeError<Module>();
+		internal Module AsModule() => this.TryAsModule() ?? throw new ModdlTypeException();
 
-		private T ThrowTypeError<T>() {
-			throw new ModdlTypeException();
-		}
+		//private T ThrowTypeError<T>() {
+		//	throw new ModdlTypeException();
+		//}
 	}
 
 	class FloatValue : Value {
