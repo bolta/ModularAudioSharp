@@ -29,7 +29,7 @@ namespace ModularAudioSharp {
 		/// <typeparam name="T"></typeparam>
 		/// <param name="initValue"></param>
 		/// <returns></returns>
-		public static VarController<T> Var<T>(T initValue = default(T)) where T : struct
+		public static VarController<T> Var<T>(T initValue = default) where T : struct
 				=> new VarController<T>(initValue);
 
 		public static ProxyController<T> Proxy<T>() where T : struct => new ProxyController<T>();
@@ -44,16 +44,6 @@ namespace ModularAudioSharp {
 
 		public static PlainEnvController PlainEnv()
 				=> new PlainEnvController();
-
-		private static IEnumerable<T> Delay<T>(IEnumerable<T> source, int amount_smp) where T : struct {
-			var buffer = new T[amount_smp];
-			var index = 0;
-			foreach (var value in source) {
-				yield return buffer[index];
-				buffer[index] = value;
-				index = (index + 1) % amount_smp;
-			}
-		}
 
 		/// <summary>
 		/// 正弦波を出力するオシレータ
@@ -91,7 +81,7 @@ namespace ModularAudioSharp {
 				var phase = 0f;
 				foreach (var dp in phaseDiffs) {
 					yield return func(phase);
-					phase = phase + dp;
+					phase += dp;
 					// 2π で余りをとらないと位相がどんどん大きくなり、演算誤差で音程が不安定になる。これはこれで面白い
 					if (! crazy) phase %= twoPi;
 				}
@@ -113,7 +103,7 @@ namespace ModularAudioSharp {
 					var dp = input.Item1;
 					var d = input.Item2;
 					yield return phase % twoPi < twoPi * d ? 1f : -1f;
-					phase = phase + dp;
+					phase += dp;
 					// 2π で余りをとらないと位相がどんどん大きくなり、演算誤差で音程が不安定になる。これはこれで面白い
 					if (! crazy) phase %= twoPi;
 				}

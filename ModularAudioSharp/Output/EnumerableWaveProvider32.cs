@@ -35,13 +35,14 @@ namespace ModularAudioSharp.Output {
 
 		public override int Read(float[] buffer, int offset, int sampleCount) {
 			var countRead = 0;
-			for (countRead = 0 ; countRead <= sampleCount - this.channels ; ) {
+			for ( ; countRead <= sampleCount - this.channels ; ) {
 				for (var i=0 ; i<this.channels ; ++i) {
 					if (! this.source.MoveNext()) break;
 					buffer[offset + countRead] = this.source.Current;
 					++ countRead;
 				}
 			}
+
 			return countRead;
 		}
 	}

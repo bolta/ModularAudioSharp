@@ -14,14 +14,14 @@ namespace ModularAudioSharp {
 		// TODO 初期化手段
 		public static int SampleRate { get; } = 44100;
 
-		private static IList<Node> activeNodes = new List<Node>();
+		private static readonly IList<Node> activeNodes = new List<Node>();
 
 		public static void AddActiveNode(Node node) {
 			Debug.Assert(! activeNodes.Contains(node));
 			activeNodes.Add(node);
 		}
 
-		private static IList<Tick> ticks = new List<Tick>();
+		private static readonly IList<Tick> ticks = new List<Tick>();
 		public static void AddTick(Tick tick) {
 			Debug.Assert(! ticks.Contains(tick));
 			ticks.Add(tick);

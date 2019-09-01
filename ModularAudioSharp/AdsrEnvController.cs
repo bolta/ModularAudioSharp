@@ -24,10 +24,10 @@ namespace ModularAudioSharp {
 		/// </summary>
 		private State state = State.Idle;
 
-		private IEnumerable<float> attackRatePerSample;
-		private IEnumerable<float> decayRatePerSample;
-		private IEnumerable<float> sustainLevelVol;
-		private IEnumerable<float> releaseRatePerSample;
+		private readonly IEnumerable<float> attackRatePerSample;
+		private readonly IEnumerable<float> decayRatePerSample;
+		private readonly IEnumerable<float> sustainLevelVol;
+		private readonly IEnumerable<float> releaseRatePerSample;
 
 		/// <summary>
 		/// 
@@ -37,14 +37,8 @@ namespace ModularAudioSharp {
 			: base(true)
 		{
 			// サンプルごとの変化量に変換
-			Func<float, float> toRatePerSample = secs => {
-				if (secs <= 0f) {
-					return 1f;
-				} else {
-					// rate[smp] = 1 / time[smp] = 1 / (smpRate[smp/s] * time[s]) 
-					return 1f / ModuleSpace.SampleRate / secs;
-				}
-			};
+			float toRatePerSample(float secs) => secs <= 0f ? 1f : 1f / ModuleSpace.SampleRate / secs;
+
 			this.attackRatePerSample = attackTimeSecs.AsFloat().UseAsStream().Select(toRatePerSample);
 			this.decayRatePerSample = decayTimeSecs.AsFloat().UseAsStream().Select(toRatePerSample);
 			this.sustainLevelVol = sustainLevelVol.AsFloat().UseAsStream();
