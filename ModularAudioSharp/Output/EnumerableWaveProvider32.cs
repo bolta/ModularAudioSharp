@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using ModularAudioSharp.Data;
 using NAudio.Wave;
 
-namespace ModularAudioSharp {
+namespace ModularAudioSharp.Output {
 
 	internal class EnumerableWaveProvider32 : WaveProvider32 {
 		private readonly IEnumerator<float> source;

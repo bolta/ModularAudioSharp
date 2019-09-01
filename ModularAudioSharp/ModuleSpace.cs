@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ModularAudioSharp.Output;
 using ModularAudioSharp.Sequencer;
 using NAudio.Wave;
 
@@ -33,16 +34,9 @@ namespace ModularAudioSharp {
 		/// <param name="master"></param>
 		/// <returns>再生用のオブジェクトの寿命を管理するためのオブジェクト。
 		/// 再生が終わったら Dispose すること</returns>
-		public static Player Play<T>(Node<T> master) where T : struct {
-			var signal = EnumerableWaveProvider32.New(MakeMasterSignal(master));
-
-			var waveOut = new WaveOut {
-				DesiredLatency = 200,
-			};
-			waveOut.Init(signal);
-			waveOut.Play();
-
-			return new Player(waveOut);
+		public static void Play<T>(Node<T> master, Output<T> output) where T : struct {
+			var signal = MakeMasterSignal(master);
+			output.Play(signal);
 		}
 
 		/// <summary>

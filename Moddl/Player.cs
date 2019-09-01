@@ -2,6 +2,7 @@
 using ModularAudioSharp;
 using ModularAudioSharp.Data;
 using ModularAudioSharp.Mml;
+using ModularAudioSharp.Output;
 using ModularAudioSharp.Sequencer;
 using ModularAudioSharp.Waveform;
 using System;
@@ -20,8 +21,7 @@ namespace Moddl {
 		private readonly Dictionary<string, Module> instruments = new Dictionary<string, Module>();
 		private readonly Evaluator evaluator = new Evaluator();
 
-		// TODO ModularAudioSharp.Player は実装詳細なので外に出さないようにしたいが…
-		public ModularAudioSharp.Player Play(string moddl) {
+		public void Play(string moddl, Output<float> output) {
 			var ast = new Parser().Parse(moddl);
 			var mmls = new Dictionary<string, StringBuilder>();
 
@@ -44,8 +44,7 @@ namespace Moddl {
 			var master = nodes.Aggregate(Const(0f), (acc, node) => (Node<float>)(acc + node));
 			var masterVol = 0.25f;
 
-			return ModuleSpace.Play((master * masterVol).AsFloat());
-
+			ModuleSpace.Play<float>((master * masterVol).AsFloat(), output);
 		}
 
 		private static void TryWithNode(AstNode node, Action action) {

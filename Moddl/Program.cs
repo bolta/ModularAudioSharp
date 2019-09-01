@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ModularAudioSharp.Output;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -16,7 +17,8 @@ namespace Moddl {
 
 			var moddlPath = args[0];
 			var moddl = File.ReadAllText(moddlPath);
-			using (new Player().Play(moddl)) {
+			using (var output = new AudioOutput<float>()) {
+				new Player().Play(moddl, output);
 				Console.WriteLine("Press any key to terminate.");
 				Console.ReadKey();
 			}
