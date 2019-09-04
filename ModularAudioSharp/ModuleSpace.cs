@@ -14,8 +14,15 @@ namespace ModularAudioSharp {
 		// TODO 初期化手段
 		public static int SampleRate { get; } = 44100;
 
+		/// <summary>
+		/// （本質的かどうかに依らず）能動的な全てのノード
+		/// </summary>
 		private static readonly IList<Node> activeNodes = new List<Node>();
 
+		/// <summary>
+		/// （本質的かどうかに依らず）能動的なノードを管理下に加える
+		/// </summary>
+		/// <param name="node"></param>
 		public static void AddActiveNode(Node node) {
 			Debug.Assert(! activeNodes.Contains(node));
 			activeNodes.Add(node);

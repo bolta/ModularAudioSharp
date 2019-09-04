@@ -80,6 +80,10 @@ namespace ModularAudioSharp {
 		/// </summary>
 		private readonly string nodeTag;
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="active">このノードが（本質的かどうかに依らず）能動的かどうか</param>
 		protected Node(bool active) {
 			this.active = active;
 
