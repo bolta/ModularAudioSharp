@@ -69,6 +69,7 @@
     <Compile Include="NodeController.cs" />
     <Compile Include="Nodes.cs" />
     <Compile Include="Output\AudioOutput.cs" />
+    <Compile Include="Output\NullOutput.cs" />
     <Compile Include="Output\Output.cs" />
     <Compile Include="PlainEnvController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
