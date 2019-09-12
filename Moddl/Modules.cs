@@ -94,7 +94,7 @@ namespace Moddl {
 
 			// BPF だとノイズが残っていまいちな音だった
 //			var osc = (Noise()).Bpf(freq, q);//.Limit(-1f, 1f);
-			var osc = (Noise() * 0.125f).Lpf(freq, q).Hpf(freq, q);//.Limit(-1f, 1f);
+			var osc = (Nodes.Noise() * 0.125f).Lpf(freq, q).Hpf(freq, q);//.Limit(-1f, 1f);
 			var env = Nodes.PlainEnv();
 			var output = (osc * env).AsFloat();
 
@@ -134,7 +134,7 @@ namespace Moddl {
 				Enumerable.Empty<INotable>());
 		}
 
-		#region Oscillators
+		#region Oscillators and Noises
 
 		/// <summary>
 		/// 正弦波オシレータ
@@ -192,6 +192,14 @@ namespace Moddl {
 			return new Module(freq, output,
 					new Dictionary<string, ProxyController<float>>() {
 						{ "duty", duty },
+					},
+					new INotable[] {
+					});
+		}
+
+		internal static Module Noise() {
+			return new Module(new ProxyController<float>[] { }, Nodes.Noise(),
+					new Dictionary<string, ProxyController<float>>() {
 					},
 					new INotable[] {
 					});
@@ -271,6 +279,24 @@ namespace Moddl {
 					},
 					new INotable[] {
 						output,
+					});
+		}
+
+		#endregion
+
+		#region Various Effectors
+
+		internal static Module SampleCrush() {
+			var input = Proxy<float>();
+			var rate = Proxy<float>(ModuleSpace.SampleRate);
+
+			var output = Nodes.SampleCrush(input, rate);
+
+			return new Module(input, output,
+					new Dictionary<string, ProxyController<float>>() {
+						{ "rate", rate },
+					},
+					new INotable[] {
 					});
 		}
 

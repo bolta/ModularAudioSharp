@@ -304,6 +304,24 @@ namespace ModularAudioSharp {
 			return Node.Create(signal, false, src, min, max, resolution);
 		}
 
+		public static Node<float> SampleCrush(this Node src, Node smpRate) {
+			IEnumerable<float> signal() {
+				float accum = ModuleSpace.SampleRate;
+				float outValue = 0f;
+				foreach (var (s, r) in src.AsFloat().UseAsStream()
+						.Zip(smpRate.AsFloat().UseAsStream(), (s, r) => (s, r))) {
+					if (accum >= ModuleSpace.SampleRate) {
+						accum %= ModuleSpace.SampleRate;
+						outValue = s;
+					}
+					yield return outValue;
+					accum += r;
+				}
+			}
+
+			return Node.Create(signal(), false, src, smpRate);
+		}
+
 		public static Node<Stereo<T>> ZipToStereo<T>(Node<T> left, Node<T> right) where T : struct
 				=> Node.Create(left.UseAsStream().Zip(right.UseAsStream(), Stereo.Create), false, left, right);
 	}

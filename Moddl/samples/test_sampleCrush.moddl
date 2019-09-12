@@ -1,0 +1,9 @@
+﻿//
+
+@tempo 114
+
+@instrument ^a, noise | sampleCrush { rate: 5000 + 4900 * 0.1 | sinOsc }
+
+a o2L1v06
+
+a c // dummy
