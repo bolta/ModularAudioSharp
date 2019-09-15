@@ -51,6 +51,7 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="Language\Context.cs" />
     <Compile Include="Module.cs" />
+    <Compile Include="ModuleConstructor.cs" />
     <Compile Include="Modules.cs" />
     <Compile Include="Language\AstNodes.cs" />
     <Compile Include="Language\Evaluator.cs" />

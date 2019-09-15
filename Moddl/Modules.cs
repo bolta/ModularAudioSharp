@@ -1,4 +1,5 @@
-﻿using ModularAudioSharp;
+﻿using Moddl.Language;
+using ModularAudioSharp;
 using ModularAudioSharp.Data;
 using ModularAudioSharp.Sequencer;
 using ModularAudioSharp.Waveform;
@@ -27,19 +28,29 @@ namespace Moddl {
 		///	  ...
 		///	} 
 		///	のような内容をリフレクションで生成している。
-		///	シグネチャが internal static Module [ModuleName]() であるメソッドをこのクラスに作ると勝手に登録される
+		///	シグネチャが internal static Module [ModuleName](IDictionary<string, Value>) であるメソッドをこのクラスに作ると勝手に登録される。
+		///	また、引数のない internal static Module [ModuleName]() であるメソッドも、引数を無視するラッパーをかました上で勝手に登録される
 		/// </remarks>
-		internal static readonly Dictionary<string, Func<Module>> BUILT_INS;
+		internal static readonly Dictionary<string, Func<IDictionary<string, Value>, Module>> BUILT_INS;
 		static Modules() {
 			BUILT_INS = typeof(Modules).GetMethods(BindingFlags.NonPublic | BindingFlags.Static)
 					.Where(m =>
 							(m.IsPublic || m.IsAssembly)
 							&& m.IsStatic
 							&& m.ReturnType == typeof(Module)
-							&& m.GetParameters().Length == 0)
+							&& (m.GetParameters().Length == 0
+									|| m.GetParameters().Length == 1
+											&& m.GetParameters()[0].ParameterType == typeof(IDictionary<string, Value>)))
 					.ToDictionary(
 							m => m.Name.Substring(0, 1).ToLower() + m.Name.Substring(1),
-							m => { return (Func<Module>) (() => (Module) m.Invoke(null, new object[] { })); });
+							m => {
+								if (m.GetParameters().Length == 0) {
+									return (constrParams) => (Module) m.Invoke(null, new object[] { });
+								} else {
+									return (Func<IDictionary<string, Value>, Module>)
+											((constrParams) => (Module) m.Invoke(null, new object[] { constrParams }));
+								}
+							});
 		}
 
 		/// <summary>
@@ -117,12 +128,23 @@ namespace Moddl {
 		}
 
 		// 接続の動作検証用
-		internal static Module Delay() {
-			var input = Proxy<float>();
-			var output = input.Node.Delay(24806, 0.5f, 0.4f, 24806);
+		internal static Module Delay(IDictionary<string, Value> constrParams) {
+			var capacity_smp = (int) ((constrParams.TryGetClassValue("capacity")?.AsFloat() ?? 2f) * ModuleSpace.SampleRate);
 
-			return new Module(input, output, new Dictionary<string, ProxyController<float>>(),
-				Enumerable.Empty<INotable>());
+			var input = Proxy<float>();
+			var time = Proxy(0.5f);
+			var feedbackLevel = Proxy(0.5f);
+			var wetLevel = Proxy(0.4f);
+
+			var output = input.Node.Delay((time.Node * (float) ModuleSpace.SampleRate).Limit(1f, capacity_smp - 1), feedbackLevel, wetLevel, capacity_smp);
+
+			return new Module(input, output,
+					new Dictionary<string, ProxyController<float>> {
+						{ nameof(time), time },
+						{ nameof(feedbackLevel), feedbackLevel },
+						{ nameof(wetLevel), wetLevel },
+					},
+					Enumerable.Empty<INotable>());
 		}
 
 		// 接続の動作検証用

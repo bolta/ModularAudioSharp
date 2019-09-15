@@ -11,7 +11,7 @@ namespace Moddl.Language {
 		private readonly Context context = new Context();
 		internal Evaluator() {
 			foreach (var kv in Modules.BUILT_INS) {
-				this.context[kv.Key] = new ModuleDefValue { Value = kv.Value };
+				this.context[kv.Key] = new ModuleConstructorValue { Constructor = new ModuleConstructor(kv.Value) };
 			}
 		}
 
@@ -59,8 +59,8 @@ namespace Moddl.Language {
 					// TODO 見つからない場合のエラー処理
 					=> this.context[visitee.Identifier];
 
-			public override Value Visit(LambdaExpr visitee) => new ModuleDefValue {
-				Value = () => {
+			public override Value Visit(LambdaExpr visitee) => new ModuleConstructorValue {
+				Constructor = new ModuleConstructor(@params => {
 					var input = Nodes.Proxy<float>();
 					var output = input;
 					var inputParamModule = new Module(input, output,
@@ -81,13 +81,15 @@ namespace Moddl.Language {
 					} finally {
 						this.context.Pop();
 					}
-				},
+				}),
 			};
 
 			public override Value Visit(ModuleParamExpr visitee) {
-				var module = visitee.ModuleDef.Accept(this).AsModule();
+				var ctor = visitee.ModuleDef.Accept(this).AsModuleConstructor()
+						.AddParameters(visitee.ConstructorParameters.ToDictionary(kv => kv.Item1, kv => kv.Item2.Accept(this)));
+				var module = ctor.CreateModule();
 
-				foreach (var param in visitee.Parameters) {
+				foreach (var param in visitee.SignalParameters) {
 					var value = param.Item2.Accept(this);
 					module.Parameters[param.Item1].Source = value.AsModule().Output;
 				}

@@ -19,8 +19,8 @@ namespace Moddl.Language {
 		internal virtual Module TryAsModule() => null;
 		internal Module AsModule() => this.TryAsModule() ?? throw new ModdlTypeException();
 
-		internal virtual Func<Module> TryAsModuleDef() => null;
-		internal Func<Module> AsModuleDef() => this.TryAsModuleDef() ?? throw new ModdlTypeException();
+		internal virtual ModuleConstructor TryAsModuleConstructor() => null;
+		internal ModuleConstructor AsModuleConstructor() => this.TryAsModuleConstructor() ?? throw new ModdlTypeException();
 
 	}
 
@@ -45,9 +45,9 @@ namespace Moddl.Language {
 		internal override Module TryAsModule() => this.Value;
 	}
 
-	class ModuleDefValue : Value {
-		public Func<Module> Value { get; set; }
-		internal override Func<Module> TryAsModuleDef() => this.Value;
-		internal override Module TryAsModule() => this.Value();
+	class ModuleConstructorValue : Value {
+		public ModuleConstructor Constructor { get; set; }
+		internal override ModuleConstructor TryAsModuleConstructor() => this.Constructor;
+		internal override Module TryAsModule() => this.Constructor.CreateModule();
 	}
 }

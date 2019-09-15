@@ -44,17 +44,24 @@ namespace Moddl.Language {
 		// TODO 途中で改行できるように
 		private static Parser<Expr> ModuleParamExpr =>
 				from x in PrimaryExpr.WithWhiteSpace()
-				from @params in (
+				from constrParams in (
+					from _ in SParse.String("(").WithWhiteSpace()
+					from @params in NamedEntryList
+					from ____ in SParse.String(")").WithWhiteSpace()
+					select @params
+				).Optional()
+				from signalParams in (
 					from _ in SParse.String("{").WithWhiteSpace()
 					from @params in NamedEntryList
 					from ____ in SParse.String("}").WithWhiteSpace()
 					select @params
 				).Optional()
-				select ! @params.IsDefined
+				select ! constrParams.IsDefined && ! signalParams.IsDefined
 						? x
 						: new ModuleParamExpr {
 							ModuleDef = x,
-							Parameters = new List<Tuple<string, Expr>>(@params.GetOrElse(Enumerable.Empty<Tuple<string, Expr>>())),
+							ConstructorParameters = new List<Tuple<string, Expr>>(constrParams.GetOrElse(Enumerable.Empty<Tuple<string, Expr>>())),
+							SignalParameters = new List<Tuple<string, Expr>>(signalParams.GetOrElse(Enumerable.Empty<Tuple<string, Expr>>())),
 						};
 
 		private static Parser<IEnumerable<Tuple<string, Expr>>> NamedEntryList =>

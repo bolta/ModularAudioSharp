@@ -78,7 +78,8 @@ namespace Moddl.Language {
 
 	public class ModuleParamExpr : Expr {
 		public Expr ModuleDef { get; set; }
-		public IList<Tuple<string, Expr>> Parameters { get; set; }
+		public IList<Tuple<string, Expr>> ConstructorParameters { get; set; }
+		public IList<Tuple<string, Expr>> SignalParameters { get; set; }
 	}
 }
 
