@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ModularAudioSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -49,6 +50,31 @@ namespace Moddl.Language {
 			public override Value Visit(IdentifierExpr visitee)
 					// TODO 見つからない場合のエラー処理
 					=> this.context[visitee.Identifier];
+
+			public override Value Visit(LambdaExpr visitee) => new ModuleDefValue {
+				Value = () => {
+					var input = Nodes.Proxy<float>();
+					var output = input;
+					var inputParamModule = new Module(input, output,
+							new Dictionary<string, ProxyController<float>>() { },
+							new INotable[] { });
+
+					this.context.Push();
+					try {
+						this.context[visitee.InputParam] = new ModuleValue { Value = inputParamModule };
+						var module = visitee.Body.Accept(this).AsModule();
+
+						return inputParamModule.Then(new Module(
+								Enumerable.Empty<ProxyController<float>>(),
+								module.Output,
+								module.Parameters,
+								module.NoteUsers));
+
+					} finally {
+						this.context.Pop();
+					}
+				},
+			};
 
 			public override Value Visit(ModuleParamExpr visitee) {
 				//var module = Modules.BUILT_INS[visitee.Identifier]();

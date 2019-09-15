@@ -54,7 +54,6 @@ namespace Moddl.Language {
 				select ! @params.IsDefined
 						? x
 						: new ModuleParamExpr {
-							//Identifier = id,
 							ModuleDef = x,
 							Parameters = new List<Tuple<string, Expr>>(@params.GetOrElse(Enumerable.Empty<Tuple<string, Expr>>())),
 						};
@@ -62,7 +61,16 @@ namespace Moddl.Language {
 		private static Parser<Expr> identifierExpr =>
 				from id in identifier
 				select new IdentifierExpr { Identifier = id };
-				
+
+		private static Parser<Expr> lambdaExpr =>
+				from _ in SParse.String(@"\").WithWhiteSpace()
+				from inputParam in identifier.WithWhiteSpace()
+				from __ in SParse.String("->").WithWhiteSpace()
+				from body in expr
+				select new LambdaExpr {
+					InputParam = inputParam,
+					Body = body,
+				};
 
 		private static Parser<Expr> parenthesizedExpr =>
 				from _ in SParse.String("(").WithWhiteSpace()
@@ -73,8 +81,8 @@ namespace Moddl.Language {
 		private static Parser<Expr> primaryExpr =>
 				((Parser<Expr>) floatLiteral)
 				.Or(trackSetLiteral)
-				//.Or(moduleCallExpr)
 				.Or(identifierExpr)
+				.Or(lambdaExpr)
 				.Or(parenthesizedExpr)
 				.Positioned();
 

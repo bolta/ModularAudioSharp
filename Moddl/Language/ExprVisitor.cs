@@ -14,6 +14,7 @@ namespace Moddl.Language {
 		public virtual Result Visit(FloatLiteral visitee) { return default(Result); }
 		public virtual Result Visit(TrackSetLiteral visitee) { return default(Result); }
 		public virtual Result Visit(IdentifierExpr visitee) { return default(Result); }
+		public virtual Result Visit(LambdaExpr visitee) { return default(Result); }
 		public virtual Result Visit(ModuleParamExpr visitee) { return default(Result); }
 	}
 
@@ -29,6 +30,7 @@ namespace Moddl.Language {
 					|| TryVisitConcreteExpr<FloatLiteral, Result>(visitee, ref result, c => visitor.Visit(c))
 					|| TryVisitConcreteExpr<TrackSetLiteral, Result>(visitee, ref result, c => visitor.Visit(c))
 					|| TryVisitConcreteExpr<IdentifierExpr, Result>(visitee, ref result, c => visitor.Visit(c))
+					|| TryVisitConcreteExpr<LambdaExpr, Result>(visitee, ref result, c => visitor.Visit(c))
 					|| TryVisitConcreteExpr<ModuleParamExpr, Result>(visitee, ref result, c => visitor.Visit(c))
 					;
 

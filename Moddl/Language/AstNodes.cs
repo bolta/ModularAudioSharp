@@ -66,6 +66,11 @@ namespace Moddl.Language {
 		public string Identifier { get; set; }
 	}
 
+	public class LambdaExpr : Expr {
+		public string InputParam { get; set; }
+		public Expr Body { get; set; }
+	}
+
 	public class ModuleParamExpr : Expr {
 		public Expr ModuleDef { get; set; }
 		public IList<Tuple<string, Expr>> Parameters { get; set; }
