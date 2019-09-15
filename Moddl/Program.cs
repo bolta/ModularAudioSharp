@@ -31,8 +31,8 @@ namespace Moddl {
 			var elapsedTime = DateTime.Now - startTime;
 			Console.WriteLine(elapsedTime);
 			Console.WriteLine(string.Format("Generation efficency: {0}", timeSecs / elapsedTime.TotalSeconds));
-#endif
 			Console.ReadKey();
+#endif
 
 		}
 	}
