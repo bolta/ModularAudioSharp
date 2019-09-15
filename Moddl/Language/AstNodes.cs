@@ -62,8 +62,12 @@ namespace Moddl.Language {
 		public IList<string> Value { get; set; }
 	}
 
-	public class ModuleCallExpr : Expr {
+	public class IdentifierExpr : Expr {
 		public string Identifier { get; set; }
+	}
+
+	public class ModuleParamExpr : Expr {
+		public Expr ModuleDef { get; set; }
 		public IList<Tuple<string, Expr>> Parameters { get; set; }
 	}
 }

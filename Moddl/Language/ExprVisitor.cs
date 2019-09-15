@@ -13,7 +13,8 @@ namespace Moddl.Language {
 		public virtual Result Visit(SubtractiveExpr visitee) { return default(Result); }
 		public virtual Result Visit(FloatLiteral visitee) { return default(Result); }
 		public virtual Result Visit(TrackSetLiteral visitee) { return default(Result); }
-		public virtual Result Visit(ModuleCallExpr visitee) { return default(Result); }
+		public virtual Result Visit(IdentifierExpr visitee) { return default(Result); }
+		public virtual Result Visit(ModuleParamExpr visitee) { return default(Result); }
 	}
 
 	public static class AstVisitorExtensions {
@@ -27,7 +28,8 @@ namespace Moddl.Language {
 					|| TryVisitConcreteExpr<SubtractiveExpr, Result>(visitee, ref result, c => visitor.Visit(c))
 					|| TryVisitConcreteExpr<FloatLiteral, Result>(visitee, ref result, c => visitor.Visit(c))
 					|| TryVisitConcreteExpr<TrackSetLiteral, Result>(visitee, ref result, c => visitor.Visit(c))
-					|| TryVisitConcreteExpr<ModuleCallExpr, Result>(visitee, ref result, c => visitor.Visit(c))
+					|| TryVisitConcreteExpr<IdentifierExpr, Result>(visitee, ref result, c => visitor.Visit(c))
+					|| TryVisitConcreteExpr<ModuleParamExpr, Result>(visitee, ref result, c => visitor.Visit(c))
 					;
 
 			if (!visited) throw new Exception($"unknown Command type: {visitee.GetType()}");

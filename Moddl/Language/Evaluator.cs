@@ -7,9 +7,22 @@ using System.Threading.Tasks;
 namespace Moddl.Language {
 	class Evaluator {
 
-		public Value Evaluate(Expr expr) => expr.Accept(new Visitor());
+		private readonly Context context = new Context();
+		internal Evaluator() {
+			foreach (var kv in Modules.BUILT_INS) {
+				this.context[kv.Key] = new ModuleDefValue { Value = kv.Value };
+			}
+		}
+
+		public Value Evaluate(Expr expr) => expr.Accept(new Visitor(this.context));
 
 		private class Visitor : ExprVisitor<Value> {
+
+			private readonly Context context;
+			internal Visitor(Context context) {
+				this.context = context;
+			}
+
 			public override Value Visit(ConnectiveExpr visitee)
 					=> this.VisitBinary(visitee, (lhs, rhs) => lhs.Then(rhs));
 			public override Value Visit(MultiplicativeExpr visitee)
@@ -30,9 +43,16 @@ namespace Moddl.Language {
 
 			public override Value Visit(FloatLiteral visitee) => new FloatValue { Value = visitee.Value };
 
-			// TODO 今のところ識別子は常に Module の名前とする。いずれは他の型の値もサポートする必要があるだろう
-			public override Value Visit(ModuleCallExpr visitee) {
-				var module = Modules.BUILT_INS[visitee.Identifier]();
+			public override Value Visit(TrackSetLiteral visitee)
+					=> new TrackSetValue { Value = visitee.Value };
+
+			public override Value Visit(IdentifierExpr visitee)
+					// TODO 見つからない場合のエラー処理
+					=> this.context[visitee.Identifier];
+
+			public override Value Visit(ModuleParamExpr visitee) {
+				//var module = Modules.BUILT_INS[visitee.Identifier]();
+				var module = visitee.ModuleDef.Accept(this).AsModule();
 
 				foreach (var param in visitee.Parameters) {
 					var value = param.Item2.Accept(this);
@@ -42,8 +62,6 @@ namespace Moddl.Language {
 				return new ModuleValue { Value = module };
 			}
 
-			public override Value Visit(TrackSetLiteral visitee)
-					=> new TrackSetValue { Value = visitee.Value };
 		}
 	}
 }

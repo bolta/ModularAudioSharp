@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Exceptions.cs" />
+    <Compile Include="Language\Context.cs" />
     <Compile Include="Module.cs" />
     <Compile Include="Modules.cs" />
     <Compile Include="Language\AstNodes.cs" />

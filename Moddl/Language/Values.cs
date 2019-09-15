@@ -16,9 +16,9 @@ namespace Moddl.Language {
 		internal virtual Module TryAsModule() => null;
 		internal Module AsModule() => this.TryAsModule() ?? throw new ModdlTypeException();
 
-		//private T ThrowTypeError<T>() {
-		//	throw new ModdlTypeException();
-		//}
+		internal virtual Func<Module> TryAsModuleDef() => null;
+		internal Func<Module> AsModuleDef() => this.TryAsModuleDef() ?? throw new ModdlTypeException();
+
 	}
 
 	class FloatValue : Value {
@@ -35,5 +35,11 @@ namespace Moddl.Language {
 	class ModuleValue : Value {
 		public Module Value { get; set; }
 		internal override Module TryAsModule() => this.Value;
+	}
+
+	class ModuleDefValue : Value {
+		public Func<Module> Value { get; set; }
+		internal override Func<Module> TryAsModuleDef() => this.Value;
+		internal override Module TryAsModule() => this.Value();
 	}
 }

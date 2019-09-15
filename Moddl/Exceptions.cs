@@ -31,4 +31,13 @@ namespace Moddl {
 	internal class ModdlTypeException : ModdlException {
 		// TODO
 	}
+
+	internal class ModdlNameNotDefinedException : ModdlException {
+		internal string Name { get; private set; }
+		internal ModdlNameNotDefinedException(string name)
+				: base($"The name {name} is not defined in the current context.") {
+			this.Name = name;
+		}
+	}
+
 }

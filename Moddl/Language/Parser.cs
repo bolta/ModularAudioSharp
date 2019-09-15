@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 namespace Moddl.Language {
 	public class Parser {
 
-		public readonly static Parser<DirectiveStatement> directiveStatement =
+		private static Parser<DirectiveStatement> directiveStatement =>
 				from _ in SParse.String("@").WithWhiteSpace()
 				from name in SParse.Regex("[a-zA-Z0-9_]+").WithWhiteSpace()
 				from args in exprList.Optional()
@@ -20,7 +20,7 @@ namespace Moddl.Language {
 					Arguments = args.GetOrElse(new Expr[] { }).ToList(),
 				};
 
-		public readonly static Parser<FloatLiteral> floatLiteral =
+		private static Parser<FloatLiteral> floatLiteral =>
 				from val in SParse.Regex(@"[+-]?[0-9]+(\.[0-9]+)?|[+-]?\.[0-9]+").WithWhiteSpace()
 				select new FloatLiteral { Value = Convert.ToSingle(val) };
 
@@ -28,16 +28,17 @@ namespace Moddl.Language {
 				from tracks in SParse.Regex("[a-z0-9]").XAtLeastOnce()
 				select tracks;
 
-		public readonly static Parser<TrackSetLiteral> trackSetLiteral =
+		private static Parser<TrackSetLiteral> trackSetLiteral =>
 				from _ in SParse.String("^")
 				from tracks in trackSet
 				select new TrackSetLiteral { Value = new List<string>(tracks) };
 
-		public readonly static Parser<string> identifier = SParse.Regex(@"[a-zA-Z_][a-zA-Z_0-9]*");
+		private static Parser<string> identifier => SParse.Regex(@"[a-zA-Z_][a-zA-Z_0-9]*");
 
 		// TODO 途中で改行できるように
-		public readonly static Parser<Expr> moduleCallExpr =
-				from id in identifier.WithWhiteSpace()
+		private static Parser<Expr> moduleParamExpr =>
+//				from id in identifier.WithWhiteSpace()
+				from x in primaryExpr.WithWhiteSpace()
 				from @params in (
 					from _ in SParse.String("{").WithWhiteSpace()
 					from @params in (
@@ -50,33 +51,42 @@ namespace Moddl.Language {
 					from ____ in SParse.String("}").WithWhiteSpace()
 					select @params
 				).Optional()
-				select new ModuleCallExpr {
-					Identifier = id,
-					Parameters = new List<Tuple<string, Expr>>(@params.GetOrElse(Enumerable.Empty<Tuple<string, Expr>>())),
-				};
+				select ! @params.IsDefined
+						? x
+						: new ModuleParamExpr {
+							//Identifier = id,
+							ModuleDef = x,
+							Parameters = new List<Tuple<string, Expr>>(@params.GetOrElse(Enumerable.Empty<Tuple<string, Expr>>())),
+						};
 
-		public readonly static Parser<Expr> parenthesizedExpr =
+		private static Parser<Expr> identifierExpr =>
+				from id in identifier
+				select new IdentifierExpr { Identifier = id };
+				
+
+		private static Parser<Expr> parenthesizedExpr =>
 				from _ in SParse.String("(").WithWhiteSpace()
 				from x in expr
 				from __ in SParse.String(")").WithWhiteSpace()
 				select x;
 
-		public readonly static Parser<Expr> primaryExpr =
+		private static Parser<Expr> primaryExpr =>
 				((Parser<Expr>) floatLiteral)
 				.Or(trackSetLiteral)
-				.Or(moduleCallExpr)
+				//.Or(moduleCallExpr)
+				.Or(identifierExpr)
 				.Or(parenthesizedExpr)
 				.Positioned();
 
-		public readonly static Parser<Expr> connectiveExpr =
-				BinaryExpr(primaryExpr, SParse.String("|").Text(), _ => new ConnectiveExpr());
+		private static Parser<Expr> connectiveExpr =>
+				BinaryExpr(moduleParamExpr, SParse.String("|").Text(), _ => new ConnectiveExpr());
 
-		public readonly static Parser<Expr> mulDivExpr =
+		private static Parser<Expr> mulDivExpr =>
 				BinaryExpr(connectiveExpr, SParse.Regex(@"\*|/"), op => op == "*"
 						? (BinaryExpr) new MultiplicativeExpr()
 						: new DivisiveExpr());
 
-		public readonly static Parser<Expr> addSubExpr =
+		private static Parser<Expr> addSubExpr =>
 				BinaryExpr(mulDivExpr, SParse.Regex(@"\+|-"), op => op == "+"
 						? (BinaryExpr) new AdditiveExpr()
 						: new SubtractiveExpr());
@@ -98,14 +108,14 @@ namespace Moddl.Language {
 					})
 				).Positioned();
 
-		public readonly static Parser<Expr> expr = addSubExpr;
+		private static Parser<Expr> expr => addSubExpr;
 
 		public readonly static Parser<IEnumerable<Expr>> exprList =
 				from head in expr.WithWhiteSpace()
 				from tail in SParse.String(",").Token().Then(_ => expr.WithWhiteSpace()).Many()
 				select new[] { head }.Concat(tail);
 
-		public readonly static Parser<MmlStatement> mmlStatement =
+		private static Parser<MmlStatement> mmlStatement =>
 				from tracks in trackSet
 				from _ in SParse.WhiteSpace.XAtLeastOnce()
 				from mml in SParse.Regex(@"[^\r\n]*")
@@ -118,7 +128,7 @@ namespace Moddl.Language {
 		/// <summary>
 		/// 任意の文
 		/// </summary>
-		public readonly static Parser<Statement> statement =
+		private static Parser<Statement> statement =>
 				((Parser<Statement>) directiveStatement)
 				.Or(mmlStatement)
 
@@ -127,7 +137,7 @@ namespace Moddl.Language {
 		/// <summary>
 		/// 変換単位全体。文を任意個並べたもの
 		/// </summary>
-		public readonly static Parser<CompilationUnit> compilationUnit =
+		private static Parser<CompilationUnit> compilationUnit =>
 				from ss in statement.Token().XMany().Token().End() // TODO 空白の扱い、これでよいか検証
 				select new CompilationUnit { Statements = ss };
 
