@@ -22,9 +22,9 @@ namespace ModularAudioSharp.Waveform {
 		private readonly Waveform<T> waveform;
 		private readonly float masterFreq;
 		private readonly IEnumerable<float> freq;
-		private int startOffset;
-		private int endOffset;
-		private int? loopOffset;
+		private readonly int startOffset;
+		private readonly int endOffset;
+		private readonly int? loopOffset;
 		private float offset;
 		private State state = State.Idle;
 
@@ -65,7 +65,7 @@ namespace ModularAudioSharp.Waveform {
 
 			foreach (var f in this.freq) {
 				if (this.state == State.Idle) {
-					yield return default(T);
+					yield return default;
 				} else if (this.state == State.Note) {
 					yield return interp[this.offset];
 

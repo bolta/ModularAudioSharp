@@ -26,7 +26,7 @@ namespace ModularAudioSharp {
 		/// <summary>
 		/// <strong>サンプル</strong>ごとの減衰率。プロパティ RatioPer<strong>Sec</strong> から設定される
 		/// </summary>
-		private IEnumerable<float> ratioPerSample;
+		private readonly IEnumerable<float> ratioPerSample;
 
 		/// <summary>
 		/// 

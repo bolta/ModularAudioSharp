@@ -77,7 +77,6 @@ namespace Moddl.Language {
 			};
 
 			public override Value Visit(ModuleParamExpr visitee) {
-				//var module = Modules.BUILT_INS[visitee.Identifier]();
 				var module = visitee.ModuleDef.Accept(this).AsModule();
 
 				foreach (var param in visitee.Parameters) {

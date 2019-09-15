@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace Moddl.Language {
 	public class ExprVisitor<Result> {
-		public virtual Result Visit(ConnectiveExpr visitee) { return default(Result); }
-		public virtual Result Visit(MultiplicativeExpr visitee) { return default(Result); }
-		public virtual Result Visit(DivisiveExpr visitee) { return default(Result); }
-		public virtual Result Visit(AdditiveExpr visitee) { return default(Result); }
-		public virtual Result Visit(SubtractiveExpr visitee) { return default(Result); }
-		public virtual Result Visit(FloatLiteral visitee) { return default(Result); }
-		public virtual Result Visit(TrackSetLiteral visitee) { return default(Result); }
-		public virtual Result Visit(IdentifierExpr visitee) { return default(Result); }
-		public virtual Result Visit(LambdaExpr visitee) { return default(Result); }
-		public virtual Result Visit(ModuleParamExpr visitee) { return default(Result); }
+		public virtual Result Visit(ConnectiveExpr visitee) { return default; }
+		public virtual Result Visit(MultiplicativeExpr visitee) { return default; }
+		public virtual Result Visit(DivisiveExpr visitee) { return default; }
+		public virtual Result Visit(AdditiveExpr visitee) { return default; }
+		public virtual Result Visit(SubtractiveExpr visitee) { return default; }
+		public virtual Result Visit(FloatLiteral visitee) { return default; }
+		public virtual Result Visit(TrackSetLiteral visitee) { return default; }
+		public virtual Result Visit(IdentifierExpr visitee) { return default; }
+		public virtual Result Visit(LambdaExpr visitee) { return default; }
+		public virtual Result Visit(ModuleParamExpr visitee) { return default; }
 	}
 
 	public static class AstVisitorExtensions {
@@ -41,8 +41,7 @@ namespace Moddl.Language {
 
 		private static bool TryVisitConcreteExpr<ConcreteExpr, Result>(Expr visitee, ref Result result,
 				Func<ConcreteExpr, Result> visit) where ConcreteExpr : Expr {
-			var conc = visitee as ConcreteExpr;
-			if (conc != null) {
+			if (visitee is ConcreteExpr conc) {
 				result = visit(conc);
 				return true;
 

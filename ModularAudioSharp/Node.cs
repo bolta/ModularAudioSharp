@@ -306,13 +306,13 @@ namespace ModularAudioSharp {
 			if (this.signal.MoveNext()) {
 				this.current = this.signal.Current;
 			} else {
-				this.current = default(T);
+				this.current = default;
 			}
 		}
 
 		// TODO 名前が適当なので変えたい
 		public class Out {
-			private Node<T> owner;
+			private readonly Node<T> owner;
 			internal Out(Node<T> owner) { this.owner = owner; }
 
 			/// <summary>

@@ -16,7 +16,7 @@ namespace ModularAudioSharp {
 	public class ProxyController<T> : NodeController<T> where T : struct {
 
 		private IEnumerator<T> source = null;
-		private T value = default(T);
+		private T value = default;
 
 		public ProxyController(Node<T> source) { this.Source = source; }
 		public ProxyController(T initValue) { this.value = initValue; }
