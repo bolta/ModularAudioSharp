@@ -3,7 +3,11 @@
 
 @tempo 80
 
-@instrument ^ab, (pulseOsc * expEnv) | lpf { cutoff: 4000 + 3000 * 0.1 | sinOsc, q: 5 } | delay
+// @instrument ^ab, (pulseOsc * expEnv) | lpf { cutoff: 4000 + 3000 * 0.1 | sinOsc, q: 5 } | delay
+@instrument ^ab, (pulseOsc * expEnv) | lpf | delay
+@params ^ab, { q: 5 }
+@params ^a, { cutoff: 4000 + 3000 * 0.1 | sinOsc } 
+@params ^b, { cutoff: 4000 + 3000 * 0.13 | sinOsc, } 
 
 // @instrument ^ab, (pulseOsc * (1 - expEnv) * plainEnv) | delay
 // @instrument ^c, portamento | (nesTriangle + filteredNoise)

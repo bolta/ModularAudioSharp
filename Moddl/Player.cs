@@ -73,6 +73,17 @@ namespace Moddl {
 						// TODO 重複設定はエラーにする
 						this.instruments.Add(track, instrm);
 					}
+
+				} else if (stmt.Name == "params") {
+					var tracks = this.evaluator.Evaluate(stmt.Arguments.TryGet(0)).AsTrackSet();
+
+					foreach (var track in tracks) {
+						var entries = this.evaluator.Evaluate(stmt.Arguments.TryGet(1)).AsAssocArray();
+						foreach (var entry in entries) {
+							// TODO パラメータが見つからない場合はエラーにする
+							this.instruments[track].Parameters[entry.Key].Source = entry.Value.AsModule().Output;
+						}
+					}
 				}
 			});
 		}

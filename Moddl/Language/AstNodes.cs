@@ -62,6 +62,11 @@ namespace Moddl.Language {
 		public IList<string> Value { get; set; }
 	}
 
+	public class AssocArrayLiteral : Expr {
+		// TODO ModuleParamExpr に合わせて Dictionary ではなく List にしているが、なぜそうしたんだっけ…
+		public IList<Tuple<string, Expr>> Entries { get; set; }
+	}
+
 	public class IdentifierExpr : Expr {
 		public string Identifier { get; set; }
 	}

@@ -47,6 +47,14 @@ namespace Moddl.Language {
 			public override Value Visit(TrackSetLiteral visitee)
 					=> new TrackSetValue { Value = visitee.Value };
 
+			public override Value Visit(AssocArrayLiteral visitee) {
+				return new AssocArrayValue {
+					Entries = visitee.Entries.ToDictionary(
+							kv => kv.Item1,
+							kv => kv.Item2.Accept(this)),
+				};
+			}
+
 			public override Value Visit(IdentifierExpr visitee)
 					// TODO 見つからない場合のエラー処理
 					=> this.context[visitee.Identifier];

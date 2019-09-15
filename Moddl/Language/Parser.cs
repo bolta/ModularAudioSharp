@@ -33,21 +33,20 @@ namespace Moddl.Language {
 				from tracks in TrackSet
 				select new TrackSetLiteral { Value = new List<string>(tracks) };
 
+		private static Parser<AssocArrayLiteral> AssocArrayLiteral =>
+				from _ in SParse.String("{").WithWhiteSpace()
+				from entries in NamedEntryList
+				from ____ in SParse.String("}").WithWhiteSpace()
+				select new AssocArrayLiteral { Entries = entries.ToList() };
+
 		private static Parser<string> Identifier => SParse.Regex(@"[a-zA-Z_][a-zA-Z_0-9]*");
 
 		// TODO 途中で改行できるように
 		private static Parser<Expr> ModuleParamExpr =>
-//				from id in identifier.WithWhiteSpace()
 				from x in PrimaryExpr.WithWhiteSpace()
 				from @params in (
 					from _ in SParse.String("{").WithWhiteSpace()
-					from @params in (
-						from name in Identifier.WithWhiteSpace()
-						from __ in SParse.String(":").WithWhiteSpace()
-						from value in Expr.WithWhiteSpace()
-						select Tuple.Create(name, value)
-					).DelimitedBy(SParse.String(",").WithWhiteSpace())
-					from ___ in SParse.String(",").WithWhiteSpace().Optional()
+					from @params in NamedEntryList
 					from ____ in SParse.String("}").WithWhiteSpace()
 					select @params
 				).Optional()
@@ -57,6 +56,17 @@ namespace Moddl.Language {
 							ModuleDef = x,
 							Parameters = new List<Tuple<string, Expr>>(@params.GetOrElse(Enumerable.Empty<Tuple<string, Expr>>())),
 						};
+
+		private static Parser<IEnumerable<Tuple<string, Expr>>> NamedEntryList =>
+				from entries in (
+					from name in Identifier.WithWhiteSpace()
+					from __ in SParse.String(":").WithWhiteSpace()
+					from value in Expr.WithWhiteSpace()
+					select Tuple.Create(name, value)
+				).DelimitedBy(SParse.String(",").WithWhiteSpace())
+				from ___ in SParse.String(",").WithWhiteSpace().Optional()
+				select entries;
+
 
 		private static Parser<Expr> IdentifierExpr =>
 				from id in Identifier
@@ -81,6 +91,7 @@ namespace Moddl.Language {
 		private static Parser<Expr> PrimaryExpr =>
 				((Parser<Expr>) FloatLiteral)
 				.Or(TrackSetLiteral)
+				.Or(AssocArrayLiteral)
 				.Or(IdentifierExpr)
 				.Or(LambdaExpr)
 				.Or(ParenthesizedExpr)
