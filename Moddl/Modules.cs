@@ -15,7 +15,7 @@ namespace Moddl {
 	/// <summary>
 	/// 組み込みモジュール各種
 	/// </summary>
-	static class Modules {
+	static partial class Modules {
 
 		/// <summary>
 		/// 全ての組み込みモジュールの一覧。

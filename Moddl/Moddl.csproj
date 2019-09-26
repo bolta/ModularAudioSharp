@@ -40,6 +40,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -59,6 +61,7 @@
     <Compile Include="Language\Parser.cs" />
     <Compile Include="Language\ParserExtensions.cs" />
     <Compile Include="Language\Values.cs" />
+    <Compile Include="ModulesGui.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -66,6 +69,9 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="samples\dq4_ryan.moddl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="samples\dq4_ryan.gui.moddl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="samples\ff3_elia.delay.moddl">
@@ -78,6 +84,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
+    <None Include="samples\gui1.moddl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="samples\test_sampleCrush.moddl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

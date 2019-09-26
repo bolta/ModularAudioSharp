@@ -56,6 +56,7 @@
     <Compile Include="Data\Stereo.cs" />
     <Compile Include="Data\Unit.cs" />
     <Compile Include="DelayBuffer.cs" />
+    <Compile Include="Output\ConsoleOutput.cs" />
     <Compile Include="Output\EnumerableWaveProvider32.cs" />
     <Compile Include="ExpEnvController.cs" />
     <Compile Include="INotable.cs" />

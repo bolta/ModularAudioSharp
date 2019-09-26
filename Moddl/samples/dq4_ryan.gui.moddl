@@ -1,0 +1,29 @@
+﻿//
+
+@tempo 114
+
+@instrument ^ab, pulseOsc * expEnv
+@instrument ^c, nesTriangle
+
+@params ^ab, { duty: slider(min: 0, max: 1, init: 0.5), }
+
+a o2L8v06 y`decay`,0.008
+b o3L8v06 y`decay`,0.008
+c o4L4v13
+
+abc [0
+
+a [5 y`decay`,0.07gy`decay`,0.008>>ddd<y`decay`,0.07gy`decay`,0.008>eee <y`decay`,0.07gy`decay`,0.008>f+f+f+<y`decay`,0.07gy`decay`,0.008>eee << ]
+b [5 rbbbr>ccc rdddrccc < ]
+c g>d2. ^2eg b1 ^1 <
+c g>d2. ^2eg b16>c16d2.. ^2<f+8e8d8c8
+c L16
+c b>cdr<gabre2 f+gardef+r<b2
+
+a >y`decay`,0.07gy`decay`,0.008>ddd<y`decay`,0.07fy`decay`,0.008>dfd <y`decay`,0.07ey`decay`,0.008>ddd<y`decay`,0.07ey`decay`,0.008>ddd
+a <<y`decay`,0.07ay`decay`,0.008>>eee<<y`decay`,0.07ay`decay`,0.008>>eee y`decay`,0.07decd<v5b>c<v4av4bv6 <y`decay`,0.008
+b rbbbra>d<a rg+g+g+rg+g+g+ >rc+c+c+rc+c+c+ <y`decay`,0.07f+gef+v5dev4cv4dv6 y`decay`,0.008
+c L8
+c rba>d<ba>d<a b>cdf^edc <b2g4b4 a1
+
+abc ]

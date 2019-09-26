@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Moddl {
 	// TODO Node のようにジェネリック版を作るべきか？
@@ -14,6 +15,7 @@ namespace Moddl {
 		public Node<float> Output { get; private set; }
 		public IDictionary<string, ProxyController<float>> Parameters { get; private set; }
 		public IEnumerable<INotable> NoteUsers { get; private set; }
+		private List<Control> gui = new List<Control>();
 
 		public Module(IEnumerable<ProxyController<float>> input, Node<float> output,
 				IDictionary<string, ProxyController<float>> parameters,
@@ -34,6 +36,15 @@ namespace Moddl {
 					Enumerable.Empty<INotable>());
 		}
 
+		internal Module WithGui(params Control[] gui) => this.WithGui((IEnumerable<Control>) gui);
+
+		internal Module WithGui(IEnumerable<Control> gui) {
+			this.gui.AddRange(gui);
+			return this;
+		}
+
+		internal IEnumerable<Control> Gui => this.gui;
+
 		/// <summary>
 		/// this の出力を after の入力として 2 つの module を接続し、
 		/// 全体で 1 つの module とする
@@ -48,7 +59,8 @@ namespace Moddl {
 					// 重複を回避できるよう名前にプレフィックスをつけるしくみを設け、
 					// それでも重複する場合のエラー処理をちゃんとすること
 					this.Parameters.Concat(after.Parameters).ToDictionary(kv => kv.Key, kv => kv.Value),
-					this.NoteUsers.Concat(after.NoteUsers));
+					this.NoteUsers.Concat(after.NoteUsers))
+					.WithGui(this.gui.Concat(after.gui));
 		}
 
 		public Module Add(Module that) => this.Binary(that, (lhs, rhs) => (lhs + rhs).AsFloat());
@@ -61,7 +73,8 @@ namespace Moddl {
 					this.Input.Concat(that.Input),
 					oper(this.Output, that.Output),
 					this.Parameters.Concat(that.Parameters).ToDictionary(kv => kv.Key, kv => kv.Value),
-					this.NoteUsers.Concat(that.NoteUsers));
+					this.NoteUsers.Concat(that.NoteUsers))
+					.WithGui(this.gui.Concat(that.gui));
 		}
 	}
 }

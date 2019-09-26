@@ -1,0 +1,7 @@
+﻿//
+
+@tempo 114
+
+@instrument ^a, slider(min: 100, max: 10000, init: 440) | pulseOsc { duty: slider(min: 0.01, max: 0.99, init: 0.5) | portamento }
+
+a v12

@@ -7,10 +7,12 @@ using ModularAudioSharp.Sequencer;
 using ModularAudioSharp.Waveform;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using static ModularAudioSharp.Nodes;
 
 namespace Moddl {
@@ -21,6 +23,7 @@ namespace Moddl {
 		private readonly Dictionary<string, Module> instruments = new Dictionary<string, Module>();
 		private readonly Evaluator evaluator = new Evaluator();
 
+		//public async Task Play(string moddl, Output<float> output) {
 		public void Play(string moddl, Output<float> output) {
 			var ast = new Parser().Parse(moddl);
 			var mmls = new Dictionary<string, StringBuilder>();
@@ -41,10 +44,39 @@ namespace Moddl {
 
 			var nodes = mmls.Select(kv => this.MmlToNode(kv.Key, kv.Value.ToString()));
 
+			//await this.ShowGuiIfNeeded(output);
+			this.ShowGuiIfNeeded(output);
+
 			var master = nodes.Aggregate(Const(0f), (acc, node) => (Node<float>)(acc + node));
 			var masterVol = 0.25f;
 
 			ModuleSpace.Play<float>((master * masterVol).AsFloat(), output);
+		}
+
+		//private async Task ShowGuiIfNeeded(Output<float> output) {
+		private void ShowGuiIfNeeded(Output<float> output) {
+			var instrms = this.instruments.Values;
+			//var gui = instrms.SelectMany(i => i.Gui)
+			//		.Concat(instrms.SelectMany(i => i.Parameters.;
+			var gui = Modules.AllGui;
+
+			if (! gui.Any() /*|| ! (output is AudioOutput<float>)*/) return; // とりあえず音声出力に限る
+
+			var form = new Form();
+
+			form.SuspendLayout();
+			var y = 0;
+			foreach (var c in gui) {
+				c.Location = new Point(0, y);
+				form.Controls.Add(c);
+				y += c.Height;
+			}
+			form.ClientSize = new Size(gui.Max(c => c.Width), gui.Sum(c => c.Height));
+
+			form.ResumeLayout(false);
+			form.PerformLayout();
+			//form.ShowDialog();
+			/*await*/ Task.Run(() => form.ShowDialog());
 		}
 
 		private static void TryWithNode(AstNode node, Action action) {
