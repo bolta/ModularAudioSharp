@@ -113,7 +113,7 @@ namespace Moddl {
 						var entries = this.evaluator.Evaluate(stmt.Arguments.TryGet(1)).AsAssocArray();
 						foreach (var entry in entries) {
 							// TODO パラメータが見つからない場合はエラーにする
-							this.instruments[track].Parameters[entry.Key].Source = entry.Value.AsModule().Output;
+							this.instruments[track].AssignParameter(entry.Key, entry.Value.AsModule());
 						}
 					}
 				}

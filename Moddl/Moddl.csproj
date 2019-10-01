@@ -87,6 +87,9 @@
     <None Include="samples\gui1.moddl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="samples\test_label.moddl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="samples\test_sampleCrush.moddl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -91,7 +91,12 @@ namespace Moddl.Language {
 
 				foreach (var param in visitee.SignalParameters) {
 					var value = param.Item2.Accept(this);
-					module.Parameters[param.Item1].Source = value.AsModule().Output;
+					var paramModule = value.AsModule();
+					module.AssignParameter(param.Item1, paramModule);
+				}
+
+				if (visitee.Label != null) {
+					module.AddLabel(visitee.Label);
 				}
 
 				return new ModuleValue { Value = module };

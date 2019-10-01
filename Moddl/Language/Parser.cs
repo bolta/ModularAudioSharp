@@ -41,29 +41,6 @@ namespace Moddl.Language {
 
 		private static Parser<string> Identifier => SParse.Regex(@"[a-zA-Z_][a-zA-Z_0-9]*");
 
-		// TODO 途中で改行できるように
-		private static Parser<Expr> ModuleParamExpr =>
-				from x in PrimaryExpr.WithWhiteSpace()
-				from constrParams in (
-					from _ in SParse.String("(").WithWhiteSpace()
-					from @params in NamedEntryList
-					from ____ in SParse.String(")").WithWhiteSpace()
-					select @params
-				).Optional()
-				from signalParams in (
-					from _ in SParse.String("{").WithWhiteSpace()
-					from @params in NamedEntryList
-					from ____ in SParse.String("}").WithWhiteSpace()
-					select @params
-				).Optional()
-				select ! constrParams.IsDefined && ! signalParams.IsDefined
-						? x
-						: new ModuleParamExpr {
-							ModuleDef = x,
-							ConstructorParameters = new List<Tuple<string, Expr>>(constrParams.GetOrElse(Enumerable.Empty<Tuple<string, Expr>>())),
-							SignalParameters = new List<Tuple<string, Expr>>(signalParams.GetOrElse(Enumerable.Empty<Tuple<string, Expr>>())),
-						};
-
 		private static Parser<IEnumerable<Tuple<string, Expr>>> NamedEntryList =>
 				from entries in (
 					from name in Identifier.WithWhiteSpace()
@@ -103,6 +80,46 @@ namespace Moddl.Language {
 				.Or(LambdaExpr)
 				.Or(ParenthesizedExpr)
 				.Positioned();
+
+		//private static Parser<Expr> ModuleLabelExpr =>
+		//		from x in PrimaryExpr.WithWhiteSpace()
+		//		from l in (
+		//			from _ in SParse.String("@").WithWhiteSpace()
+		//			from l in Identifier.WithWhiteSpace()
+		//			select l
+		//		).Optional()
+		//		select l.IsDefined
+		//				? new ModuleLabelExpr { Expr = x, Label = l.Get(), }
+		//				: x;
+
+		// TODO 途中で改行できるように
+		private static Parser<Expr> ModuleParamExpr =>
+				from x in PrimaryExpr.WithWhiteSpace()
+				from label in (
+					from _ in SParse.String("@").WithWhiteSpace()
+					from l in Identifier.WithWhiteSpace()
+					select l
+				).Optional()
+				from constrParams in (
+					from _ in SParse.String("(").WithWhiteSpace()
+					from @params in NamedEntryList
+					from ____ in SParse.String(")").WithWhiteSpace()
+					select @params
+				).Optional()
+				from signalParams in (
+					from _ in SParse.String("{").WithWhiteSpace()
+					from @params in NamedEntryList
+					from ____ in SParse.String("}").WithWhiteSpace()
+					select @params
+				).Optional()
+				select ! label.IsDefined && ! constrParams.IsDefined && ! signalParams.IsDefined
+						? x
+						: new ModuleParamExpr {
+							ModuleDef = x,
+							Label = label.GetOrDefault(),
+							ConstructorParameters = new List<Tuple<string, Expr>>(constrParams.GetOrElse(Enumerable.Empty<Tuple<string, Expr>>())),
+							SignalParameters = new List<Tuple<string, Expr>>(signalParams.GetOrElse(Enumerable.Empty<Tuple<string, Expr>>())),
+						};
 
 		private static Parser<Expr> ConnectiveExpr =>
 				BinaryExpr(ModuleParamExpr, SParse.String("|").Text(), _ => new ConnectiveExpr());
