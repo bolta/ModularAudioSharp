@@ -11,9 +11,6 @@ using System.Windows.Forms;
 
 namespace Moddl {
 	static partial class Modules {
-		// TODO 全ての GUI インスタンスを捕捉するためにグローバル変数を使っている。この方法がベストだとは思っていないが…
-		internal static IEnumerable<Control> AllGui => allGui;
-		private static List<Control> allGui = new List<Control>();
 
 		internal static Module Slider(IDictionary<string, Value> constrParams) {
 			// TODO コピペ解消
@@ -33,7 +30,7 @@ namespace Moddl {
 				Maximum = guiMaximum,
 				Value = (int) ((init - min) * (guiMaximum - guiMinimum) / (max - min) + guiMinimum),
 			};
-			//string makeText() => bar.Value.ToString();
+
 			var text = new TextBox {
 				Width = 100,
 				TextAlign = HorizontalAlignment.Right,
@@ -47,12 +44,10 @@ namespace Moddl {
 
 			var panel = ArrangeHorizontally(bar, text);
 
-			allGui.Add(panel);
-
 			return new Module(new ProxyController<float>[] { }, output,
 					new Dictionary<string, ProxyController<float>>() { },
-					new INotable[] { })
-					.WithGui(panel);
+					new INotable[] { },
+					new Control[] { panel });
 		}
 
 		private static Control ArrangeHorizontally(IEnumerable<Control> ctrls) {
@@ -71,6 +66,7 @@ namespace Moddl {
 
 			return panel;
 		}
+
 		private static Control ArrangeHorizontally(params Control[] ctrls) => ArrangeHorizontally((IEnumerable<Control>) ctrls);
 
 	}

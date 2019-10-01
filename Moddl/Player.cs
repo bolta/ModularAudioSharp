@@ -23,7 +23,6 @@ namespace Moddl {
 		private readonly Dictionary<string, Module> instruments = new Dictionary<string, Module>();
 		private readonly Evaluator evaluator = new Evaluator();
 
-		//public async Task Play(string moddl, Output<float> output) {
 		public void Play(string moddl, Output<float> output) {
 			var ast = new Parser().Parse(moddl);
 			var mmls = new Dictionary<string, StringBuilder>();
@@ -44,7 +43,6 @@ namespace Moddl {
 
 			var nodes = mmls.Select(kv => this.MmlToNode(kv.Key, kv.Value.ToString()));
 
-			//await this.ShowGuiIfNeeded(output);
 			this.ShowGuiIfNeeded(output);
 
 			var master = nodes.Aggregate(Const(0f), (acc, node) => (Node<float>)(acc + node));
@@ -53,14 +51,11 @@ namespace Moddl {
 			ModuleSpace.Play<float>((master * masterVol).AsFloat(), output);
 		}
 
-		//private async Task ShowGuiIfNeeded(Output<float> output) {
 		private void ShowGuiIfNeeded(Output<float> output) {
 			var instrms = this.instruments.Values;
-			//var gui = instrms.SelectMany(i => i.Gui)
-			//		.Concat(instrms.SelectMany(i => i.Parameters.;
-			var gui = Modules.AllGui;
+			var gui = instrms.SelectMany(i => i.Gui);
 
-			if (! gui.Any() /*|| ! (output is AudioOutput<float>)*/) return; // とりあえず音声出力に限る
+			if (! gui.Any() /*|| ! (output is AudioOutput<float>)*/) return;
 
 			var form = new Form();
 
@@ -75,8 +70,7 @@ namespace Moddl {
 
 			form.ResumeLayout(false);
 			form.PerformLayout();
-			//form.ShowDialog();
-			/*await*/ Task.Run(() => form.ShowDialog());
+			Task.Run(() => form.ShowDialog());
 		}
 
 		private static void TryWithNode(AstNode node, Action action) {
@@ -113,7 +107,7 @@ namespace Moddl {
 						var entries = this.evaluator.Evaluate(stmt.Arguments.TryGet(1)).AsAssocArray();
 						foreach (var entry in entries) {
 							// TODO パラメータが見つからない場合はエラーにする
-							this.instruments[track].AssignParameter(entry.Key, entry.Value.AsModule());
+							this.instruments[track].AssignModuleToParameter(entry.Key, entry.Value.AsModule());
 						}
 					}
 				}
