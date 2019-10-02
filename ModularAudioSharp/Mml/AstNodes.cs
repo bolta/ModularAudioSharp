@@ -67,7 +67,9 @@ namespace ModularAudioSharp.Mml {
 		public uint? Times { get; set; }
 		public IEnumerable<Command> Content { get; set; }
 		public override string ToString() => $"[{this.Times ?? 0} {this.Content.Select(s => s.ToString())}]";
-    }
+	}
+
+	public class LoopBreakCommand : Command { }
 
 	public class ToneName /*: AstNode*/ {
 		/// <summary>

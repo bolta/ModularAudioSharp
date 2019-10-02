@@ -17,6 +17,7 @@ namespace ModularAudioSharp.Mml {
 		public virtual void Visit(RestCommand visitee) { }
 		public virtual void Visit(ParameterCommand visitee) { }
 		public virtual void Visit(LoopCommand visitee) { }
+		public virtual void Visit(LoopBreakCommand visitee) { }
 	}
 
 	public static class AstVisitorExtensions {
@@ -32,6 +33,7 @@ namespace ModularAudioSharp.Mml {
 					|| TryVisitConcreteCommand<RestCommand>(visitee, c => visitor.Visit(c))
 					|| TryVisitConcreteCommand<ParameterCommand>(visitee, c => visitor.Visit(c))
 					|| TryVisitConcreteCommand<LoopCommand>(visitee, c => visitor.Visit(c))
+					|| TryVisitConcreteCommand<LoopBreakCommand>(visitee, c => visitor.Visit(c))
 					;
 
 			if (! visited) throw new Exception($"unknown Command type: {visitee.GetType()}");

@@ -128,7 +128,13 @@ namespace ModularAudioSharp.Mml {
 				if (visitee.Times.HasValue) {
 					// とりあえず有限ループは展開する実装とする。メモリ効率的に問題があればループのまま演奏する実装を検討する
 					for (int i=0 ; i<visitee.Times.Value ; ++i) {
-						foreach (var child in visitee.Content) child.Accept(this);
+						foreach (var child in visitee.Content) {
+							if (child is LoopBreakCommand) {
+								if (i == visitee.Times.Value - 1) break;
+								else continue;
+							}
+							child.Accept(this);
+						}
 					}
 				} else {
 					var start = this.result.Count;
@@ -136,6 +142,12 @@ namespace ModularAudioSharp.Mml {
 					this.result.Add(new JumpInstruction(start));
 				}
 			}
+
+			public override void Visit(LoopBreakCommand visitee) {
+				// ループ中では別途チェックされるので、これを visit することはありえない
+				throw new Exception("The loop break command (:) is available only in a finite loop.");
+			}
+
 
 			/// <summary>
 			/// Length から Tick 数を計算する

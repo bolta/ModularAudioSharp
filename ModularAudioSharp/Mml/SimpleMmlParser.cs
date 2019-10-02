@@ -155,6 +155,10 @@ namespace ModularAudioSharp.Mml {
 				  let tn = ToNullable(t) ?? 2
 				  select new LoopCommand { Times = tn == 0 ? null : (uint?) tn, Content = c };
 
+		public readonly static Parser<LoopBreakCommand> loopBreakCommand
+				= from _ in SParse.String(":").Text().Token()
+				  select new LoopBreakCommand();
+
 		/// <summary>
 		/// 任意の文
 		/// </summary>
@@ -169,6 +173,7 @@ namespace ModularAudioSharp.Mml {
 				.Or(restCommand)
 				.Or(parameterCommand)
 				.Or(loopCommand)
+				.Or(loopBreakCommand)
 				;
 
 		/// <summary>
