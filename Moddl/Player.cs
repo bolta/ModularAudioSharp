@@ -23,6 +23,13 @@ namespace Moddl {
 		private readonly Dictionary<string, Module> instruments = new Dictionary<string, Module>();
 		private readonly Evaluator evaluator = new Evaluator();
 
+		/// <summary>
+		/// true の場合、this.mutedOrUnmutedTracks に含まれるトラックをミュートする。
+		/// false の場合、this.mutedOrUnmutedTracks に含まれないトラックをミュートする
+		/// </summary>
+		private bool muteSpecifiedTracks = true;
+		private readonly ISet<string> mutedOrUnmutedTracks = new HashSet<string>();
+
 		public void Play(string moddl, Output<float> output) {
 			var ast = new Parser().Parse(moddl);
 			var mmls = new Dictionary<string, StringBuilder>();
@@ -41,7 +48,9 @@ namespace Moddl {
 				}
 			}
 
-			var nodes = mmls.Select(kv => this.MmlToNode(kv.Key, kv.Value.ToString()));
+			var nodes = mmls
+					.Where(kv => this.muteSpecifiedTracks != this.mutedOrUnmutedTracks.Contains(kv.Key))
+					.Select(kv => this.MmlToNode(kv.Key, kv.Value.ToString()));
 
 			this.ShowGuiIfNeeded(output);
 
@@ -110,6 +119,12 @@ namespace Moddl {
 							this.instruments[track].AssignModuleToParameter(entry.Key, entry.Value.AsModule());
 						}
 					}
+				} else if (stmt.Name == "mute" || stmt.Name == "solo") {
+					this.muteSpecifiedTracks = stmt.Name == "mute";
+					var tracks = this.evaluator.Evaluate(stmt.Arguments.TryGet(0)).AsTrackSet();
+					// 最後の 1 文だけが有効
+					this.mutedOrUnmutedTracks.Clear();
+					this.mutedOrUnmutedTracks.UnionWith(tracks);
 				}
 			});
 		}
