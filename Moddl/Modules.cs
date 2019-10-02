@@ -241,12 +241,15 @@ namespace Moddl {
 
 		#region Filters
 
-		internal static Module Lpf() {
+		internal static Module Lpf() => FilterCommon(Nodes.Lpf);
+		internal static Module Hpf() => FilterCommon(Nodes.Hpf);
+
+		private static Module FilterCommon(Func<Node<float>, Node<float>, Node<float>, Node<float>> makeFilter) {
 			var input = Proxy<float>();
 
 			var cutoff = Proxy(500f);
 			var q = Proxy(5f);
-			var output = Nodes.Lpf(input, cutoff, q);
+			var output = makeFilter(input, cutoff, q);
 
 			return new Module(input, output,
 					new Dictionary<string, ProxyController<float>>() {
@@ -256,7 +259,6 @@ namespace Moddl {
 					new INotable[] {
 					});
 		}
-
 
 		#endregion
 

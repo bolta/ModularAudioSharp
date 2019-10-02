@@ -1,0 +1,22 @@
+﻿@tempo 120
+
+// fe は不要（cutoff: 8000 とかでいい）かも
+@instrument ^h, \_ -> noise | hpf { cutoff: 7000 + 1000 * expEnv@fe {decay: 0.05}, q: 3 } * adsrEnv { attack: 0, release: 0 }
+
+@instrument ^s, \_ -> (170 + 30 * expEnv@fe { decay: 0.001 } ^ 2 ) | triangleOsc * adsrEnv@te { attack: 0, decay: 0.1, sustain: 0, release: 0 } + 0.2 * noise | sampleCrush { rate: 13000 } * adsrEnv@ne { attack: 0, decay: 0.25, sustain: 0, release: 0} ^ 1.5
+
+@instrument ^k, \_ -> (20 + 100 * expEnv@fe { decay: 0.001 } ^ 1.5 ) | triangleOsc * adsrEnv { attack: 0, decay: 0.2, sustain: 0, release: 0 } ^ 0.5
+
+h L16v7
+s L16v15
+k L16v15
+
+h [8
+h   y`decay`,0.08 y`sustain`,0 c8 y`decay`,0.3 y`sustain`,0.1 c8
+// TODO 裏の裏が鳴ってない？
+h   y`decay`,0.08 y`sustain`,0 c8 y`decay`,0.3 y`sustain`,0.1 c y`decay`,0.08 y`sustain`,0 c
+h   y`decay`,0.08 y`sustain`,0 c8 y`decay`,0.3 y`sustain`,0.1 c8
+h   y`decay`,0.08 y`sustain`,0 cc y`decay`,0.3 y`sustain`,0.1 c8
+h ]
+s [4 r4c8.cr4c4 r4c8.crc8.c4 ]
+k [2 [3 [4c4] ] c4c4c8.cc8c8 ]

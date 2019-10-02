@@ -1,0 +1,8 @@
+﻿@tempo 120
+
+// ignores input freq
+@instrument ^a, \_ -> (170 + 30 * expEnv@fe { decay: 0.001 } ^ 2 ) | triangleOsc * adsrEnv@te { attack: 0, decay: 0.1, sustain: 0, release: 0 } + 0.2 * noise | sampleCrush { rate: 13000 } * adsrEnv@ne { attack: 0, decay: 0.25, sustain: 0, release: 0} ^ 1.5
+
+a o8L4v15
+
+a [0 c4 ]
