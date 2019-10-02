@@ -215,6 +215,32 @@ namespace ModularAudioSharp {
 					?? CalcFailed(lhs, "/", rhs);
 		}
 
+		/// <summary>
+		/// Node に対する剰余演算子のオーバーロード。
+		/// lhs が負の場合、- (-lhs % rhs) を返すので注意
+		/// </summary>
+		/// <param name="lhs"></param>
+		/// <param name="rhs"></param>
+		/// <returns></returns>
+		public static Node operator %(Node lhs, Node rhs) {
+			return TryCalc<float, float, float>(lhs, rhs, (l, r) => l % r)
+					?? TryCalc<float, int, float>(lhs, rhs, (l, r) => l % r)
+					?? TryCalc<int, float, float>(lhs, rhs, (l, r) => l % r)
+					?? TryCalc<int, int, float>(lhs, rhs, (l, r) => l % r)
+					?? CalcFailed(lhs, "%", rhs);
+		}
+
+		// C# には組み込みの累乗演算子がないので、オーバーロードは提供しない
+		// （数値から Node への暗黙の変換が絡むと累乗か xor かわかりづらくなる懸念がある）
+		//public static Node operator ^(Node lhs, Node rhs) {
+		//	return TryCalc<float, float, float>(lhs, rhs, (l, r) => (float) Math.Pow(l, r))
+		//			?? TryCalc<float, int, float>(lhs, rhs, (l, r) => (float) Math.Pow(l, r))
+		//			?? TryCalc<int, float, float>(lhs, rhs, (l, r) => (float) Math.Pow(l, r))
+		//			// 整数の累乗は常に実数に拡張する（負数乗は整数にならないため）
+		//			?? TryCalc<int, int, float>(lhs, rhs, (l, r) => (float) Math.Pow(l, r))
+		//			?? CalcFailed(lhs, "^", rhs);
+		//}
+
 		private static Node TryCalc<TLhs, TRhs, TResult>(Node lhs, Node rhs, Func<TLhs, TRhs, TResult> calc)
 				where TLhs : struct
 				where TRhs : struct

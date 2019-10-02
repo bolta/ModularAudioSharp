@@ -91,6 +91,8 @@ namespace Moddl {
 		public Module Subtract(Module that) => this.Binary(that, (lhs, rhs) => (lhs - rhs).AsFloat());
 		public Module Multiply(Module that) => this.Binary(that, (lhs, rhs) => (lhs * rhs).AsFloat());
 		public Module Divide(Module that) => this.Binary(that, (lhs, rhs) => (lhs / rhs).AsFloat());
+		public Module Modulo(Module that) => this.Binary(that, (lhs, rhs) => (lhs % rhs).AsFloat());
+		public Module Power(Module that) => this.Binary(that, (lhs, rhs) => lhs.Pow(rhs).AsFloat());
 
 		private Module Binary(Module that, Func<Node<float>, Node<float>, Node<float>> oper) {
 			return new Module(

@@ -26,10 +26,14 @@ namespace Moddl.Language {
 
 			public override Value Visit(ConnectiveExpr visitee)
 					=> this.VisitBinary(visitee, (lhs, rhs) => lhs.Then(rhs));
+			public override Value Visit(PowerExpr visitee)
+					=> this.VisitBinary(visitee, (lhs, rhs) => lhs.Power(rhs));
 			public override Value Visit(MultiplicativeExpr visitee)
 					=> this.VisitBinary(visitee, (lhs, rhs) => lhs.Multiply(rhs));
 			public override Value Visit(DivisiveExpr visitee)
 					=> this.VisitBinary(visitee, (lhs, rhs) => lhs.Divide(rhs));
+			public override Value Visit(ModuloExpr visitee)
+					=> this.VisitBinary(visitee, (lhs, rhs) => lhs.Modulo(rhs));
 			public override Value Visit(AdditiveExpr visitee)
 					=> this.VisitBinary(visitee, (lhs, rhs) => lhs.Add(rhs));
 			public override Value Visit(SubtractiveExpr visitee)

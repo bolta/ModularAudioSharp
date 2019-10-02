@@ -124,13 +124,17 @@ namespace Moddl.Language {
 		private static Parser<Expr> ConnectiveExpr =>
 				BinaryExpr(ModuleParamExpr, SParse.String("|").Text(), _ => new ConnectiveExpr());
 
-		private static Parser<Expr> MulDivExpr =>
-				BinaryExpr(ConnectiveExpr, SParse.Regex(@"\*|/"), op => op == "*"
-						? (BinaryExpr) new MultiplicativeExpr()
-						: new DivisiveExpr());
+		private static Parser<Expr> PowerExpr =>
+				BinaryExpr(ConnectiveExpr, SParse.String("^").Text(), _ => new PowerExpr());
+
+		private static Parser<Expr> MulDivModExpr =>
+				BinaryExpr(PowerExpr, SParse.Regex(@"\*|/|%"), op =>
+						op == "*" ? (BinaryExpr) new MultiplicativeExpr()
+						: op == "/" ? (BinaryExpr) new DivisiveExpr()
+						: (BinaryExpr) new ModuloExpr());
 
 		private static Parser<Expr> AddSubExpr =>
-				BinaryExpr(MulDivExpr, SParse.Regex(@"\+|-"), op => op == "+"
+				BinaryExpr(MulDivModExpr, SParse.Regex(@"\+|-"), op => op == "+"
 						? (BinaryExpr) new AdditiveExpr()
 						: new SubtractiveExpr());
 

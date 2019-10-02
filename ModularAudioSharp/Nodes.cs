@@ -35,6 +35,13 @@ namespace ModularAudioSharp {
 		public static ProxyController<T> Proxy<T>() where T : struct => new ProxyController<T>();
 		public static ProxyController<T> Proxy<T>(T initValue) where T : struct => new ProxyController<T>(initValue);
 
+		public static Node<float> Pow(this Node @base, Node exponent) {
+			var signal = @base.AsFloat().UseAsStream().Zip(exponent.AsFloat().UseAsStream(), (b, x) => (b, x))
+				.Select(bx => (float) Math.Pow(bx.b, bx.x));
+
+			return Node.Create(signal, false, @base, exponent);
+		}
+
 		public static ExpEnvController ExpEnv(Node<float> ratioPerSec)
 				=> new ExpEnvController(ratioPerSec);
 

@@ -49,8 +49,10 @@ namespace Moddl.Language {
 	}
 
 	public class ConnectiveExpr : BinaryExpr { }
+	public class PowerExpr : BinaryExpr { }
 	public class MultiplicativeExpr : BinaryExpr { }
 	public class DivisiveExpr : BinaryExpr { }
+	public class ModuloExpr : BinaryExpr { }
 	public class AdditiveExpr : BinaryExpr { }
 	public class SubtractiveExpr : BinaryExpr { }
 
