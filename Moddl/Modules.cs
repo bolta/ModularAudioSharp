@@ -115,10 +115,20 @@ namespace Moddl {
 
 		}
 
+		internal static Module TriangleOsc() {
+			var freq = Proxy<float>();
+			var osc = Nodes.TriangleOsc(freq);
+
+			return new Module(freq, osc, new Dictionary<string, ProxyController<float>>() {
+			}, new INotable[] { });
+
+		}
+
+		// TODO ModDL で triangleOsc を使って書き直す
 		internal static Module NesTriangle() {
 			var freq = Proxy<float>();
 
-			var osc = TriangleOsc(freq);
+			var osc = Nodes.TriangleOsc(freq);
 			var env = Nodes.PlainEnv();
 			var output = (osc * env).QuantCrush(-1f, 1f, 16);
 
