@@ -144,9 +144,9 @@ namespace ModularAudioSharp {
 			var sinw0 = w0.Select(w => (float) Math.Sin(w));
 			var alpha = sinw0 / (2 * q);
 
-			var b0 = (1 - cosw0) / 2;
 			var b1 = 1 - cosw0;
-			var b2 = (1 - cosw0) / 2;
+			var b0 = b1 / 2;
+			var b2 = b0;
 			var a0 = 1 + alpha;
 			var a1 = -2 * cosw0;
 			var a2 = 1 - alpha;
@@ -170,9 +170,10 @@ namespace ModularAudioSharp {
 			var sinw0 = w0.Select(w => (float) Math.Sin(w));
 			var alpha = sinw0 / (2 * q);
 
-			var b0 = (1 + cosw0) / 2;
-			var b1 = -1 * (1 + cosw0);
-			var b2 = (1 + cosw0) / 2;
+			var b = 1 + cosw0;
+			var b0 = b / 2;
+			var b1 = -1 * b;
+			var b2 = b0;
 			var a0 = 1 + alpha;
 			var a1 = -2 * cosw0;
 			var a2 = 1 - alpha;
@@ -198,7 +199,7 @@ namespace ModularAudioSharp {
 
 			var b0 = q * alpha;
 			var b1 = Const(0f);
-			var b2 = -1 * q * alpha;
+			var b2 = -1 * b0;
 			var a0 = 1 + alpha;
 			var a1 = -2 * cosw0;
 			var a2 = 1 - alpha;
