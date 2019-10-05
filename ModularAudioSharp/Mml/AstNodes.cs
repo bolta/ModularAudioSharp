@@ -31,6 +31,11 @@ namespace ModularAudioSharp.Mml {
 
 	public class VolumeCommand : Command {
 		public float Value { get; set; }
+		public override string ToString() => $"V{this.Value}";
+	}
+
+	public class VelocityCommand : Command {
+		public float Value { get; set; }
 		public override string ToString() => $"v{this.Value}";
 	}
 

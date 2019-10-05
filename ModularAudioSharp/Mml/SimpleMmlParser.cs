@@ -113,9 +113,13 @@ namespace ModularAudioSharp.Mml {
 																		   from l in integer.Token()
 																		   select new LengthCommand { Value = l };
 
-		public readonly static Parser<VolumeCommand> volumeCommand = from _ in SParse.String("v").Token()
+		public readonly static Parser<VolumeCommand> volumeCommand = from _ in SParse.String("V").Token()
 																		   from v in real.Token()
 																		   select new VolumeCommand { Value = v };
+
+		public readonly static Parser<VelocityCommand> velocityCommand = from _ in SParse.String("v").Token()
+																		   from v in real.Token()
+																		   select new VelocityCommand { Value = v };
 
 		public readonly static Parser<DetuneCommand> detuneCommand = from _ in SParse.String("@d").Token()
 																		   from v in real.Token()
@@ -168,6 +172,7 @@ namespace ModularAudioSharp.Mml {
 				.Or(octaveDecrCommand)
 				.Or(lengthCommand)
 				.Or(volumeCommand)
+				.Or(velocityCommand)
 				.Or(detuneCommand)
 				.Or(toneCommand)
 				.Or(restCommand)

@@ -135,6 +135,7 @@ namespace Moddl {
 			var instrm = this.instruments[track];
 			var temper = new EqualTemperament(440f);
 			var vol = Proxy(1f);
+			var vel = Proxy(1f);
 
 			var parser = new SimpleMmlParser();
 			var ast = parser.Parse(mml);
@@ -151,12 +152,13 @@ namespace Moddl {
 
 			var parameters = new Dictionary<string, ProxyController<float>>(instrm.Parameters) {
 				{  SimpleMmlInstructionGenerator.PARAM_TRACK_VOLUME, vol },
+				{  SimpleMmlInstructionGenerator.PARAM_TRACK_VELOCITY, vel },
 			};
 
 			new Sequencer(tick, parameters, instrcs);
 
 			// TODO ステレオに正しく対応（キャストを除去）
-			return (Node<float>) (instrm.Output * vol);
+			return (Node<float>) (instrm.Output * vol * vel);
 		}
 	}
 }
