@@ -1,0 +1,35 @@
+version: 1.0.{build}
+branches:
+  only:
+  - master
+  - ci-test
+image: Visual Studio 2019
+configuration: Release
+before_build:
+- cmd: nuget restore
+build:
+  verbosity: minimal
+after_build:
+- ps: >-
+    $compress = @{
+
+    Path= "C:\projects\modularaudiosharp\Moddl\bin\Release\moddl.exe","C:\projects\ModularAudioSharp\Moddl\bin\Release\Sprache.dll","C:\projects\ModularAudioSharp\Moddl\bin\Release\NAudio.dll","C:\projects\ModularAudioSharp\Moddl\bin\Release\ModularAudioSharp.dll",
+
+    "C:\projects\ModularAudioSharp\Moddl\bin\Release\samples"
+
+    CompressionLevel = "Optimal"
+
+    DestinationPath = "C:\projects\modularaudiosharp\ModularAudioSharp.zip"
+
+    }
+
+
+    Compress-Archive @compress
+artifacts:
+- path: ModularAudioSharp.zip
+  name: Release
+deploy:
+- provider: GitHub
+  auth_token:
+    secure: UklUNQDE4Y/eBdn1oiuqRME6wmSyfVqEOcn/KXCclQ0txgiH/teAJyw00TcXagDn
+  artifact: Release
