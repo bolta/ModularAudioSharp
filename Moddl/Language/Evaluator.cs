@@ -103,8 +103,13 @@ namespace Moddl.Language {
 
 				foreach (var param in visitee.SignalParameters) {
 					var value = param.Item2.Accept(this);
-					var paramModule = value.AsModule();
-					module.AssignModuleToParameter(param.Item1, paramModule);
+					var fValue = value.TryAsFloat();
+					if (fValue.HasValue) {
+						module.Parameters[param.Item1].Set(fValue.Value);
+					} else {
+						var paramModule = value.AsModule();
+						module.AssignModuleToParameter(param.Item1, paramModule);
+					}
 				}
 
 				if (visitee.Label != null) {

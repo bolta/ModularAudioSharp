@@ -3,9 +3,10 @@
 @instrument ^a, pulseOsc | lpf * adsrEnv@ae { attack: 0, decay: 0.01, sustain: 0.25, release: 0.1 }
 // @instrument ^a, pulseOsc | lpf { q: 5, cutoff: 1000+8000 } * adsrEnv@fe { attack: 0, decay: 0.01, sustain: 0.25, release: 0.1 }
 
-@params ^a, { q: 5, cutoff: 1000+8000 * adsrEnv@fe { decay: .125, sustain: 0.1, release: 0.1 } }
+@params ^a, { q: 5, cutoff: 1000+8000 * adsrEnv@fe { attack: 1, decay: .125, sustain: 0.1, release: 0.1 } }
 a o4L4v15
 
+a cdefgab>c<
 a y`fe.attack`,0
 a cdefgab>c<
 a y`fe.attack`,0.125
