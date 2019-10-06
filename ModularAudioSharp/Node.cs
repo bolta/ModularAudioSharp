@@ -183,35 +183,35 @@ namespace ModularAudioSharp {
 		}
 
 		public static Node operator +(Node lhs, Node rhs) {
-			return TryCalc<float, float, float>(lhs, rhs, (l, r) => l + r)
-					?? TryCalc<float, int, float>(lhs, rhs, (l, r) => l + r)
-					?? TryCalc<int, float, float>(lhs, rhs, (l, r) => l + r)
+			return TryCalc<float, float, float>(lhs, rhs, FloatAdd)
+					?? TryCalc<float, int, float>(lhs, rhs, (l, r) => FloatAdd(l, r))
+					?? TryCalc<int, float, float>(lhs, rhs, (l, r) => FloatAdd(l, r))
 					?? TryCalc<int, int, int>(lhs, rhs, (l, r) => l + r)
 					?? CalcFailed(lhs, "+", rhs);
 		}
 
 		public static Node operator -(Node lhs, Node rhs) {
-			return TryCalc<float, float, float>(lhs, rhs, (l, r) => l - r)
-					?? TryCalc<float, int, float>(lhs, rhs, (l, r) => l - r)
-					?? TryCalc<int, float, float>(lhs, rhs, (l, r) => l - r)
+			return TryCalc<float, float, float>(lhs, rhs, FloatSubtract)
+					?? TryCalc<float, int, float>(lhs, rhs, (l, r) => FloatSubtract(l, r))
+					?? TryCalc<int, float, float>(lhs, rhs, (l, r) => FloatSubtract(l, r))
 					?? TryCalc<int, int, int>(lhs, rhs, (l, r) => l - r)
 					?? CalcFailed(lhs, "-", rhs);
 		}
 
 		public static Node operator *(Node lhs, Node rhs) {
-			return TryCalc<float, float, float>(lhs, rhs, (l, r) => l * r)
-					?? TryCalc<float, int, float>(lhs, rhs, (l, r) => l * r)
-					?? TryCalc<int, float, float>(lhs, rhs, (l, r) => l * r)
+			return TryCalc<float, float, float>(lhs, rhs, FloatMultiply)
+					?? TryCalc<float, int, float>(lhs, rhs, (l, r) => FloatMultiply(l, r))
+					?? TryCalc<int, float, float>(lhs, rhs, (l, r) => FloatMultiply(l, r))
 					?? TryCalc<int, int, int>(lhs, rhs, (l, r) => l * r)
 					?? CalcFailed(lhs, "*", rhs);
 		}
 
 		public static Node operator /(Node lhs, Node rhs) {
-			return TryCalc<float, float, float>(lhs, rhs, (l, r) => l / r)
-					?? TryCalc<float, int, float>(lhs, rhs, (l, r) => l / r)
-					?? TryCalc<int, float, float>(lhs, rhs, (l, r) => l / r)
+			return TryCalc<float, float, float>(lhs, rhs, FloatDivide)
+					?? TryCalc<float, int, float>(lhs, rhs, (l, r) => FloatDivide(l, r))
+					?? TryCalc<int, float, float>(lhs, rhs, (l, r) => FloatDivide(l, r))
 					// 整数の割り算は常に実数に拡張する
-					?? TryCalc<int, int, float>(lhs, rhs, (l, r) => ((float) l) / r)
+					?? TryCalc<int, int, float>(lhs, rhs, (l, r) => FloatDivide(l, r))
 					?? CalcFailed(lhs, "/", rhs);
 		}
 
@@ -223,10 +223,10 @@ namespace ModularAudioSharp {
 		/// <param name="rhs"></param>
 		/// <returns></returns>
 		public static Node operator %(Node lhs, Node rhs) {
-			return TryCalc<float, float, float>(lhs, rhs, (l, r) => l % r)
-					?? TryCalc<float, int, float>(lhs, rhs, (l, r) => l % r)
-					?? TryCalc<int, float, float>(lhs, rhs, (l, r) => l % r)
-					?? TryCalc<int, int, float>(lhs, rhs, (l, r) => l % r)
+			return TryCalc<float, float, float>(lhs, rhs, FloatModulo)
+   					?? TryCalc<float, int, float>(lhs, rhs, (l, r) => FloatModulo(l, r))
+					?? TryCalc<int, float, float>(lhs, rhs, (l, r) => FloatModulo(l, r))
+					?? TryCalc<int, int, float>(lhs, rhs, (l, r) => FloatModulo(l, r))
 					?? CalcFailed(lhs, "%", rhs);
 		}
 
@@ -240,6 +240,15 @@ namespace ModularAudioSharp {
 		//			?? TryCalc<int, int, float>(lhs, rhs, (l, r) => (float) Math.Pow(l, r))
 		//			?? CalcFailed(lhs, "^", rhs);
 		//}
+
+		// float 同士の演算は以下のとおり行う。
+		// 他の場所（ModDL 等）で同様の演算を行う場合も、統一的な挙動のため、なるべく以下のメソッドを使うこと
+		public static float FloatAdd(float lhs, float rhs) => lhs + rhs;
+		public static float FloatSubtract(float lhs, float rhs) => lhs - rhs;
+		public static float FloatMultiply(float lhs, float rhs) => lhs * rhs;
+		public static float FloatDivide(float lhs, float rhs) => lhs / rhs;
+		public static float FloatPower(float lhs, float rhs) => (float) Math.Pow(lhs, rhs);
+		public static float FloatModulo(float lhs, float rhs) => lhs % rhs;
 
 		private static Node TryCalc<TLhs, TRhs, TResult>(Node lhs, Node rhs, Func<TLhs, TRhs, TResult> calc)
 				where TLhs : struct

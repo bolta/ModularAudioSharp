@@ -37,7 +37,7 @@ namespace ModularAudioSharp {
 
 		public static Node<float> Pow(this Node @base, Node exponent) {
 			var signal = @base.AsFloat().UseAsStream().Zip(exponent.AsFloat().UseAsStream(), (b, x) => (b, x))
-				.Select(bx => (float) Math.Pow(bx.b, bx.x));
+				.Select(bx => Node.FloatPower(bx.b, bx.x));
 
 			return Node.Create(signal, false, @base, exponent);
 		}

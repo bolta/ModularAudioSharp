@@ -25,25 +25,33 @@ namespace Moddl.Language {
 			}
 
 			public override Value Visit(ConnectiveExpr visitee)
-					=> this.VisitBinary(visitee, (lhs, rhs) => lhs.Then(rhs));
+					=> this.VisitBinary(visitee, null, (lhs, rhs) => lhs.Then(rhs));
 			public override Value Visit(PowerExpr visitee)
-					=> this.VisitBinary(visitee, (lhs, rhs) => lhs.Power(rhs));
+					=> this.VisitBinary(visitee, Node.FloatPower, (lhs, rhs) => lhs.Power(rhs));
 			public override Value Visit(MultiplicativeExpr visitee)
-					=> this.VisitBinary(visitee, (lhs, rhs) => lhs.Multiply(rhs));
+					=> this.VisitBinary(visitee, Node.FloatMultiply, (lhs, rhs) => lhs.Multiply(rhs));
 			public override Value Visit(DivisiveExpr visitee)
-					=> this.VisitBinary(visitee, (lhs, rhs) => lhs.Divide(rhs));
+					=> this.VisitBinary(visitee, Node.FloatDivide, (lhs, rhs) => lhs.Divide(rhs));
 			public override Value Visit(ModuloExpr visitee)
-					=> this.VisitBinary(visitee, (lhs, rhs) => lhs.Modulo(rhs));
+					=> this.VisitBinary(visitee, Node.FloatModulo, (lhs, rhs) => lhs.Modulo(rhs));
 			public override Value Visit(AdditiveExpr visitee)
-					=> this.VisitBinary(visitee, (lhs, rhs) => lhs.Add(rhs));
+					=> this.VisitBinary(visitee, Node.FloatAdd, (lhs, rhs) => lhs.Add(rhs));
 			public override Value Visit(SubtractiveExpr visitee)
-					=> this.VisitBinary(visitee, (lhs, rhs) => lhs.Subtract(rhs));
+					=> this.VisitBinary(visitee, Node.FloatSubtract, (lhs, rhs) => lhs.Subtract(rhs));
 
-			private Value VisitBinary(BinaryExpr visitee, Func<Module, Module, Module> oper) {
-				var lhs = visitee.Lhs.Accept(this).AsModule();
-				var rhs = visitee.Rhs.Accept(this).AsModule();
+			private Value VisitBinary(BinaryExpr visitee, Func<float, float, float> floatOper,
+					Func<Module, Module, Module> moduleOper) {
+				var lhs = visitee.Lhs.Accept(this);
+				var rhs = visitee.Rhs.Accept(this);
+				var lf = lhs.TryAsFloat();
+				var rf = rhs.TryAsFloat();
 
-				return new ModuleValue { Value = oper(lhs, rhs) };
+				if (floatOper != null && lf.HasValue && rf.HasValue) {
+					return new FloatValue { Value = floatOper(lf.Value, rf.Value) };
+
+				} else {
+					return new ModuleValue { Value = moduleOper(lhs.AsModule(), rhs.AsModule()) };
+				}
 			}
 
 			public override Value Visit(FloatLiteral visitee) => new FloatValue { Value = visitee.Value };
