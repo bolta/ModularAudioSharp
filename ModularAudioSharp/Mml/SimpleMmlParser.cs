@@ -113,6 +113,10 @@ namespace ModularAudioSharp.Mml {
 																		   from l in integer.Token()
 																		   select new LengthCommand { Value = l };
 
+		public readonly static Parser<GateRateCommand> gateRateCommand = from _ in SParse.String("q").Text().Token()
+																		   from r in real.Token()
+																		   select new GateRateCommand { Value = r };
+
 		public readonly static Parser<VolumeCommand> volumeCommand = from _ in SParse.String("V").Token()
 																		   from v in real.Token()
 																		   select new VolumeCommand { Value = v };
@@ -171,6 +175,7 @@ namespace ModularAudioSharp.Mml {
 				.Or(octaveIncrCommand)
 				.Or(octaveDecrCommand)
 				.Or(lengthCommand)
+				.Or(gateRateCommand)
 				.Or(volumeCommand)
 				.Or(velocityCommand)
 				.Or(detuneCommand)

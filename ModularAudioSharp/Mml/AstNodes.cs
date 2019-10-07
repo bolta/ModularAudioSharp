@@ -29,6 +29,11 @@ namespace ModularAudioSharp.Mml {
 		public override string ToString() => $"L{this.Value}";
 	}
 
+	public class GateRateCommand : Command {
+		public float Value { get; set; }
+		public override string ToString() => $"q{this.Value}";
+	}
+
 	public class VolumeCommand : Command {
 		public float Value { get; set; }
 		public override string ToString() => $"V{this.Value}";

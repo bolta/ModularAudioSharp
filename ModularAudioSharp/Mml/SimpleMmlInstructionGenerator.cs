@@ -12,6 +12,7 @@ namespace ModularAudioSharp.Mml {
 		public const string PARAM_TRACK_VELOCITY = "#velocity";
 		public const float MAX_VOLUME = 15f;
 		public const float MAX_VELOCITY = 15f;
+		public const float MAX_GATE_RATE = 8f;
 
 		private readonly List<VarController<float>> freqUsers = new List<VarController<float>>();
 		private readonly List<INotable> noteUsers = new List<INotable>();
@@ -48,11 +49,12 @@ namespace ModularAudioSharp.Mml {
 
 			private int octave = 4;
 			private int length = 4;
+
 			/// <summary>
 			/// スラーの途中（前の音符にスラーがついていた）かどうか
 			/// </summary>
 			private bool slur = false;
-			private float gateRatio = 1f;
+			private float gateRate = 1f;
 			private Detune detune = null;
 
 			internal Visitor(SimpleMmlInstructionGenerator owner, List<Instruction> result, int ticksPerBeat,
@@ -71,6 +73,7 @@ namespace ModularAudioSharp.Mml {
 			public override void Visit(OctaveIncrCommand visitee) { this.octave += 1; }
 			public override void Visit(OctaveDecrCommand visitee) { this.octave -= 1; }
 			public override void Visit(LengthCommand visitee) { this.length = visitee.Value; }
+			public override void Visit(GateRateCommand visitee) { this.gateRate = visitee.Value / MAX_GATE_RATE; }
 
 			public override void Visit(VolumeCommand visitee) {
 				this.result.Add(new ParameterInstruction(PARAM_TRACK_VOLUME, visitee.Value / MAX_VOLUME));
@@ -87,7 +90,7 @@ namespace ModularAudioSharp.Mml {
 
 			public override void Visit(ToneCommand visitee) {
 				var stepTicks = CalcTicksFromLength(visitee.Length, this.ticksPerBar, this.length);
-				var gateTicks = (int) (stepTicks * this.gateRatio);
+				var gateTicks = (int) (stepTicks * this.gateRate);
 
 				// TODO ちゃんと書き直す
 				Data.ToneName toneName; switch (visitee.ToneName.BaseName.ToUpper()) {

@@ -11,6 +11,7 @@ namespace ModularAudioSharp.Mml {
 		public virtual void Visit(OctaveIncrCommand visitee) { }
 		public virtual void Visit(OctaveDecrCommand visitee) { }
 		public virtual void Visit(LengthCommand visitee) { }
+		public virtual void Visit(GateRateCommand visitee) { }
 		public virtual void Visit(VolumeCommand visitee) { }
 		public virtual void Visit(VelocityCommand visitee) { }
 		public virtual void Visit(DetuneCommand visitee) { }
@@ -28,6 +29,7 @@ namespace ModularAudioSharp.Mml {
 					|| TryVisitConcreteCommand<OctaveIncrCommand>(visitee, c => visitor.Visit(c))
 					|| TryVisitConcreteCommand<OctaveDecrCommand>(visitee, c => visitor.Visit(c))
 					|| TryVisitConcreteCommand<LengthCommand>(visitee, c => visitor.Visit(c))
+					|| TryVisitConcreteCommand<GateRateCommand>(visitee, c => visitor.Visit(c))
 					|| TryVisitConcreteCommand<VolumeCommand>(visitee, c => visitor.Visit(c))
 					|| TryVisitConcreteCommand<VelocityCommand>(visitee, c => visitor.Visit(c))
 					|| TryVisitConcreteCommand<DetuneCommand>(visitee, c => visitor.Visit(c))
