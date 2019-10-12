@@ -16,6 +16,7 @@ namespace ModularAudioSharp.Mml {
 
 		private readonly List<VarController<float>> freqUsers = new List<VarController<float>>();
 		private readonly List<INotable> noteUsers = new List<INotable>();
+		private readonly IDictionary<string, IEnumerable<Command>> macros = new Dictionary<string, IEnumerable<Command>>();
 
 		public IEnumerable<Instruction> GenerateInstructions(CompilationUnit astRoot, int ticksPerBeat,
 				Temperament temper) {
@@ -39,6 +40,15 @@ namespace ModularAudioSharp.Mml {
 		}
 		public SimpleMmlInstructionGenerator AddNoteUsers(params INotable[] users) {
 			return this.AddNoteUsers((IEnumerable<INotable>) users);
+		}
+
+		public SimpleMmlInstructionGenerator AddMacros(IDictionary<string, IEnumerable<Command>> macros) {
+			foreach (var m in macros) {
+				// TODO 重複をチェックして専用例外にする
+				this.macros.Add(m.Key, m.Value);
+			}
+
+			return this;
 		}
 
 		private class Visitor : AstVisitor {
@@ -155,6 +165,14 @@ namespace ModularAudioSharp.Mml {
 			public override void Visit(LoopBreakCommand visitee) {
 				// ループ中では別途チェックされるので、これを visit することはありえない
 				throw new Exception("The loop break command (:) is available only in a finite loop.");
+			}
+
+			public override void Visit(ExpandMacroCommand visitee) {
+				// TODO マクロが見つからないときのエラー処理
+				// TODO 無限再帰検出
+				foreach (var command in this.owner.macros[visitee.Name.Name]) {
+					command.Accept(this);
+				}
 			}
 
 

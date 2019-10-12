@@ -167,6 +167,11 @@ namespace ModularAudioSharp.Mml {
 				= from _ in SParse.String(":").Text().Token()
 				  select new LoopBreakCommand();
 
+		public readonly static Parser<ExpandMacroCommand> expandMacroCommand
+				= from _ in SParse.String("$").Text().Token()
+				  from name in identifier
+				  select new ExpandMacroCommand { Name = name };
+
 		/// <summary>
 		/// 任意の文
 		/// </summary>
@@ -184,6 +189,7 @@ namespace ModularAudioSharp.Mml {
 				.Or(parameterCommand)
 				.Or(loopCommand)
 				.Or(loopBreakCommand)
+				.Or(expandMacroCommand)
 				;
 
 		/// <summary>

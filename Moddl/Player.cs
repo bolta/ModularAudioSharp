@@ -20,7 +20,8 @@ namespace Moddl {
 
 		private float tempo = 120f;
 
-		private readonly Dictionary<string, Module> instruments = new Dictionary<string, Module>();
+		private readonly IDictionary<string, Module> instruments = new Dictionary<string, Module>();
+		private readonly IDictionary<string, IDictionary<string, string>> macros = new Dictionary<string, IDictionary<string, string>>();
 		private readonly Evaluator evaluator = new Evaluator();
 
 		/// <summary>
@@ -96,24 +97,26 @@ namespace Moddl {
 		}
 
 		private void ProcessDirectiveStatement(DirectiveStatement stmt) {
+			Value getArg(int index) => this.evaluator.Evaluate(stmt.Arguments.TryGet(index));
+
 			TryWithNode(stmt, () => {
 				if (stmt.Name == "tempo") {
-					this.tempo = this.evaluator.Evaluate(stmt.Arguments.TryGet(0)).AsFloat();
+					this.tempo = getArg(0).AsFloat();
 
 				} else if (stmt.Name == "instrument") {
-					var tracks = this.evaluator.Evaluate(stmt.Arguments.TryGet(0)).AsTrackSet();
+					var tracks = getArg(0).AsTrackSet();
 
 					foreach (var track in tracks) {
-						var instrm = this.evaluator.Evaluate(stmt.Arguments.TryGet(1)).AsModule();
+						var instrm = getArg(1).AsModule();
 						// TODO 重複設定はエラーにする
 						this.instruments.Add(track, instrm);
 					}
 
 				} else if (stmt.Name == "params") {
-					var tracks = this.evaluator.Evaluate(stmt.Arguments.TryGet(0)).AsTrackSet();
+					var tracks = getArg(0).AsTrackSet();
 
 					foreach (var track in tracks) {
-						var entries = this.evaluator.Evaluate(stmt.Arguments.TryGet(1)).AsAssocArray();
+						var entries = getArg(1).AsAssocArray();
 						foreach (var entry in entries) {
 							// TODO パラメータが見つからない場合はエラーにする
 							this.instruments[track].AssignModuleToParameter(entry.Key, entry.Value.AsModule());
@@ -121,10 +124,22 @@ namespace Moddl {
 					}
 				} else if (stmt.Name == "mute" || stmt.Name == "solo") {
 					this.muteSpecifiedTracks = stmt.Name == "mute";
-					var tracks = this.evaluator.Evaluate(stmt.Arguments.TryGet(0)).AsTrackSet();
+					var tracks = getArg(0).AsTrackSet();
 					// 最後の 1 文だけが有効
 					this.mutedOrUnmutedTracks.Clear();
 					this.mutedOrUnmutedTracks.UnionWith(tracks);
+
+				} else if (stmt.Name == "macro") {
+					var tracks = getArg(0).AsTrackSet();
+					var name = getArg(1).AsIdentifier();
+					var mml = getArg(2).AsMml();
+					foreach (var track in tracks) {
+						if (! this.macros.ContainsKey(track)) {
+							this.macros.Add(track, new Dictionary<string, string>());
+						}
+						// TODO 重複はチェックして専用例外にする
+						this.macros[track].Add(name, mml);
+					}
 				}
 			});
 		}
@@ -139,6 +154,9 @@ namespace Moddl {
 
 			var parser = new SimpleMmlParser();
 			var ast = parser.Parse(mml);
+			var macros = this.macros.TryGetValue(track, out var macroTexts)
+					? macroTexts.ToDictionary(kv => kv.Key, kv => parser.Parse(kv.Value).Commands)
+					: new Dictionary<string, IEnumerable<Command>>();
 			var instrcGen = new SimpleMmlInstructionGenerator();
 			var freq = Var<float>();
 			// TODO input が複数の場合はとりあえず全てに freq を設定するが、
@@ -146,6 +164,7 @@ namespace Moddl {
 			foreach (var i in instrm.Input) i.Source = freq;
 			instrcGen.AddFreqUsers(freq);
 			foreach (var n in instrm.NoteUsers) instrcGen.AddNoteUsers(n);
+			instrcGen.AddMacros(macros);
 			var instrcs = instrcGen.GenerateInstructions(ast, ticksPerBeat, temper).ToList();
 
 			var tick = new Tick(this.tempo, ticksPerBeat);

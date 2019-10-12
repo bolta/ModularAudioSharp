@@ -1,0 +1,28 @@
+﻿// 三国志Ⅱより…
+@tempo 100
+
+@instrument ^ab, pulseOsc * adsrEnv { attack: 0.375, decay: .75, sustain: 0.2, release: 1 }
+@instrument ^c, triangleOsc * plainEnv
+
+// 対象トラック、名前、MML コードを指定する
+@macro ^ab, `a`, 'g4ea4geg ede2.'
+
+// マクロの中でさらにマクロを使うことができる。まだ定義されていないマクロも使える
+@macro ^ab, `b`, '[3 $`c` ] d4cd egede4cd egag'
+
+@macro ^ab, `c`, 'dedc'
+
+a o4L8v15
+b o4L8v13 @d-500
+c o3L1v14
+
+abc [0
+
+	// $<identifier> でマクロを展開する。マクロの中で行った状態変更（o, y 等）はマクロの後に影響する
+	ab $`a` $`a` g4ea4ga>c dcded4<ga $`a`
+	c c ^ <f ^ a >d2<g2> c ^
+
+	ab > $`b`e2 $`b`a2 <
+	c <[2 f g : a ^ ] a . f2 >
+
+abc ]

@@ -81,6 +81,11 @@ namespace ModularAudioSharp.Mml {
 
 	public class LoopBreakCommand : Command { }
 
+	public class ExpandMacroCommand : Command {
+		public Identifier Name { get; set; }
+		public override string ToString() => string.Format("$`{0}`", this.Name);
+	}
+
 	public class ToneName /*: AstNode*/ {
 		/// <summary>
 		/// 調号を含まない名前。大文字

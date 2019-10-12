@@ -59,6 +59,12 @@ namespace Moddl.Language {
 			public override Value Visit(TrackSetLiteral visitee)
 					=> new TrackSetValue { Value = visitee.Value };
 
+			public override Value Visit(IdentifierLiteral visitee)
+					=> new IdentifierValue { Value = visitee.Value };
+
+			public override Value Visit(MmlLiteral visitee)
+					=> new MmlValue { Value = visitee.Value };
+
 			public override Value Visit(AssocArrayLiteral visitee) {
 				return new AssocArrayValue {
 					Entries = visitee.Entries.ToDictionary(

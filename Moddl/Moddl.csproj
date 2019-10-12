@@ -67,6 +67,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="samples\test_macro.moddl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="samples\dq4_ryan.moddl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

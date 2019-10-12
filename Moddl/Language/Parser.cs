@@ -33,6 +33,18 @@ namespace Moddl.Language {
 				from tracks in TrackSet
 				select new TrackSetLiteral { Value = new List<string>(tracks) };
 
+		private static Parser<IdentifierLiteral> IdentifierLiteral =>
+				from _ in SParse.String("`")
+				from value in Identifier
+				from __ in SParse.String("`")
+				select new IdentifierLiteral { Value = value };
+
+		private static Parser<MmlLiteral> MmlLiteral =>
+				from _ in SParse.String("'")
+				from value in SParse.Regex(@"[^']*")
+				from __ in SParse.String("'")
+				select new MmlLiteral { Value = value };
+
 		private static Parser<AssocArrayLiteral> AssocArrayLiteral =>
 				from _ in SParse.String("{").WithWhiteSpace()
 				from entries in NamedEntryList
@@ -75,6 +87,8 @@ namespace Moddl.Language {
 		private static Parser<Expr> PrimaryExpr =>
 				((Parser<Expr>) FloatLiteral)
 				.Or(TrackSetLiteral)
+				.Or(IdentifierLiteral)
+				.Or(MmlLiteral)
 				.Or(AssocArrayLiteral)
 				.Or(IdentifierExpr)
 				.Or(LambdaExpr)
