@@ -20,6 +20,7 @@ namespace ModularAudioSharp.Mml {
 		public virtual void Visit(ParameterCommand visitee) { }
 		public virtual void Visit(LoopCommand visitee) { }
 		public virtual void Visit(LoopBreakCommand visitee) { }
+		public virtual void Visit(StackCommand visitee) { }
 		public virtual void Visit(ExpandMacroCommand visitee) { }
 	}
 
@@ -39,6 +40,7 @@ namespace ModularAudioSharp.Mml {
 					|| TryVisitConcreteCommand<ParameterCommand>(visitee, c => visitor.Visit(c))
 					|| TryVisitConcreteCommand<LoopCommand>(visitee, c => visitor.Visit(c))
 					|| TryVisitConcreteCommand<LoopBreakCommand>(visitee, c => visitor.Visit(c))
+					|| TryVisitConcreteCommand<StackCommand>(visitee, c => visitor.Visit(c))
 					|| TryVisitConcreteCommand<ExpandMacroCommand>(visitee, c => visitor.Visit(c))
 					;
 

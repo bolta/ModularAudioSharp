@@ -157,6 +157,14 @@ namespace Moddl {
 			var macros = this.macros.TryGetValue(track, out var macroTexts)
 					? macroTexts.ToDictionary(kv => kv.Key, kv => parser.Parse(kv.Value).Commands)
 					: new Dictionary<string, IEnumerable<Command>>();
+			var parameters = new Dictionary<string, ProxyController<float>>(instrm.Parameters) {
+				{  SimpleMmlInstructionGenerator.PARAM_TRACK_VOLUME, vol },
+				{  SimpleMmlInstructionGenerator.PARAM_TRACK_VELOCITY, vel },
+			};
+			var initials = parameters
+					.ToDictionary(kv => kv.Key, kv => kv.Value.InitialValue)
+					.Where(kv => kv.Value.HasValue)
+					.ToDictionary(kv => kv.Key, kv => kv.Value.Value);
 			var instrcGen = new SimpleMmlInstructionGenerator();
 			var freq = Var<float>();
 			// TODO input が複数の場合はとりあえず全てに freq を設定するが、
@@ -165,14 +173,11 @@ namespace Moddl {
 			instrcGen.AddFreqUsers(freq);
 			foreach (var n in instrm.NoteUsers) instrcGen.AddNoteUsers(n);
 			instrcGen.AddMacros(macros);
+			instrcGen.AddParameterInitials(initials);
 			var instrcs = instrcGen.GenerateInstructions(ast, ticksPerBeat, temper).ToList();
 
 			var tick = new Tick(this.tempo, ticksPerBeat);
 
-			var parameters = new Dictionary<string, ProxyController<float>>(instrm.Parameters) {
-				{  SimpleMmlInstructionGenerator.PARAM_TRACK_VOLUME, vol },
-				{  SimpleMmlInstructionGenerator.PARAM_TRACK_VELOCITY, vel },
-			};
 
 			new Sequencer(tick, parameters, instrcs);
 

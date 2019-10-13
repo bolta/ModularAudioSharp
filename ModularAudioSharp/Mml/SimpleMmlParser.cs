@@ -159,13 +159,19 @@ namespace ModularAudioSharp.Mml {
 				= from _ in SParse.String("[").Text().Token()
 				  from t in unsignedInteger.Token().Optional()
 				  from c in command.Token().Many()
-				  from __ in SParse.String("]")
+				  from __ in SParse.String("]").Token()
 				  let tn = ToNullable(t) ?? 2
 				  select new LoopCommand { Times = tn == 0 ? null : (uint?) tn, Content = c };
 
 		public readonly static Parser<LoopBreakCommand> loopBreakCommand
 				= from _ in SParse.String(":").Text().Token()
 				  select new LoopBreakCommand();
+
+		public readonly static Parser<StackCommand> stackCommand
+				= from _ in SParse.String("{").Text().Token()
+				  from c in command.Token().Many()
+				  from __ in SParse.String("}").Token()
+				  select new StackCommand { Content = c };
 
 		public readonly static Parser<ExpandMacroCommand> expandMacroCommand
 				= from _ in SParse.String("$").Text().Token()
@@ -189,6 +195,7 @@ namespace ModularAudioSharp.Mml {
 				.Or(parameterCommand)
 				.Or(loopCommand)
 				.Or(loopBreakCommand)
+				.Or(stackCommand)
 				.Or(expandMacroCommand)
 				;
 

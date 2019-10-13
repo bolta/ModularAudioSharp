@@ -1,0 +1,11 @@
+﻿@tempo 120
+
+@instrument ^a, pulseOsc * expEnv { decay: 0.1 }
+
+
+// デフォルトの o4L4v15q8 で演奏される
+a cdefg2
+
+a { o5L16q4v8 [4 ceg {o3q8c8.} > ] }
+
+a cdefg2

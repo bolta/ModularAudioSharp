@@ -104,6 +104,9 @@
     <None Include="samples\test_sampleCrush.moddl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="samples\test_stack.moddl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ModularAudioSharp\ModularAudioSharp.csproj">

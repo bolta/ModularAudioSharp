@@ -17,6 +17,7 @@ namespace ModularAudioSharp.Mml {
 		private readonly List<VarController<float>> freqUsers = new List<VarController<float>>();
 		private readonly List<INotable> noteUsers = new List<INotable>();
 		private readonly IDictionary<string, IEnumerable<Command>> macros = new Dictionary<string, IEnumerable<Command>>();
+		private readonly IDictionary<string, float> initials = new Dictionary<string, float>();
 
 		public IEnumerable<Instruction> GenerateInstructions(CompilationUnit astRoot, int ticksPerBeat,
 				Temperament temper) {
@@ -51,21 +52,102 @@ namespace ModularAudioSharp.Mml {
 			return this;
 		}
 
+		public SimpleMmlInstructionGenerator AddParameterInitials(IDictionary<string, float> initials) {
+			foreach (var i in initials) {
+				// 重複は例外が投げられる
+				this.initials.Add(i.Key, i.Value);
+			}
+
+			return this;
+		}
+
+		private class Context {
+
+			/// <summary>
+			/// スタックで管理される項目のうち、InstructionGenerator の内部状態である（Node のパラメータではない）もの
+			/// </summary>
+			private class MmlState {
+				internal int Octave { get; set; }
+				internal int Length { get; set; }
+
+				/// <summary>
+				/// スラーの途中（前の音符にスラーがついていた）かどうか
+				/// </summary>
+				internal bool Slur { get; set; }
+				internal float GateRate { get; set; }
+				internal Detune Detune { get; set; }
+
+				internal MmlState Clone() => (MmlState) this.MemberwiseClone();
+			}
+
+			/// <summary>
+			/// スタックで管理される項目のセット（InstructionGenerator の状態と各 Node のパラメータ）
+			/// </summary>
+			private class StackFrame {
+				internal MmlState MmlState { get; set; }
+				internal IDictionary<string, float> Parameters { get; private set; } = new Dictionary<string, float>();
+
+				internal StackFrame(MmlState state, IDictionary<string, float> initParams) : this(state) {
+					foreach (var kv in initParams) this.Parameters.Add(kv.Key, kv.Value);
+				}
+				internal StackFrame(MmlState state) {
+					this.MmlState = state;
+				}
+			}
+
+			private readonly Stack<StackFrame> stack = new Stack<StackFrame>();
+
+			internal int Octave {
+				get => this.stack.Peek().MmlState.Octave;
+				set => this.stack.Peek().MmlState.Octave = value;
+			}
+			internal int Length {
+				get => this.stack.Peek().MmlState.Length;
+				set => this.stack.Peek().MmlState.Length = value;
+			}
+			internal bool Slur {
+				get => this.stack.Peek().MmlState.Slur;
+				set => this.stack.Peek().MmlState.Slur = value;
+			}
+			internal float GateRate {
+				get => this.stack.Peek().MmlState.GateRate;
+				set => this.stack.Peek().MmlState.GateRate = value;
+			}
+			internal Detune Detune {
+				get => this.stack.Peek().MmlState.Detune;
+				set => this.stack.Peek().MmlState.Detune = value;
+			}
+
+			internal Context(IDictionary<string, float> initParams) {
+				var rootFrame = new StackFrame(
+						new MmlState {
+							Octave = 4,
+							Length = 4,
+							Slur = false,
+							GateRate = 1f,
+							Detune = null,
+						},
+						initParams);
+				this.stack.Push(rootFrame);
+			}
+
+			internal void Push() {
+				var newFrame = new StackFrame(this.stack.Peek().MmlState.Clone());
+				this.stack.Push(newFrame);
+			}
+
+			internal void Pop() {
+				this.stack.Pop();
+				// TODO Pop したフレームで設定していたパラメータを復元する
+			}
+		}
+
 		private class Visitor : AstVisitor {
 			private readonly SimpleMmlInstructionGenerator owner;
 			private readonly List<Instruction> result;
 			private readonly int ticksPerBar;
 			private readonly Temperament temperament;
-
-			private int octave = 4;
-			private int length = 4;
-
-			/// <summary>
-			/// スラーの途中（前の音符にスラーがついていた）かどうか
-			/// </summary>
-			private bool slur = false;
-			private float gateRate = 1f;
-			private Detune detune = null;
+			private readonly Context context; // = new Context();
 
 			internal Visitor(SimpleMmlInstructionGenerator owner, List<Instruction> result, int ticksPerBeat,
 					Temperament temperament) {
@@ -73,17 +155,18 @@ namespace ModularAudioSharp.Mml {
 				this.result = result;
 				this.ticksPerBar = 4 * ticksPerBeat;
 				this.temperament = temperament;
+				this.context = new Context(this.owner.initials);
 			}
 
 			public override void Visit(CompilationUnit visitee) {
 				foreach (var s in visitee.Commands) s.Accept(this);
 			}
 
-			public override void Visit(OctaveCommand visitee) { this.octave = visitee.Value; }
-			public override void Visit(OctaveIncrCommand visitee) { this.octave += 1; }
-			public override void Visit(OctaveDecrCommand visitee) { this.octave -= 1; }
-			public override void Visit(LengthCommand visitee) { this.length = visitee.Value; }
-			public override void Visit(GateRateCommand visitee) { this.gateRate = visitee.Value / MAX_GATE_RATE; }
+			public override void Visit(OctaveCommand visitee) { this.context.Octave = visitee.Value; }
+			public override void Visit(OctaveIncrCommand visitee) { this.context.Octave += 1; }
+			public override void Visit(OctaveDecrCommand visitee) { this.context.Octave -= 1; }
+			public override void Visit(LengthCommand visitee) { this.context.Length = visitee.Value; }
+			public override void Visit(GateRateCommand visitee) { this.context.GateRate = visitee.Value / MAX_GATE_RATE; }
 
 			public override void Visit(VolumeCommand visitee) {
 				this.result.Add(new ParameterInstruction(PARAM_TRACK_VOLUME, visitee.Value / MAX_VOLUME));
@@ -95,12 +178,12 @@ namespace ModularAudioSharp.Mml {
 
 			public override void Visit(DetuneCommand visitee) {
 				//this.result.Add(new DetuneInstruction(visitee.Value));
-				this.detune = new CentDetune(visitee.Value);
+				this.context.Detune = new CentDetune(visitee.Value);
 			}
 
 			public override void Visit(ToneCommand visitee) {
-				var stepTicks = CalcTicksFromLength(visitee.Length, this.ticksPerBar, this.length);
-				var gateTicks = (int) (stepTicks * this.gateRate);
+				var stepTicks = CalcTicksFromLength(visitee.Length, this.ticksPerBar, this.context.Length);
+				var gateTicks = (int) (stepTicks * this.context.GateRate);
 
 				// TODO ちゃんと書き直す
 				Data.ToneName toneName; switch (visitee.ToneName.BaseName.ToUpper()) {
@@ -114,11 +197,11 @@ namespace ModularAudioSharp.Mml {
 				default: throw new Exception();
 				}
 
-				var tone = new Tone { Octave = this.octave, ToneName = toneName, Accidental = visitee.ToneName.Accidental };
-				var freq = this.detune?.GetDetunedFreq(this.temperament[tone]) ?? this.temperament[tone];
+				var tone = new Tone { Octave = this.context.Octave, ToneName = toneName, Accidental = visitee.ToneName.Accidental };
+				var freq = this.context.Detune?.GetDetunedFreq(this.temperament[tone]) ?? this.temperament[tone];
 
 				this.result.AddRange(this.owner.freqUsers.Select(u => new ValueInstruction<float>(u, freq)));
-				if (! this.slur) {
+				if (! this.context.Slur) {
 					this.result.AddRange(this.owner.noteUsers.Select(u => new NoteInstruction(u, true)));
 				}
 				this.result.Add(new WaitInstruction(gateTicks));
@@ -131,11 +214,11 @@ namespace ModularAudioSharp.Mml {
 					this.result.Add(new WaitInstruction(stepTicks - gateTicks));
 				}
 
-				this.slur = visitee.Slur;
+				this.context.Slur = visitee.Slur;
 			}
 
 			public override void Visit(RestCommand visitee) {
-				var ticks = CalcTicksFromLength(visitee.Length, this.ticksPerBar, this.length);
+				var ticks = CalcTicksFromLength(visitee.Length, this.ticksPerBar, this.context.Length);
 				this.result.Add(new WaitInstruction(ticks));
 			}
 
@@ -165,6 +248,17 @@ namespace ModularAudioSharp.Mml {
 			public override void Visit(LoopBreakCommand visitee) {
 				// ループ中では別途チェックされるので、これを visit することはありえない
 				throw new Exception("The loop break command (:) is available only in a finite loop.");
+			}
+
+			public override void Visit(StackCommand visitee) {
+				this.context.Push();
+				try {
+					foreach (var child in visitee.Content) {
+						child.Accept(this);
+					}
+				} finally {
+					this.context.Pop();
+				}
 			}
 
 			public override void Visit(ExpandMacroCommand visitee) {

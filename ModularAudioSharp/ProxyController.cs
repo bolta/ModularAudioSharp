@@ -46,6 +46,8 @@ namespace ModularAudioSharp {
 			this.Node.Update();
 		}
 
+		public T? InitialValue => this.source == null ? this.value : (T?) null;
+
 		protected override IEnumerable<T> Signal() {
 			while (true) {
 				// TODO source を設定する前に this.source.MoveNext() が評価されてしまうため、

@@ -81,6 +81,11 @@ namespace ModularAudioSharp.Mml {
 
 	public class LoopBreakCommand : Command { }
 
+	public class StackCommand : Command {
+		public IEnumerable<Command> Content { get; set; }
+		public override string ToString() => string.Format("{{{0}}}", string.Join("", this.Content));
+	}
+
 	public class ExpandMacroCommand : Command {
 		public Identifier Name { get; set; }
 		public override string ToString() => string.Format("$`{0}`", this.Name);
