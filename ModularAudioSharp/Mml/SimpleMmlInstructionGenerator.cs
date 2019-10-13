@@ -138,8 +138,18 @@ namespace ModularAudioSharp.Mml {
 
 			internal void Pop() {
 				this.stack.Pop();
-				// TODO Pop したフレームで設定していたパラメータを復元する
 			}
+
+			// TODO 専用の例外にする
+			internal float GetParameter(string name) => this.stack.FirstOrDefault(f => f.Parameters.ContainsKey(name))?.Parameters[name]
+					?? throw new Exception($"parameter {name} not found");
+
+			internal void SetParameter(string name, float value) {
+				this.stack.Peek().Parameters[name] = value;
+			}
+
+			// TODO clone するか readonly にして返す
+			internal IDictionary<string, float> ParametersSetInCurrentScope => this.stack.Peek().Parameters;
 		}
 
 		private class Visitor : AstVisitor {
@@ -168,16 +178,21 @@ namespace ModularAudioSharp.Mml {
 			public override void Visit(LengthCommand visitee) { this.context.Length = visitee.Value; }
 			public override void Visit(GateRateCommand visitee) { this.context.GateRate = visitee.Value / MAX_GATE_RATE; }
 
+			private void SetParameter(string name, float value) {
+				this.result.Add(new ParameterInstruction(name, value));
+				this.context.SetParameter(name, value);
+			}
+
 			public override void Visit(VolumeCommand visitee) {
-				this.result.Add(new ParameterInstruction(PARAM_TRACK_VOLUME, visitee.Value / MAX_VOLUME));
+				this.SetParameter(PARAM_TRACK_VOLUME, visitee.Value / MAX_VOLUME);
 			}
 
 			public override void Visit(VelocityCommand visitee) {
-				this.result.Add(new ParameterInstruction(PARAM_TRACK_VELOCITY, visitee.Value / MAX_VELOCITY));
+				this.SetParameter(PARAM_TRACK_VELOCITY, visitee.Value / MAX_VELOCITY);
+
 			}
 
 			public override void Visit(DetuneCommand visitee) {
-				//this.result.Add(new DetuneInstruction(visitee.Value));
 				this.context.Detune = new CentDetune(visitee.Value);
 			}
 
@@ -223,7 +238,7 @@ namespace ModularAudioSharp.Mml {
 			}
 
 			public override void Visit(ParameterCommand visitee) {
-				this.result.Add(new ParameterInstruction(visitee.Name.Name, visitee.Value));
+				this.SetParameter(visitee.Name.Name, visitee.Value);
 			}
 
 			public override void Visit(LoopCommand visitee) {
@@ -256,8 +271,13 @@ namespace ModularAudioSharp.Mml {
 					foreach (var child in visitee.Content) {
 						child.Accept(this);
 					}
+
 				} finally {
+					var paramsToRestore = this.context.ParametersSetInCurrentScope.Keys;
 					this.context.Pop();
+					foreach (var name in paramsToRestore) {
+						this.result.Add(new ParameterInstruction(name, this.context.GetParameter(name)));
+					}
 				}
 			}
 
