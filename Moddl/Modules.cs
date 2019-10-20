@@ -134,10 +134,8 @@ namespace Moddl {
 
 			return new Module(freq, output, new Dictionary<string, ProxyController<float>>() {
 			}, new INotable[] { env });
-
 		}
 
-		// 接続の動作検証用
 		internal static Module Delay(IDictionary<string, Value> constrParams) {
 			var capacity_smp = (int) ((constrParams.TryGetClassValue("capacity")?.AsFloat() ?? 2f) * ModuleSpace.SampleRate);
 
@@ -157,13 +155,17 @@ namespace Moddl {
 					Enumerable.Empty<INotable>());
 		}
 
-		// 接続の動作検証用
 		internal static Module Portamento() {
 			var input = Proxy<float>();
-			var output = Nodes.Portamento(input, 0.002f);
+			// サンプルごとの変化率が 0.002（以前の設定値）となる値
+			var halflifeDefault = (float) (1 / (- ModuleSpace.SampleRate * Math.Log(1 - 0.002) / Math.Log(2)));
+			var halflife = Proxy(halflifeDefault);
+			var output = Nodes.Portamento(input, halflife);
 
-			return new Module(input, output, new Dictionary<string, ProxyController<float>>(),
-				Enumerable.Empty<INotable>());
+			return new Module(input, output, new Dictionary<string, ProxyController<float>> {
+				// TODO 名前は再考の余地あり？
+				{ "halflife", halflife },
+			}, Enumerable.Empty<INotable>());
 		}
 
 		#region Oscillators and Noises
@@ -332,6 +334,20 @@ namespace Moddl {
 					},
 					new INotable[] {
 					});
+		}
+
+		internal static Module QuantCrush() {
+			var input = Proxy<float>();
+			var min = Proxy(-1f);
+			var max = Proxy(1f);
+			var res = Proxy(16f);
+			var output = input.Node.QuantCrush(min, max, res);
+
+			return new Module(input, output, new Dictionary<string, ProxyController<float>>() {
+				{ "min", min },
+				{ "max", max },
+				{ "resolution", res },
+			}, new INotable[] { });
 		}
 
 		#endregion

@@ -253,14 +253,25 @@ namespace ModularAudioSharp {
 			return Node.Create(signal(), true, input, b0, b1, b2, a0, a1, a2);
 		}
 
-		public static Node<float> Portamento(Node freq, float ratio) {
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="freq">目標周波数</param>
+		/// <param name="halflife_sec">半減期（現在値と目標値の中間まで達するのにかかる秒数）</param>
+		/// <returns></returns>
+		public static Node<float> Portamento(Node freq, Node halflife_sec) {
 			float? actualFreq = null;
 
+			// サンプルごとの変化率
+			var ratioPerSample = halflife_sec.AsFloat().Select(h => (float) (1 - Math.Pow(2, -1 / (ModuleSpace.SampleRate * h))));
+
 			IEnumerable<float> signal() {
-				foreach (var f in freq.AsFloat().UseAsStream()) {
+				foreach (var (f, r) in freq.AsFloat().UseAsStream()
+						.Zip(ratioPerSample.UseAsStream(),
+						(f, r) => (f, r))) {
 					if (! actualFreq.HasValue) actualFreq = f;
 					yield return actualFreq.Value;
-					actualFreq = (1 - ratio) * actualFreq.Value + ratio * f;
+					actualFreq = (1 - r) * actualFreq.Value + r * f;
 				}
 			}
 
