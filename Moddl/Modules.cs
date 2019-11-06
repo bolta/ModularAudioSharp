@@ -168,6 +168,22 @@ namespace Moddl {
 			}, Enumerable.Empty<INotable>());
 		}
 
+		internal static Module NesFreq() {
+			var input = Proxy<float>();
+			var output = input.Node.Select(f => {
+				// 周波数を一旦 2A03 のレジスタの値に変換し、また周波数に戻すことで、周波数分解能を 2A03 並にする。
+				// ここではパルス波の場合を実装している。三角波の場合は 1 オクターブ上げてからこの変換を通し、
+				// その後 1 オクターブ下げる（(\freq -> (freq * 2) | nesFreq / 2)）ことで実現できる
+				// TODO 三角波にも対応できるようパラメータを設ける
+				// https://wikiwiki.jp/mck/周波数とレジスタの関係
+				var r = Math.Min(Math.Max(0, Math.Round(1789772.7272f / f / 16)), 2047);
+				return (float) (1789772.7272f / r / 16);
+			});
+
+			return new Module(input, output, new Dictionary<string, ProxyController<float>> {
+			}, Enumerable.Empty<INotable>());
+		}
+
 		#region Oscillators and Noises
 
 		/// <summary>
